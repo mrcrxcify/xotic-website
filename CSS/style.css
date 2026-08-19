@@ -153,6 +153,7 @@ button {
     background-image: url(../images/banner2.png);
     background-position: center; 
     background-attachment: fixed; 
+    overflow-y: hidden;
     background-size: cover; 
     background-repeat: no-repeat;
 
@@ -249,7 +250,10 @@ button {
 /* SECTION */
 
 .section {
-    padding: 100px 0;
+    padding-left: 100px 0;
+    padding-right: 100px 0;
+    padding-bottom: 50px ;
+    padding-top: 50px ;
 }
 
 .section-header {
@@ -585,7 +589,9 @@ footer {
     }
 
     .section {
-        padding: 70px 0;
+        padding-left: 70px 0;
+        padding-right: 70px 0;
+        
     }
 
     .footer-grid {
