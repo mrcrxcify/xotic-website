@@ -1,102 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rosters | Surge Esports</title>
-    <link rel="icon" href="images/whitelogo.PNG">
+
+    <title>Rosters | Xotic Esports</title>
+
+    <link rel="icon" href="images/purplogo.PNG">
     <link rel="stylesheet" href="CSS/style.css">
 </head>
 
 <body>
 
-<nav class="navbar" style="border-bottom: 0.5px solid rgba(255,255,255,0.5);">
+<nav class="navbar">
+
     <div class="nav-container">
 
         <a href="index.html" class="logo">
-            <img src="images/whitelogo.PNG" alt="Surge Logo">
-            SURGE<span></span>
+            <img src="images/whitelogo.PNG" alt="Xotic Esports Logo">
+            XOTIC
+            <span></span>
         </a>
 
-        <button class="menu-button" onclick="toggleMenu()">☰</button>
+        <button
+            class="menu-button"
+            onclick="toggleMenu()"
+            aria-label="Open navigation"
+        >
+            ☰
+        </button>
 
         <div class="nav-links" id="navLinks">
             <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="rosters.html" class="active">Rosters</a>
-                <a href="contact.html">Contact</a>
-                <a href="merch.html">Merch</a>
+            <a href="about.html">About</a>
+            <a href="rosters.html" class="active">Rosters</a>
+            <a href="contact.html">Contact</a>
+            <a href="merch.html">Merch</a>
         </div>
 
     </div>
+
 </nav>
+
 
 <main>
 
-<section class="hero" style="border-top: 0.25px solid rgba(255,255,255,0.8); border-bottom: 0.25px solid rgba(255,255,255,0.8);   background-image: url(images/banner2.png); background-position: center; background-attachment: fixed; background-size: cover; background-repeat: no-repeat; margin-top: 78px;">
-    <div class="hero-bg" style="padding-top: 11vh;padding-bottom: 11vh; align-items: center;">
-    <div class="container">
-        <div class="hero-content page-title" style="height: auto; background-color: rgba(0,0,0,0.5);border-top-right-radius: 20px; border-bottom-right-radius: 20px; padding: 5px;">
-        <div class="section-label">WHO WE ARE</div>
-        <h1>SURGE <br>
-            <span>ROSTERS</span></h1>
-        <p>
-            Learn more about the currently available Rosters in our team.
-        </p>
+<section class="hero">
+
+    <div class="hero-bg">
+
+        <div class="container">
+
+            <div class="hero-content">
+
+                <div class="section-label">
+                    COMPETE WITH US
+                </div>
+
+                <h1>
+                    XOTIC<br>
+                    <span>ROSTERS</span>
+                </h1>
+
+                <p>
+                    Explore the competitive pathways and creator opportunities available through Xotic Esports.
+                </p>
+
+            </div>
+
+        </div>
+
     </div>
-    </div>
-    </div>
+
 </section>
 
 
+<!-- COMPETITIVE ROSTERS -->
 
 <section class="section">
 
     <div class="container">
 
         <div class="section-header">
-            <div class="section-label">COMPETITIVE ROSTERS</div>
-            <h2 class="section-title">COMP</h2>
+
+            <div class="section-label">
+                COMPETITIVE ROSTERS
+            </div>
+
+            <h2 class="section-title">
+                COMP
+            </h2>
+
         </div>
+
 
         <div class="card-grid">
 
-            <div class="card">
+
+            <a href="roster/pro.html" class="card">
+
                 <div class="card-content">
-                    <h3 class="card-title">PRO</h3>
+
+                    <h3 class="card-title">
+                        PRO
+                    </h3>
+
                     <p class="card-text">
-                        For Serious competitive players with over 10,000 yearly PR. Members of this roster go on our Fortnite Tracker.
+                        For serious competitive players with over 10,000 yearly PR.
                     </p>
+
                 </div>
-            </div><div class="card">
+
+            </a>
+
+
+            <a href="roster/semipro.html" class="card">
+
                 <div class="card-content">
-                    <h3 class="card-title">SEMI-PRO</h3>
+
+                    <h3 class="card-title">
+                        SEMI-PRO
+                    </h3>
+
                     <p class="card-text">
-                        For Serious competitive players with over 5,000 yearly PR.
+                        For serious competitive players with over 5,000 yearly PR.
                     </p>
+
                 </div>
-            </div><div class="card">
+
+            </a>
+
+
+            <a href="roster/future2.html" class="card">
+
                 <div class="card-content">
-                    <h3 class="card-title">FUTURE 2.0</h3>
+
+                    <h3 class="card-title">
+                        FUTURE 2.0
+                    </h3>
+
                     <p class="card-text">
                         For competitive players with over 1,000 yearly PR.
                     </p>
+
                 </div>
-            </div><div class="card">
+
+            </a>
+
+
+            <a href="roster/academy.html" class="card">
+
                 <div class="card-content">
-                    <h3 class="card-title">ACADEMY</h3>
+
+                    <h3 class="card-title">
+                        ACADEMY
+                    </h3>
+
                     <p class="card-text">
-                        For our imroving players with over 250 yearly PR.
+                        For upcoming competitive players with over 250 yearly PR.
                     </p>
+
                 </div>
-            </div><div class="card">
+
+            </a>
+
+
+            <a href="roster/future-academy.html" class="card">
+
                 <div class="card-content">
-                    <h3 class="card-title">FUTURE ACADEMY</h3>
+
+                    <h3 class="card-title">
+                        FUTURE ACADEMY
+                    </h3>
+
                     <p class="card-text">
-                        For our dedicated competitive players with at least 50 yearly PR.
+                        For dedicated competitive players with at least 50 yearly PR.
                     </p>
+
                 </div>
-            </div>
+
+            </a>
+
 
         </div>
 
@@ -104,154 +189,327 @@
 
 </section>
 
+
+<!-- CONTENT CREATORS -->
+
 <section class="section">
 
-        
-        <div class="container">
+    <div class="container">
 
         <div class="section-header">
-            <div class="section-label">CONTENT CREATORS</div>
-            <h2 class="section-title">CONTENT</h2>
-            <p class="card-text">
-               This Roster is designed for growing content creators and streamers.
+
+            <div class="section-label">
+                CONTENT CREATOR
+            </div>
+
+            <h2 class="section-title">
+                CONTENT
+            </h2>
+
+            <p class="section-description">
+                Designed for growing content creators and streamers.
             </p>
+
         </div>
+
 
         <div class="card-grid">
 
-            <div class="card">
-                <div class="card-content">
-                    <h3 class="card-title">JUNIOR CONTENT CREATOR</h3>
-                    <p class="card-text">
-                        For new content creators, regularly posting Fortnite content, with at least 500 subscribers on YouTube or 1,000 followers on TikTok.                 </p>
-                </div>
-            </div>
 
-            <div class="card">
-                <div class="card-content">
-                    <h3 class="card-title">MAIN CONTENT CREATOR</h3>
-                    <p class="card-text">
-                       This roster is designed for larger content creators regularly posting Fortnite content, with at least 1,000 subscribers on YouTube and other channels, or 3,000 followers on TikTok.
-                    </p>
-                </div>
-            </div>
+            <a href="roster/jr-content.html" class="card">
 
-            <div class="card">
                 <div class="card-content">
-                    <h3 class="card-title">STREAMER</h3>
+
+                    <h3 class="card-title">
+                        JUNIOR CONTENT CREATOR
+                    </h3>
+
                     <p class="card-text">
-                        This Roster is designed specifically for our content creators who are streaming Fortnite content 3+ times a day, with at least 1,000 subscribers on their platforms.
+                        For new content creators regularly posting Fortnite content, with at least 500 subscribers on YouTube or 1,000 followers on TikTok.
                     </p>
+
                 </div>
-            </div>
+
+            </a>
+
+
+            <a href="roster/main-content.html" class="card">
+
+                <div class="card-content">
+
+                    <h3 class="card-title">
+                        MAIN CONTENT CREATOR
+                    </h3>
+
+                    <p class="card-text">
+                        For larger content creators regularly posting Fortnite content, with at least 1,000 subscribers on YouTube or 3,000 followers on TikTok.
+                    </p>
+
+                </div>
+
+            </a>
+
+
+            <a href="roster/streamer.html" class="card">
+
+                <div class="card-content">
+
+                    <h3 class="card-title">
+                        STREAMER
+                    </h3>
+
+                    <p class="card-text">
+                        Designed for creators who regularly stream Fortnite content and have at least 1,000 subscribers or followers on their platform.
+                    </p>
+
+                </div>
+
+            </a>
+
 
         </div>
 
     </div>
 
-
-
 </section>
+
+
+<!-- TOKEN ROSTERS -->
 
 <section class="section">
 
-        
-        <div class="container">
+    <div class="container">
 
         <div class="section-header">
-            <div class="section-label">TOKEN ROSTERS</div>
-            <h2 class="section-title">TOKENS</h2>
-            <p class="card-text">
+
+            <div class="section-label">
+                TOKEN ROSTERS
+            </div>
+
+            <h2 class="section-title">
+                TOKENS
+            </h2>
+
+            <p class="section-description">
                 For skilled Fortnite players with earnings from unofficial tournaments.
             </p>
+
         </div>
+
 
         <div class="card-grid">
 
-            <div class="card">
-                <div class="card-content">
-                    <h3 class="card-title">TOKEN PRO</h3>
-                    <p class="card-text">
-                        For highly skilled and experienced Fortnite players with over 1,000 USD in Tokens.
-                    </p>
-                </div>
-            </div>
 
-            <div class="card">
-                <div class="card-content">
-                    <h3 class="card-title">MAIN TOKEN</h3>
-                    <p class="card-text">
-                        For dedicated Fortnite players with over 400 USD in Tokens.
-                    </p>
-                </div>
-            </div>
+            <a href="roster/token-pro.html" class="card">
 
-            <div class="card">
                 <div class="card-content">
-                    <h3 class="card-title">ACADEMY TOKEN</h3>
+
+                    <h3 class="card-title">
+                        TOKEN PRO
+                    </h3>
+
                     <p class="card-text">
-                        For Fortnite players with at least 50 USD in Tokens.
+                        For highly skilled and experienced Fortnite players with over $1,000 in tokens.
                     </p>
+
                 </div>
-            </div>
+
+            </a>
+
+
+            <a href="roster/main-token.html" class="card">
+
+                <div class="card-content">
+
+                    <h3 class="card-title">
+                        MAIN TOKEN
+                    </h3>
+
+                    <p class="card-text">
+                        For dedicated Fortnite players with over $400 in tokens.
+                    </p>
+
+                </div>
+
+            </a>
+
+
+            <a href="roster/academy-token.html" class="card">
+
+                <div class="card-content">
+
+                    <h3 class="card-title">
+                        ACADEMY TOKEN
+                    </h3>
+
+                    <p class="card-text">
+                        For Fortnite players with at least $50 in tokens.
+                    </p>
+
+                </div>
+
+            </a>
+
 
         </div>
 
     </div>
 
-
-
 </section>
+
+
+<!-- CREATIVE ROSTERS -->
+
 <section class="section">
 
-        
-        <div class="container">
+    <div class="container">
 
         <div class="section-header">
-            <div class="section-label">CREATIVE ROSTERS</div>
-            <h2 class="section-title">CREATIVE</h2>
-            <p class="card-text">
+
+            <div class="section-label">
+                CREATIVE ROSTERS
+            </div>
+
+            <h2 class="section-title">
+                CREATIVE
+            </h2>
+
+            <p class="section-description">
                 For mechanically advanced players mainly playing creative games.
             </p>
+
         </div>
+
 
         <div class="card-grid">
 
-            <div class="card">
-                <div class="card-content">
-                    <h3 class="card-title">PRO CREATIVE</h3>
-                    <p class="card-text">
-                        For Fortnite players with a wide variety of builds, and extremely fast mechanics.
-                    </p>
-                </div>
-            </div>
 
-            <div class="card">
-                <div class="card-content">
-                    <h3 class="card-title">MAIN CREATIVE</h3>
-                    <p class="card-text">
-                        For Fortnite players with a wide variety of builds, and fast mechanics.
-                    </p>
-                </div>
-            </div>
+            <a href="roster/pro-creative.html" class="card">
 
-            <div class="card">
                 <div class="card-content">
-                    <h3 class="card-title">CREATIVE ACADEMY</h3>
+
+                    <h3 class="card-title">
+                        PRO CREATIVE
+                    </h3>
+
                     <p class="card-text">
-                        For dedicated Fortnite players, with fast mechanics.
+                        For Fortnite players with a wide variety of builds and extremely fast mechanics.
                     </p>
+
                 </div>
-            </div>
+
+            </a>
+
+
+            <a href="roster/main-creative.html" class="card">
+
+                <div class="card-content">
+
+                    <h3 class="card-title">
+                        MAIN CREATIVE
+                    </h3>
+
+                    <p class="card-text">
+                        For Fortnite players with a wide variety of builds and fast mechanics.
+                    </p>
+
+                </div>
+
+            </a>
+
+
+            <a href="roster/creative-academy.html" class="card">
+
+                <div class="card-content">
+
+                    <h3 class="card-title">
+                        CREATIVE ACADEMY
+                    </h3>
+
+                    <p class="card-text">
+                        For dedicated Fortnite players with fast mechanics.
+                    </p>
+
+                </div>
+
+            </a>
+
 
         </div>
 
     </div>
 
+</section>
 
+
+<!-- OTHER ROSTERS -->
+
+<section class="section">
+
+    <div class="container">
+
+        <div class="section-header">
+
+            <div class="section-label">
+                OTHER ROSTERS
+            </div>
+
+            <h2 class="section-title">
+                OTHER
+            </h2>
+
+            <p class="section-description">
+                Additional roles for dedicated members of Xotic Esports.
+            </p>
+
+        </div>
+
+
+        <div class="card-grid">
+
+
+            <a href="roster/goat.html" class="card">
+
+                <div class="card-content">
+
+                    <h3 class="card-title">
+                        GOAT
+                    </h3>
+
+                    <p class="card-text">
+                        For members consistently using our support-a-creator code.
+                    </p>
+
+                </div>
+
+            </a>
+
+
+            <a href="roster/grinder.html" class="card">
+
+                <div class="card-content">
+
+                    <h3 class="card-title">
+                        GRINDER
+                    </h3>
+
+                    <p class="card-text">
+                        For dedicated members, representing our team.
+                    </p>
+
+                </div>
+
+            </a>
+
+
+        </div>
+
+    </div>
 
 </section>
+
 </main>
+
 
 <footer>
 
@@ -259,50 +517,97 @@
 
         <div class="footer-grid">
 
+
             <div class="footer-brand">
 
                 <div class="logo">
-                    <img src="images/whitelogo.PNG" alt="Surge">
-                    SURGE<span></span>
+
+                    <img
+                        src="images/whitelogo.PNG"
+                        alt="Xotic Esports"
+                    >
+
+                    XOTIC
+
+                    <span></span>
+
                 </div>
 
                 <p>
-                    Competitive Esports Organization founded in December 2025.
+                    Competitive esports organization established in August 2026.
                 </p>
 
             </div>
 
-            
-            <div class="footer-column" style="align-items:end;">
 
-                <h3>SURGE</h3>
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="rosters.html">Rosters</a>
-                <a href="contact.html">Contact</a>
-                
-                <a href="merch.html">Merch</a>
+            <div class="footer-column">
+
+                <h3>
+                    XOTIC
+                </h3>
+
+                <a href="index.html">
+                    Home
+                </a>
+
+                <a href="about.html">
+                    About
+                </a>
+
+                <a href="rosters.html">
+                    Rosters
+                </a>
+
+                <a href="contact.html">
+                    Contact
+                </a>
+
+                <a href="merch.html">
+                    Merch
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    SOCIALS
+                </h3>
+
+                <a
+                    href="#"
+                    target="_blank"
+                >
+                    X
+                </a>
+
+                <a
+                    href="#"
+                    target="_blank"
+                >
+                    TikTok
+                </a>
+
             </div>
 
 
-            <div class="footer-column" style="align-items:end;">
+            <div class="footer-column">
 
-                <h3>SOCIALS</h3>
+                <h3>
+                    DISCORD
+                </h3>
 
-                <a href="https://x.com/fearsrg0" target="_blank">X</a>
-                <a href="https://tiktok.com/@fearsrg0" target="_blank">TikTok</a>
-                <a href="https://fortnitetracker.com/esports/organization/surge-esports" target="_blank">Fortnite Tracker</a>
-
-            </div>
-            <div class="footer-column" style="align-items:end;">
-
-                <h3>SERVERS</h3>
-
-                <a href="https://discord.gg/fearsrg" target="_blank">Main Discord</a>
-                <a href="https://discord.gg/xWb9d4yB4J" target="_blank">Appeals & Reports</a>
-                <a href="https://discord.gg/srgscrims" target="_blank">Scrims</a>
+                <a
+                    href="https://discord.gg/xotic"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    Main Discord
+                </a>
 
             </div>
+
 
         </div>
 
@@ -310,7 +615,7 @@
         <div class="footer-bottom">
 
             <span>
-                EST. 2025
+                EST. 2026
             </span>
 
             <span>
@@ -322,11 +627,21 @@
     </div>
 
 </footer>
+
+
 <script>
+
 function toggleMenu() {
-    document.getElementById("navLinks").classList.toggle("show");
+
+    document
+        .getElementById("navLinks")
+        .classList
+        .toggle("show");
+
 }
+
 </script>
+
 
 </body>
 </html>
