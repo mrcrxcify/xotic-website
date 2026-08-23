@@ -106,7 +106,44 @@
     </div>
 
 </section>
+<section class="section stats-section">
 
+    <div class="container">
+
+        <div class="section-header">
+
+            <div class="section-label">
+                XOTIC BY THE NUMBERS
+            </div>
+
+            <h2 class="section-title">
+                THE COMMUNITY
+            </h2>
+
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                <div class="stat-number" id="discord-members">00</div>
+                <div class="stat-label">Discord Members</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-number" id="players-count">00</div>
+                <div class="stat-label">Players</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-number" id="staff-count">00</div>
+                <div class="stat-label">Staff</div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
 <section class="cta">
 
     <div class="cta-content">
@@ -188,9 +225,53 @@
 </footer>
 
 <script>
+
 function toggleMenu() {
     document.getElementById("navLinks").classList.toggle("show");
 }
+
+
+const API_URL = "https://api.xoticesports.com";
+
+
+async function loadStats() {
+
+    try {
+
+        const response = await fetch(`${API_URL}/api/stats`);
+
+        if (!response.ok) {
+            throw new Error("Stats API request failed");
+        }
+
+        const data = await response.json();
+
+        document.getElementById("discord-members").textContent =
+            data.members;
+
+        document.getElementById("players-count").textContent =
+            data.players;
+
+        document.getElementById("staff-count").textContent =
+            data.staff;
+
+    } catch (error) {
+
+        console.error("Stats loading error:", error);
+
+        document.getElementById("discord-members").textContent = "00";
+        document.getElementById("players-count").textContent = "00";
+        document.getElementById("staff-count").textContent = "00";
+
+    }
+
+}
+
+
+loadStats();
+
+setInterval(loadStats, 60000);
+
 </script>
 
 </body>
