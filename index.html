@@ -232,13 +232,14 @@ function toggleMenu() {
 
 
 const API_URL = "https://api.xoticesports.com";
+const SERVER_ID="1490116751927546089";
 
 
 async function loadStats() {
 
     try {
 
-        const response = await fetch(`${API_URL}/api/stats`);
+        const response = await fetch(`${API_URL}/api/server/${SERVER_ID}/stats`);
 
         if (!response.ok) {
             throw new Error("Stats API request failed");

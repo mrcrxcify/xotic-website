@@ -254,8 +254,9 @@ function toggleMenu() {
 */
 
 const API_URL = "https://api.xoticesports.com";
+const SERVER_ID="1490116751927546089";
 
-const STAFF_API = `${API_URL}/api/staff`;
+const STAFF_API = `${API_URL}/api/server/${SERVER_ID}/staff`;
 
 
 /*
@@ -415,11 +416,16 @@ function escapeHTML(text) {
     Convert role IDs into role names.
 */
 
-function getStaffRoles(roleIds) {
+function getStaffRoles(roles) {
 
-    return roleIds
-        .filter(roleId => STAFF_ROLES[roleId])
-        .map(roleId => STAFF_ROLES[roleId])
+    return roles
+        .filter(role => STAFF_ROLES[role.id])
+        .map(role => ({
+            id: role.id,
+            name: role.name,
+            color: role.color,
+            order: STAFF_ROLES[role.id].order
+        }))
         .sort((a, b) => a.order - b.order);
 
 }

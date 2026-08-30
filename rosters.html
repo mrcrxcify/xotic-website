@@ -524,6 +524,7 @@
 </footer>
 <script>
 const API_URL = "https://api.xoticesports.com";
+const SERVER_ID="1490116751927546089";
 function toggleMenu() {
     document
         .getElementById("navLinks")
@@ -538,7 +539,7 @@ async function loadRosterCounts() {
         const roleId = counter.dataset.roleId;
         try {
             const response = await fetch(
-                `${API_URL}/api/roster/${roleId}`
+                `${API_URL}/api/server/${SERVER_ID}/roster/${roleId}`
             );
             if (!response.ok) {
                 throw new Error("API request failed");
