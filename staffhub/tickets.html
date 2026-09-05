@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Xotic StaffHub</title>
+<link rel="stylesheet" href="css/staffhub.css">
+
+<link rel="icon" type="image/png" href="../images/purplogo.PNG">
+</head>
+<body data-page="announcements">
+<nav class="navbar">
+<div class="nav-container container">
+<a href="index.html" class="logo"><img src="../images/whitelogo.PNG" alt="Xotic">XOTIC</a>
+<div class="staff-nav">
+<a href="index.html">Home</a>
+<a href="commands.html">Commands</a>
+<a href="tickets.html">Tickets</a>
+<a href="expectations.html">Expectations</a>
+<a href="examples.html">Examples</a>
+<a href="announcements.html">Announcements</a>
+<a href="staffupdates.html">Updates</a>
+<a href="admin.html">Admin</a>
+</div>
+<div id="staff-user" class="staff-user"><span>Checking...</span></div>
+</div>
+</nav>
+<main class="hub-main"><div class="container">
+<div class="page-head"><div class="eyebrow">STAFF RESOURCE</div><h1 id="page-title">TICKET GUIDE</h1><p>Internal instructions for handling tickets.</p></div>
+<article class="document" id="page-content"></article>
+<section class="editor" id="editor" hidden>
+<div class="section-label">EDITOR</div>
+<input id="editor-title" placeholder="Page title">
+<textarea id="editor-content" placeholder="Write the page content here..."></textarea>
+<button class="btn btn-primary" onclick="savePage('tickets')">SAVE PAGE</button>
+</section>
+</div></main>
+<footer><div class="container"><span id="staff-server">Xotic StaffHub</span> • Internal Staff Portal</div></footer>
+<script src="javascript/staffhub.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Xotic StaffHub</title>
+<link rel="stylesheet" href="css/staffhub.css">
+
+<link rel="icon" type="image/png" href="../images/purplogo.PNG">
+</head>
+<body data-page="announcements">
+<nav class="navbar">
+<div class="nav-container container">
+<a href="index.html" class="logo"><img src="../images/whitelogo.PNG" alt="Xotic">XOTIC</a>
+<div class="staff-nav">
+<a href="index.html">Home</a>
+<a href="commands.html">Commands</a>
+<a href="tickets.html">Tickets</a>
+<a href="expectations.html">Expectations</a>
+<a href="examples.html">Examples</a>
+<a href="announcements.html">Announcements</a>
+<a href="staffupdates.html">Updates</a>
+<a href="admin.html">Admin</a>
+
+</div>
+<div id="staff-user" class="staff-user"><span>Checking...</span></div>
+</div>
+</nav>
+<main class="hub-main"><div class="container">
+<div class="page-head"><div class="eyebrow">STAFF RESOURCE</div><h1>COMMANDS</h1>
+<p>Only commands available to your current staff level are shown.</p></div>
+<div class="command-list" id="commands-list"></div>
+<section class="editor" id="command-editor" hidden>
+<div class="section-label">COMMAND EDITOR</div>
+<div class="editor-row">
+<input id="new-command" placeholder="/command">
+<input id="new-use" placeholder="How to use the command">
+<input id="new-level" type="number" min="0" value="0" placeholder="Minimum level">
+<button class="btn btn-primary" onclick="addCommand()">ADD</button>
+</div>
+<div id="command-editor-list"></div>
+</section>
+</div></main>
+<footer><div class="container"><span id="staff-server">Xotic StaffHub</span> • Internal Staff Portal</div></footer>
+<script src="javascript/staffhub.js"></script>
+</body>
+</html>
