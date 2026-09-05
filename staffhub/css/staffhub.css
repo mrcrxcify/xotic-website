@@ -1382,3 +1382,231 @@ footer {
         flex: 1;
     }
 }
+/* ==================================================
+   STAFFHUB ATTACHMENTS
+================================================== */
+
+.staffhub-attachments {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(180px, 1fr)
+        );
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+.staffhub-attachment-image {
+    display: block;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.025);
+}
+
+.staffhub-attachment-image img {
+    display: block;
+
+    width: 100%;
+
+    aspect-ratio: 16 / 9;
+
+    object-fit: cover;
+
+    transition:
+        transform .2s ease;
+}
+
+.staffhub-attachment-image:hover img {
+    transform:
+        scale(1.025);
+}
+
+.staffhub-attachment-file {
+    min-height: 72px;
+
+    padding: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    color: inherit;
+
+    text-decoration: none;
+}
+
+.staffhub-attachment-icon {
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing:
+        .08em;
+
+    opacity: .7;
+}
+
+.staffhub-attachment-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.staffhub-attachment-info strong,
+.staffhub-attachment-info small {
+    display: block;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.staffhub-attachment-info small {
+    margin-top: 4px;
+
+    opacity: .5;
+}
+
+/* ==================================================
+   ACTIVITY FILTERS
+================================================== */
+
+.staff-activity-filters {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+}
+
+.staff-activity-filters select {
+    width: 100%;
+
+    padding:
+        13px 14px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.1);
+
+    border-radius: 10px;
+
+    background:
+        #0d1017;
+
+    color: inherit;
+
+    font: inherit;
+}
+
+.staff-update-card {
+    padding: 18px;
+
+    margin-bottom: 12px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,.025);
+}
+
+.staff-update-top {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 10px;
+}
+
+.staff-update-type {
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing:
+        .1em;
+}
+
+.staff-update-top time {
+    font-size: 12px;
+
+    opacity: .5;
+}
+
+.staff-update-card h3 {
+    margin:
+        0 0 7px;
+}
+
+.staff-update-card p {
+    margin: 0;
+
+    opacity: .7;
+}
+
+.staff-update-card small {
+    display: block;
+
+    margin-top: 12px;
+
+    opacity: .45;
+}
+
+@media (
+    max-width: 700px
+) {
+    .staff-activity-filters {
+        grid-template-columns:
+            1fr;
+    }
+
+    .staffhub-attachments {
+        grid-template-columns:
+            1fr;
+    }
+
+    .staff-update-top {
+        align-items: flex-start;
+
+        flex-direction:
+            column;
+    }
+}

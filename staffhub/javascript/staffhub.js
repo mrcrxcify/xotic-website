@@ -3360,3 +3360,562 @@ async function renderCurrentStaff() {
         `;
     }
 }
+/*
+==================================================
+STAFFHUB ATTACHMENTS
+==================================================
+*/
+
+async function uploadAttachments(
+    files,
+    page
+) {
+    const attachments = [];
+
+    for (
+        const file of Array.from(
+            files || []
+        )
+    ) {
+        if (
+            file.size >
+            8 * 1024 * 1024
+        ) {
+            alert(
+                `${file.name} is larger than 8MB.`
+            );
+
+            continue;
+        }
+
+        const data =
+            await new Promise(
+                (resolve, reject) => {
+                    const reader =
+                        new FileReader();
+
+                    reader.onload =
+                        () =>
+                            resolve(
+                                reader.result
+                            );
+
+                    reader.onerror =
+                        reject;
+
+                    reader.readAsDataURL(
+                        file
+                    );
+                }
+            );
+
+        const result =
+            await api(
+                "/api/staffhub/upload",
+                {
+                    method: "POST",
+
+                    body:
+                        JSON.stringify({
+                            page,
+
+                            name:
+                                file.name,
+
+                            type:
+                                file.type,
+
+                            data
+                        })
+                }
+            );
+
+        if (
+            result.attachment
+        ) {
+            attachments.push(
+                result.attachment
+            );
+        }
+    }
+
+    return attachments;
+}
+
+function getAttachments(
+    item
+) {
+    if (
+        Array.isArray(
+            item?.attachments
+        )
+    ) {
+        return item.attachments;
+    }
+
+    if (
+        Array.isArray(
+            item?.images
+        )
+    ) {
+        return item.images.map(
+            image => ({
+                ...image,
+
+                type:
+                    "image/*"
+            })
+        );
+    }
+
+    return [];
+}
+
+function renderAttachments(
+    attachments
+) {
+    if (
+        !attachments?.length
+    ) {
+        return "";
+    }
+
+    return `
+        <div class="staffhub-attachments">
+
+            ${attachments.map(
+                file => {
+                    const name =
+                        escapeHtml(
+                            file.name ||
+                            "Attachment"
+                        );
+
+                    const url =
+                        escapeHtml(
+                            file.url ||
+                            ""
+                        );
+
+                    const type =
+                        escapeHtml(
+                            file.type ||
+                            ""
+                        );
+
+                    if (
+                        (
+                            file.type ||
+                            ""
+                        ).startsWith(
+                            "image/"
+                        )
+                    ) {
+                        return `
+                            <a
+                                class="staffhub-attachment-image"
+                                href="${url}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <img
+                                    src="${url}"
+                                    alt="${name}"
+                                    loading="lazy"
+                                >
+                            </a>
+                        `;
+                    }
+
+                    const size =
+                        file.size
+                            ? `${Math.max(
+                                1,
+                                Math.round(
+                                    file.size /
+                                    1024
+                                )
+                            )} KB`
+                            : "";
+
+                    return `
+                        <a
+                            class="staffhub-attachment-file"
+                            href="${url}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span
+                                class="staffhub-attachment-icon"
+                            >
+                                FILE
+                            </span>
+
+                            <span
+                                class="staffhub-attachment-info"
+                            >
+                                <strong>
+                                    ${name}
+                                </strong>
+
+                                <small>
+                                    ${type}
+                                    ${
+                                        size
+                                            ? ` • ${size}`
+                                            : ""
+                                    }
+                                </small>
+                            </span>
+
+                            <span>
+                                ↗
+                            </span>
+                        </a>
+                    `;
+                }
+            ).join("")}
+
+        </div>
+    `;
+}
+function activityGroup(
+    type
+) {
+    switch (
+        String(
+            type || ""
+        ).toLowerCase()
+    ) {
+        case "promotion":
+        case "demotion":
+            return "promotions";
+
+        case "hire":
+            return "hires";
+
+        case "removal":
+        case "resignation":
+            return "fires";
+
+        case "demo":
+        case "demos":
+        case "demonstration":
+            return "demos";
+
+        default:
+            return "all";
+    }
+}
+
+function activityLabel(
+    type
+) {
+    switch (
+        String(
+            type || ""
+        ).toLowerCase()
+    ) {
+        case "promotion":
+            return "PROMOTION";
+
+        case "demotion":
+            return "DEMOTION";
+
+        case "hire":
+            return "HIRE";
+
+        case "removal":
+            return "FIRED / REMOVED";
+
+        case "resignation":
+            return "RESIGNATION";
+
+        case "demo":
+        case "demos":
+        case "demonstration":
+            return "DEMO";
+
+        default:
+            return String(
+                type ||
+                "ROLE CHANGE"
+            )
+                .replaceAll(
+                    "_",
+                    " "
+                )
+                .toUpperCase();
+    }
+}
+async function renderActivityLog() {
+    const list =
+        qs(
+            "staff-updates-list"
+        );
+
+    if (!list) {
+        return;
+    }
+
+    try {
+        const data =
+            await api(
+                "/api/staffhub/staff-updates"
+            );
+
+        const updates =
+            Array.isArray(
+                data.updates
+            )
+                ? data.updates
+                : [];
+
+        const typeFilter =
+            qs(
+                "activity-type-filter"
+            );
+
+        const userFilter =
+            qs(
+                "activity-user-filter"
+            );
+
+        if (
+            userFilter
+        ) {
+            const users =
+                [
+                    ...new Map(
+                        updates
+                            .filter(
+                                update =>
+                                    update.memberId
+                            )
+                            .map(
+                                update => [
+                                    update.memberId,
+
+                                    update.displayName ||
+                                    update.username ||
+                                    update.memberId
+                                ]
+                            )
+                    )
+                ]
+                    .sort(
+                        (a, b) =>
+                            a[1].localeCompare(
+                                b[1]
+                            )
+                    );
+
+            userFilter.innerHTML = `
+                <option value="all">
+                    All Staff
+                </option>
+
+                ${users.map(
+                    ([id, name]) => `
+                        <option
+                            value="${escapeHtml(id)}"
+                        >
+                            ${escapeHtml(name)}
+                        </option>
+                    `
+                ).join("")}
+            `;
+        }
+
+        function draw() {
+            const selectedType =
+                typeFilter?.value ||
+                "all";
+
+            const selectedUser =
+                userFilter?.value ||
+                "all";
+
+            const filtered =
+                updates.filter(
+                    update => {
+                        const typeOkay =
+                            selectedType ===
+                                "all" ||
+                            activityGroup(
+                                update.type
+                            ) ===
+                                selectedType;
+
+                        const userOkay =
+                            selectedUser ===
+                                "all" ||
+                            update.memberId ===
+                                selectedUser;
+
+                        return (
+                            typeOkay &&
+                            userOkay
+                        );
+                    }
+                );
+
+            if (
+                !filtered.length
+            ) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        No matching staff activity.
+                    </div>
+                `;
+
+                return;
+            }
+
+            list.innerHTML =
+                filtered.map(
+                    update => `
+                        <article
+                            class="staff-update-card"
+                        >
+                            <div
+                                class="staff-update-top"
+                            >
+                                <span
+                                    class="staff-update-type"
+                                >
+                                    ${escapeHtml(
+                                        activityLabel(
+                                            update.type
+                                        )
+                                    )}
+                                </span>
+
+                                <time>
+                                    ${escapeHtml(
+                                        formatDate(
+                                            update.date
+                                        )
+                                    )}
+                                </time>
+                            </div>
+
+                            <h3>
+                                ${escapeHtml(
+                                    update.displayName ||
+                                    update.username ||
+                                    "Unknown"
+                                )}
+                            </h3>
+
+                            <p>
+                                ${
+                                    update.oldRoles?.length
+                                        ? escapeHtml(
+                                            update.oldRoles
+                                                .map(
+                                                    role =>
+                                                        role.name
+                                                )
+                                                .join(
+                                                    ", "
+                                                )
+                                        ) +
+                                        " → "
+                                        : ""
+                                }
+
+                                ${
+                                    update.newRoles?.length
+                                        ? escapeHtml(
+                                            update.newRoles
+                                                .map(
+                                                    role =>
+                                                        role.name
+                                                )
+                                                .join(
+                                                    ", "
+                                                )
+                                        )
+                                        : ""
+                                }
+                            </p>
+
+                            ${
+                                update.updatedBy
+                                    ? `
+                                        <small>
+                                            Updated by
+                                            ${escapeHtml(
+                                                update.updatedBy.displayName ||
+                                                update.updatedBy.username ||
+                                                "Unknown"
+                                            )}
+                                        </small>
+                                    `
+                                    : ""
+                            }
+                        </article>
+                    `
+                ).join("");
+        }
+
+        typeFilter?.addEventListener(
+            "change",
+            draw
+        );
+
+        userFilter?.addEventListener(
+            "change",
+            draw
+        );
+
+        draw();
+
+    } catch (error) {
+        list.innerHTML = `
+            <div class="empty-state">
+                ${escapeHtml(
+                    error.message
+                )}
+            </div>
+        `;
+    }
+}
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+        const page =
+            document.body.dataset.page;
+
+        if (
+            page ===
+            "promosDemos"
+        ) {
+            const edit =
+                qs(
+                    "promos-demos-edit-button"
+                );
+
+            const permissions =
+                qs(
+                    "promos-demos-permissions-button"
+                );
+
+            if (edit) {
+                edit.remove();
+            }
+
+            if (permissions) {
+                permissions.remove();
+            }
+
+            setTimeout(
+                () => {
+                    renderActivityLog();
+                },
+                100
+            );
+        }
+    }
+);
