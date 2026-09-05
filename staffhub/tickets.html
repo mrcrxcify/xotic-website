@@ -1,41 +1,165 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Xotic StaffHub</title>
-<link rel="stylesheet" href="css/staffhub.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="icon" type="image/png" href="../images/purplogo.PNG">
+
+<title>Tickets | Xotic StaffHub</title>
+
+<link rel="stylesheet" href="staffhub.css">
+
+
 </head>
-<body data-page="announcements">
-<nav class="navbar">
-<div class="nav-container container">
-<a href="index.html" class="logo"><img src="../images/whitelogo.PNG" alt="Xotic">XOTIC</a>
-<div class="staff-nav">
-<a href="index.html">Home</a>
-<a href="commands.html">Commands</a>
-<a href="tickets.html">Tickets</a>
-<a href="expectations.html">Expectations</a>
-<a href="examples.html">Examples</a>
-<a href="announcements.html">Announcements</a>
-<a href="staffupdates.html">Updates</a>
-<a href="admin.html">Admin</a>
+
+<body data-page="tickets">
+
+<header class="navbar">
+    <div class="container nav-container">
+
+
+    <a href="index.html" class="logo">
+        <img src="../images/whitelogo.PNG" alt="Xotic">
+        XOTIC
+    </a>
+
+    <div class="staff-nav">
+        <a href="index.html">Home</a>
+        <a href="commands.html">Commands</a>
+        <a href="tickets.html">Tickets</a>
+        <a href="etiquette.html">Etiquette</a>
+        <a href="announcements.html">Announcements</a>
+        <a href="promos-demos.html">Promos &amp; Demos</a>
+        <a href="current-staff.html">Current Staff</a>
+    </div>
+
+    <div id="staff-user" class="staff-user">
+        <span>Checking...</span>
+    </div>
+
 </div>
-<div id="staff-user" class="staff-user"><span>Checking...</span></div>
+
+
+</header>
+
+<main class="hub-main">
+    <div class="container">
+
+
+    <div class="page-head">
+        <div class="eyebrow">STAFF RESOURCE</div>
+
+        <div class="page-title-row">
+            <div>
+                <h1>TICKETS</h1>
+                <p>
+                    Information and procedures for handling Xotic tickets.
+                </p>
+            </div>
+
+            <div class="page-actions">
+                <button
+                    id="tickets-edit-button"
+                    class="icon-button"
+                    type="button"
+                    hidden
+                    title="Edit Tickets"
+                    onclick="openTicketsEditor()">
+                    ✎
+                </button>
+
+                <button
+                    id="tickets-permissions-button"
+                    class="icon-button"
+                    type="button"
+                    hidden
+                    title="Edit Page Permissions"
+                    onclick="openTicketsPermissions()">
+                    ⚙
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <section id="tickets-list" class="document">
+        <div class="empty-state">
+            Loading tickets...
+        </div>
+    </section>
+
+    <section id="tickets-editor" class="editor" hidden>
+
+        <div class="section-label">
+            TICKETS EDITOR
+        </div>
+
+        <div class="editor-panel">
+
+            <div class="editor-header">
+                <div>
+                    <h2>Manage Tickets</h2>
+                    <p>
+                        Manage ticket categories and instructions.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    onclick="closeTicketsEditor()">
+                    CLOSE
+                </button>
+            </div>
+
+            <div id="tickets-editor-list"></div>
+
+        </div>
+
+    </section>
+
+    <section id="tickets-permissions" class="editor" hidden>
+
+        <div class="section-label">
+            PAGE PERMISSIONS
+        </div>
+
+        <div class="editor-panel">
+
+            <div class="editor-header">
+                <div>
+                    <h2>Tickets Access</h2>
+                    <p>
+                        Control who can view and edit the Tickets page.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    onclick="closeTicketsPermissions()">
+                    CLOSE
+                </button>
+            </div>
+
+            <div id="tickets-permissions-content"></div>
+
+        </div>
+
+    </section>
+
 </div>
-</nav>
-<main class="hub-main"><div class="container">
-<div class="page-head"><div class="eyebrow">STAFF RESOURCE</div><h1 id="page-title">TICKET GUIDE</h1><p>Internal instructions for handling tickets.</p></div>
-<article class="document" id="page-content"></article>
-<section class="editor" id="editor" hidden>
-<div class="section-label">EDITOR</div>
-<input id="editor-title" placeholder="Page title">
-<textarea id="editor-content" placeholder="Write the page content here..."></textarea>
-<button class="btn btn-primary" onclick="savePage('tickets')">SAVE PAGE</button>
-</section>
-</div></main>
-<footer><div class="container"><span id="staff-server">Xotic StaffHub</span> • Internal Staff Portal</div></footer>
+
+
+</main>
+
+<footer>
+    <div class="container">
+        XOTIC ESPORTS &copy; 2026
+    </div>
+</footer>
+
 <script src="javascript/staffhub.js"></script>
+
 </body>
 </html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Promos &amp; Demos | Xotic StaffHub</title>
+
+<link rel="stylesheet" href="staffhub.css">
+
+
+</head>
+
+<body data-page="promosDemos">
+
+<header class="navbar">
+    <div class="container nav-container">
+
+
+    <a href="index.html" class="logo">
+        <img src="../images/whitelogo.PNG" alt="Xotic">
+        XOTIC
+    </a>
+
+    <div class="staff-nav">
+        <a href="index.html">Home</a>
+        <a href="commands.html">Commands</a>
+        <a href="tickets.html">Tickets</a>
+        <a href="etiquette.html">Etiquette</a>
+        <a href="announcements.html">Announcements</a>
+        <a href="promos-demos.html">Promos &amp; Demos</a>
+        <a href="current-staff.html">Current Staff</a>
+    </div>
+
+    <div id="staff-user" class="staff-user">
+        <span>Checking...</span>
+    </div>
+
+</div>
+
+
+</header>
+
+<main class="hub-main">
+    <div class="container">
+
+
+    <div class="page-head">
+        <div class="eyebrow">RESTRICTED RESOURCE</div>
+
+        <div class="page-title-row">
+            <div>
+                <h1>PROMOS &amp; DEMOS</h1>
+                <p>
+                    Internal promotional material, demonstrations and resources.
+                </p>
+            </div>
+
+            <div class="page-actions">
+                <button
+                    id="promos-demos-edit-button"
+                    class="icon-button"
+                    type="button"
+                    hidden
+                    title="Edit Promos & Demos"
+                    onclick="openPromosDemosEditor()">
+                    ✎
+                </button>
+
+                <button
+                    id="promos-demos-permissions-button"
+                    class="icon-button"
+                    type="button"
+                    hidden
+                    title="Edit Page Permissions"
+                    onclick="openPromosDemosPermissions()">
+                    ⚙
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <section id="promos-demos-list" class="document">
+        <div class="empty-state">
+            Loading resources...
+        </div>
+    </section>
+
+    <section id="promos-demos-editor" class="editor" hidden>
+
+        <div class="section-label">
+            PROMOS &amp; DEMOS EDITOR
+        </div>
+
+        <div class="editor-panel">
+
+            <div class="editor-header">
+                <div>
+                    <h2>Manage Promos &amp; Demos</h2>
+                    <p>
+                        Manage restricted promotional resources and demonstrations.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    onclick="closePromosDemosEditor()">
+                    CLOSE
+                </button>
+            </div>
+
+            <div id="promos-demos-editor-list"></div>
+
+        </div>
+
+    </section>
+
+    <section id="promos-demos-permissions" class="editor" hidden>
+
+        <div class="section-label">
+            PAGE PERMISSIONS
+        </div>
+
+        <div class="editor-panel">
+
+            <div class="editor-header">
+                <div>
+                    <h2>Promos &amp; Demos Access</h2>
+                    <p>
+                        Control who can view and edit this restricted page.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    onclick="closePromosDemosPermissions()">
+                    CLOSE
+                </button>
+            </div>
+
+            <div id="promos-demos-permissions-content"></div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+</main>
+
+<footer>
+    <div class="container">
+        XOTIC ESPORTS &copy; 2026
+    </div>
+</footer>
+
+<script src="javascript/staffhub.js"></script>
+
+</body>
+</html>

@@ -1,44 +1,165 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Xotic StaffHub</title>
-<link rel="stylesheet" href="css/staffhub.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="icon" type="image/png" href="../images/purplogo.PNG">
+
+<title>Announcements | Xotic StaffHub</title>
+
+<link rel="stylesheet" href="staffhub.css">
+
+
 </head>
+
 <body data-page="announcements">
-<nav class="navbar">
-<div class="nav-container container">
-<a href="index.html" class="logo"><img src="../images/whitelogo.PNG" alt="Xotic">XOTIC</a>
-<div class="staff-nav">
-<a href="index.html">Home</a>
-<a href="commands.html">Commands</a>
-<a href="tickets.html">Tickets</a>
-<a href="expectations.html">Expectations</a>
-<a href="examples.html">Examples</a>
-<a href="announcements.html">Announcements</a>
-<a href="staffupdates.html">Updates</a>
-<a href="admin.html">Admin</a>
+
+<header class="navbar">
+    <div class="container nav-container">
+
+
+    <a href="index.html" class="logo">
+        <img src="../images/whitelogo.PNG" alt="Xotic">
+        XOTIC
+    </a>
+
+    <div class="staff-nav">
+        <a href="index.html">Home</a>
+        <a href="commands.html">Commands</a>
+        <a href="tickets.html">Tickets</a>
+        <a href="etiquette.html">Etiquette</a>
+        <a href="announcements.html">Announcements</a>
+        <a href="promos-demos.html">Promos &amp; Demos</a>
+        <a href="current-staff.html">Current Staff</a>
+    </div>
+
+    <div id="staff-user" class="staff-user">
+        <span>Checking...</span>
+    </div>
+
 </div>
-<div id="staff-user" class="staff-user"><span>Checking...</span></div>
+
+
+</header>
+
+<main class="hub-main">
+    <div class="container">
+
+
+    <div class="page-head">
+        <div class="eyebrow">STAFF NEWS</div>
+
+        <div class="page-title-row">
+            <div>
+                <h1>ANNOUNCEMENTS</h1>
+                <p>
+                    Important internal announcements for Xotic staff.
+                </p>
+            </div>
+
+            <div class="page-actions">
+                <button
+                    id="announcements-edit-button"
+                    class="icon-button"
+                    type="button"
+                    hidden
+                    title="Manage Announcements"
+                    onclick="openAnnouncementsEditor()">
+                    ✎
+                </button>
+
+                <button
+                    id="announcements-permissions-button"
+                    class="icon-button"
+                    type="button"
+                    hidden
+                    title="Edit Page Permissions"
+                    onclick="openAnnouncementsPermissions()">
+                    ⚙
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <section id="announcements-list" class="announcement-list">
+        <div class="empty-state">
+            Loading announcements...
+        </div>
+    </section>
+
+    <section id="announcements-editor" class="editor" hidden>
+
+        <div class="section-label">
+            ANNOUNCEMENT EDITOR
+        </div>
+
+        <div class="editor-panel">
+
+            <div class="editor-header">
+                <div>
+                    <h2>Manage Announcements</h2>
+                    <p>
+                        Publish or remove internal staff announcements.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    onclick="closeAnnouncementsEditor()">
+                    CLOSE
+                </button>
+            </div>
+
+            <div id="announcements-editor-list"></div>
+
+        </div>
+
+    </section>
+
+    <section id="announcements-permissions" class="editor" hidden>
+
+        <div class="section-label">
+            PAGE PERMISSIONS
+        </div>
+
+        <div class="editor-panel">
+
+            <div class="editor-header">
+                <div>
+                    <h2>Announcements Access</h2>
+                    <p>
+                        Control who can view and edit the Announcements page.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    onclick="closeAnnouncementsPermissions()">
+                    CLOSE
+                </button>
+            </div>
+
+            <div id="announcements-permissions-content"></div>
+
+        </div>
+
+    </section>
+
 </div>
-</nav>
-<main class="hub-main"><div class="container">
-<div class="page-head"><div class="eyebrow">INTERNAL FEED</div><h1>ANNOUNCEMENTS</h1>
-<p>Important internal announcements published by authorised staff.</p></div>
-<section class="editor" id="announcement-editor" hidden>
-<div class="section-label">NEW ANNOUNCEMENT</div>
-<input id="announcement-title" placeholder="Announcement title">
-<textarea id="announcement-content" placeholder="Write the announcement..."></textarea>
-<label>Images</label>
-<input id="announcement-images" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
-<button class="btn btn-primary" onclick="publishAnnouncement()">PUBLISH</button>
-</section>
-<section class="announcement-list" id="announcements-list" style="margin-top:30px"></section>
-</div></main>
-<footer><div class="container"><span id="staff-server">Xotic StaffHub</span> • Internal Staff Portal</div></footer>
+
+
+</main>
+
+<footer>
+    <div class="container">
+        XOTIC ESPORTS &copy; 2026
+    </div>
+</footer>
+
 <script src="javascript/staffhub.js"></script>
+
 </body>
 </html>
