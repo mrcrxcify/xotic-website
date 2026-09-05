@@ -1,166 +1,164 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Xotic StaffHub | Commands</title>
+    <title>Commands | Xotic StaffHub</title>
 
-<link rel="stylesheet" href="css/staffhub.css">
-<link rel="icon" type="image/png" href="../images/purplogo.PNG">
+    <link rel="stylesheet" href="css/staffhub.css">
 </head>
 
 <body data-page="commands">
 
-<nav class="navbar">
-    <div class="nav-container container">
+<header class="navbar">
+    <div class="container nav-container">
 
+        <a href="index.html" class="logo">
+            <img src="../images/whitelogo.PNG" alt="Xotic">
+            <span>XOTIC</span>
+        </a>
 
-    <a href="index.html" class="logo">
-        <img src="../images/whitelogo.PNG" alt="Xotic">
-        XOTIC
-    </a>
+        <button
+            id="mobile-menu-button"
+            class="mobile-menu-button"
+            type="button"
+            onclick="toggleMobileMenu()">
+            ☰
+        </button>
 
-    <div class="staff-nav">
-        <a href="index.html">Home</a>
-        <a href="commands.html">Commands</a>
-        <a href="tickets.html">Tickets</a>
-        <a href="etiquette.html">Etiquette</a>
-        <a href="announcements.html">Announcements</a>
-        <a href="promos-demos.html">Promos &amp; Demos</a>
-        <a href="current-staff.html">Current Staff</a>
+        <nav id="staff-nav" class="staff-nav">
+            <a data-page-link="home" href="index.html">Home</a>
+            <a data-page-link="commands" href="commands.html">Commands</a>
+            <a data-page-link="tickets" href="tickets.html">Tickets</a>
+            <a data-page-link="etiquette" href="etiquette.html">Etiquette</a>
+            <a data-page-link="announcements" href="announcements.html">Announcements</a>
+            <a data-page-link="promosDemos" href="promos-demos.html">Promos &amp; Demos</a>
+            <a data-page-link="currentStaff" href="current-staff.html">Current Staff</a>
+
+            <button class="nav-logout" onclick="logout()">
+                Logout
+            </button>
+        </nav>
+
+        <div id="staff-user" class="staff-user">
+            <span>Checking...</span>
+        </div>
+
     </div>
-
-    <div id="staff-user" class="staff-user">
-        <span>Checking...</span>
-    </div>
-
-</div>
-
-
-</nav>
+</header>
 
 <main class="hub-main">
     <div class="container">
 
+        <div class="page-head">
+            <div class="eyebrow">STAFF RESOURCE</div>
 
-    <div class="page-head">
-        <div class="eyebrow">STAFF RESOURCE</div>
+            <div class="page-title-row">
+                <div>
+                    <h1>COMMANDS</h1>
+                    <p>
+                        Commands available to your current staff permissions.
+                    </p>
+                </div>
 
-        <div class="page-title-row">
-            <div>
-                <h1>COMMANDS</h1>
-                <p>
-                    Commands available to your current staff permissions.
-                </p>
-            </div>
+                <div class="page-actions">
+                    <button
+                        id="commands-edit-button"
+                        class="icon-button"
+                        hidden
+                        onclick="openCommandEditor()">
+                        ✎
+                    </button>
 
-            <div class="page-actions">
-                <button
-                    id="commands-edit-button"
-                    class="icon-button"
-                    type="button"
-                    hidden
-                    title="Edit Commands"
-                    onclick="openCommandEditor()">
-                    ✎
-                </button>
-
-                <button
-                    id="commands-permissions-button"
-                    class="icon-button"
-                    type="button"
-                    hidden
-                    title="Edit Page Permissions"
-                    onclick="openCommandPermissions()">
-                    ⚙
-                </button>
+                    <button
+                        id="commands-permissions-button"
+                        class="icon-button"
+                        hidden
+                        onclick="openCommandPermissions()">
+                        ⚙
+                    </button>
+                </div>
             </div>
         </div>
+
+        <section id="commands-list" class="command-list">
+            <div class="empty-state">
+                Loading commands...
+            </div>
+        </section>
+
+        <section
+            id="command-editor"
+            class="editor"
+            hidden>
+
+            <div class="editor-panel">
+
+                <div class="editor-header">
+                    <div>
+                        <div class="section-label">
+                            COMMAND EDITOR
+                        </div>
+
+                        <h2>Manage Commands</h2>
+
+                        <p>
+                            Create categories and control which Discord roles can use commands.
+                        </p>
+                    </div>
+
+                    <button
+                        class="btn"
+                        onclick="closeCommandEditor()">
+                        CLOSE
+                    </button>
+                </div>
+
+                <div id="command-editor-list"></div>
+
+            </div>
+        </section>
+
+        <section
+            id="command-permissions"
+            class="editor"
+            hidden>
+
+            <div class="editor-panel">
+
+                <div class="editor-header">
+                    <div>
+                        <div class="section-label">
+                            PAGE PERMISSIONS
+                        </div>
+
+                        <h2>Commands Access</h2>
+
+                        <p>
+                            Control who can view and edit Commands.
+                        </p>
+                    </div>
+
+                    <button
+                        class="btn"
+                        onclick="closeCommandPermissions()">
+                        CLOSE
+                    </button>
+                </div>
+
+                <div id="command-permissions-content"></div>
+
+            </div>
+        </section>
+
     </div>
-
-    <section id="commands-list" class="command-list">
-        <div class="empty-state">
-            Loading commands...
-        </div>
-    </section>
-
-    <section
-        id="command-editor"
-        class="editor"
-        hidden>
-
-        <div class="section-label">
-            COMMAND EDITOR
-        </div>
-
-        <div class="editor-panel">
-
-            <div class="editor-header">
-                <div>
-                    <h2>Manage Commands</h2>
-                    <p>
-                        Create categories and add commands to them.
-                    </p>
-                </div>
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="closeCommandEditor()">
-                    CLOSE
-                </button>
-            </div>
-
-            <div id="command-editor-list"></div>
-
-        </div>
-
-    </section>
-
-    <section
-        id="command-permissions"
-        class="editor"
-        hidden>
-
-        <div class="section-label">
-            PAGE PERMISSIONS
-        </div>
-
-        <div class="editor-panel">
-
-            <div class="editor-header">
-                <div>
-                    <h2>Commands Access</h2>
-                    <p>
-                        Control who can view and edit the Commands page.
-                    </p>
-                </div>
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="closeCommandPermissions()">
-                    CLOSE
-                </button>
-            </div>
-
-            <div id="command-permissions-content"></div>
-
-        </div>
-
-    </section>
-
-</div>
-
-
 </main>
 
 <footer>
     <div class="container">
-        <span id="staff-server">Xotic StaffHub</span>
-        • Internal Staff Portal
+        <span id="staff-server">Xotic Esports</span>
+        <span> • Internal Staff Portal</span>
     </div>
 </footer>
 

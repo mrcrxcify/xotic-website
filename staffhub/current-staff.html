@@ -1,16 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Current Staff | Xotic StaffHub</title>
 
-<title>Current Staff | Xotic StaffHub</title>
-
-<link rel="stylesheet" href="css/staffhub.css">
-
-
+    <link rel="stylesheet" href="css/staffhub.css">
 </head>
 
 <body data-page="currentStaff">
@@ -18,62 +14,62 @@
 <header class="navbar">
     <div class="container nav-container">
 
+        <a href="index.html" class="logo">
+            <img src="../images/whitelogo.PNG" alt="Xotic">
+            <span>XOTIC</span>
+        </a>
 
-    <a href="index.html" class="logo">
-        <img src="../images/whitelogo.PNG" alt="Xotic">
-        XOTIC
-    </a>
+        <button class="mobile-menu-button" onclick="toggleMobileMenu()">☰</button>
 
-    <div class="staff-nav">
-        <a href="index.html">Home</a>
-        <a href="commands.html">Commands</a>
-        <a href="tickets.html">Tickets</a>
-        <a href="etiquette.html">Etiquette</a>
-        <a href="announcements.html">Announcements</a>
-        <a href="promos-demos.html">Promos &amp; Demos</a>
-        <a href="current-staff.html">Current Staff</a>
+        <nav id="staff-nav" class="staff-nav">
+            <a data-page-link="home" href="index.html">Home</a>
+            <a data-page-link="commands" href="commands.html">Commands</a>
+            <a data-page-link="tickets" href="tickets.html">Tickets</a>
+            <a data-page-link="etiquette" href="etiquette.html">Etiquette</a>
+            <a data-page-link="announcements" href="announcements.html">Announcements</a>
+            <a data-page-link="promosDemos" href="promos-demos.html">Promos &amp; Demos</a>
+            <a data-page-link="currentStaff" href="current-staff.html">Current Staff</a>
+            <button class="nav-logout" onclick="logout()">Logout</button>
+        </nav>
+
+        <div id="staff-user" class="staff-user">
+            <span>Checking...</span>
+        </div>
+
     </div>
-
-    <div id="staff-user" class="staff-user">
-        <span>Checking...</span>
-    </div>
-
-</div>
-
-
 </header>
 
 <main class="hub-main">
     <div class="container">
 
+        <div class="page-head">
+            <div class="eyebrow">XOTIC STAFF</div>
 
-    <div class="page-head">
-        <div class="eyebrow">XOTIC STAFF</div>
-
-        <div class="page-title-row">
-            <div>
-                <h1>CURRENT STAFF</h1>
-                <p>
-                    The current Xotic staff team, automatically synced with Discord.
-                </p>
+            <div class="page-title-row">
+                <div>
+                    <h1>CURRENT STAFF</h1>
+                    <p>
+                        The current Xotic staff team, automatically synced with Discord.
+                    </p>
+                </div>
             </div>
         </div>
+
+        <section
+            id="current-staff-list"
+            class="staff-grid">
+            <div class="empty-state">
+                Loading current staff...
+            </div>
+        </section>
+
     </div>
-
-    <section id="current-staff-list" class="updates-list">
-        <div class="empty-state">
-            Loading current staff...
-        </div>
-    </section>
-
-</div>
-
-
 </main>
 
 <footer>
     <div class="container">
-        XOTIC ESPORTS &copy; 2026
+        <span id="staff-server">Xotic Esports</span>
+        <span> • Internal Staff Portal</span>
     </div>
 </footer>
 

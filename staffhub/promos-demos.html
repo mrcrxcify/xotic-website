@@ -1,16 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Promos &amp; Demos | Xotic StaffHub</title>
 
-<title>Promos &amp; Demos | Xotic StaffHub</title>
-
-<link rel="stylesheet" href="css/staffhub.css">
-
-
+    <link rel="stylesheet" href="css/staffhub.css">
 </head>
 
 <body data-page="promosDemos">
@@ -18,144 +14,104 @@
 <header class="navbar">
     <div class="container nav-container">
 
+        <a href="index.html" class="logo">
+            <img src="../images/whitelogo.PNG" alt="Xotic">
+            <span>XOTIC</span>
+        </a>
 
-    <a href="index.html" class="logo">
-        <img src="../images/whitelogo.PNG" alt="Xotic">
-        XOTIC
-    </a>
+        <button class="mobile-menu-button" onclick="toggleMobileMenu()">☰</button>
 
-    <div class="staff-nav">
-        <a href="index.html">Home</a>
-        <a href="commands.html">Commands</a>
-        <a href="tickets.html">Tickets</a>
-        <a href="etiquette.html">Etiquette</a>
-        <a href="announcements.html">Announcements</a>
-        <a href="promos-demos.html">Promos &amp; Demos</a>
-        <a href="current-staff.html">Current Staff</a>
+        <nav id="staff-nav" class="staff-nav">
+            <a data-page-link="home" href="index.html">Home</a>
+            <a data-page-link="commands" href="commands.html">Commands</a>
+            <a data-page-link="tickets" href="tickets.html">Tickets</a>
+            <a data-page-link="etiquette" href="etiquette.html">Etiquette</a>
+            <a data-page-link="announcements" href="announcements.html">Announcements</a>
+            <a data-page-link="promosDemos" href="promos-demos.html">Promos &amp; Demos</a>
+            <a data-page-link="currentStaff" href="current-staff.html">Current Staff</a>
+            <button class="nav-logout" onclick="logout()">Logout</button>
+        </nav>
+
+        <div id="staff-user" class="staff-user">
+            <span>Checking...</span>
+        </div>
+
     </div>
-
-    <div id="staff-user" class="staff-user">
-        <span>Checking...</span>
-    </div>
-
-</div>
-
-
 </header>
 
 <main class="hub-main">
     <div class="container">
 
+        <div class="page-head">
+            <div class="eyebrow">RESTRICTED RESOURCE</div>
 
-    <div class="page-head">
-        <div class="eyebrow">RESTRICTED RESOURCE</div>
+            <div class="page-title-row">
+                <div>
+                    <h1>PROMOS &amp; DEMOS</h1>
+                    <p>
+                        Internal promotional resources, demonstrations and staff activity.
+                    </p>
+                </div>
 
-        <div class="page-title-row">
-            <div>
-                <h1>PROMOS &amp; DEMOS</h1>
-                <p>
-                    Internal promotional material, demonstrations and resources.
-                </p>
-            </div>
+                <div class="page-actions">
+                    <button
+                        id="promos-demos-edit-button"
+                        class="icon-button"
+                        hidden
+                        onclick="openDocumentEditor('promosDemos')">
+                        ✎
+                    </button>
 
-            <div class="page-actions">
-                <button
-                    id="promos-demos-edit-button"
-                    class="icon-button"
-                    type="button"
-                    hidden
-                    title="Edit Promos & Demos"
-                    onclick="openPromosDemosEditor()">
-                    ✎
-                </button>
-
-                <button
-                    id="promos-demos-permissions-button"
-                    class="icon-button"
-                    type="button"
-                    hidden
-                    title="Edit Page Permissions"
-                    onclick="openPromosDemosPermissions()">
-                    ⚙
-                </button>
+                    <button
+                        id="promos-demos-permissions-button"
+                        class="icon-button"
+                        hidden
+                        onclick="openPagePermissions('promosDemos')">
+                        ⚙
+                    </button>
+                </div>
             </div>
         </div>
+
+        <section id="promos-demos-list" class="document">
+            <div class="empty-state">
+                Loading resources...
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-label">
+                STAFF ACTIVITY
+            </div>
+
+            <section
+                id="staff-updates-list"
+                class="updates-list">
+                <div class="empty-state">
+                    Loading staff activity...
+                </div>
+            </section>
+        </section>
+
+        <section
+            id="promos-demos-editor"
+            class="editor"
+            hidden>
+        </section>
+
+        <section
+            id="promos-demos-permissions"
+            class="editor"
+            hidden>
+        </section>
+
     </div>
-
-    <section id="promos-demos-list" class="document">
-        <div class="empty-state">
-            Loading resources...
-        </div>
-    </section>
-
-    <section id="promos-demos-editor" class="editor" hidden>
-
-        <div class="section-label">
-            PROMOS &amp; DEMOS EDITOR
-        </div>
-
-        <div class="editor-panel">
-
-            <div class="editor-header">
-                <div>
-                    <h2>Manage Promos &amp; Demos</h2>
-                    <p>
-                        Manage restricted promotional resources and demonstrations.
-                    </p>
-                </div>
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="closePromosDemosEditor()">
-                    CLOSE
-                </button>
-            </div>
-
-            <div id="promos-demos-editor-list"></div>
-
-        </div>
-
-    </section>
-
-    <section id="promos-demos-permissions" class="editor" hidden>
-
-        <div class="section-label">
-            PAGE PERMISSIONS
-        </div>
-
-        <div class="editor-panel">
-
-            <div class="editor-header">
-                <div>
-                    <h2>Promos &amp; Demos Access</h2>
-                    <p>
-                        Control who can view and edit this restricted page.
-                    </p>
-                </div>
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="closePromosDemosPermissions()">
-                    CLOSE
-                </button>
-            </div>
-
-            <div id="promos-demos-permissions-content"></div>
-
-        </div>
-
-    </section>
-
-</div>
-
-
 </main>
 
 <footer>
     <div class="container">
-        XOTIC ESPORTS &copy; 2026
+        <span id="staff-server">Xotic Esports</span>
+        <span> • Internal Staff Portal</span>
     </div>
 </footer>
 
