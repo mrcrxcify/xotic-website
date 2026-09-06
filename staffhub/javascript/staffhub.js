@@ -41,7 +41,7 @@ const PAGE_INFO = {
     promosDemos: {
         title: "Promos & Demos",
         description:
-            "Promotional and demonstration resources.",
+            "Staff promotions, hires, removals and demotions.",
         href: "promos-demos.html"
     },
 
@@ -67,8 +67,83 @@ function escapeHtml(value) {
 }
 
 function formatText(value) {
-    return escapeHtml(value)
-        .replace(/\n/g, "<br>");
+    let text = escapeHtml(value ?? "");
+
+    const codeBlocks = [];
+
+    text = text.replace(
+        /```([\s\S]*?)```/g,
+        (_, code) => {
+            const id = `__CODEBLOCK_${codeBlocks.length}__`;
+
+            codeBlocks.push(
+                `<pre class="discord-codeblock"><code>${code.trim()}</code></pre>`
+            );
+
+            return id;
+        }
+    );
+
+    const inlineCode = [];
+
+    text = text.replace(
+        /`([^`\n]+)`/g,
+        (_, code) => {
+            const id = `__INLINECODE_${inlineCode.length}__`;
+
+            inlineCode.push(
+                `<code class="discord-inline-code">${code}</code>`
+            );
+
+            return id;
+        }
+    );
+
+    text = text
+        .replace(
+            /\*\*(.+?)\*\*/g,
+            "<strong>$1</strong>"
+        )
+        .replace(
+            /__(.+?)__/g,
+            "<u>$1</u>"
+        )
+        .replace(
+            /~~(.+?)~~/g,
+            "<s>$1</s>"
+        )
+        .replace(
+            /(?<!\*)\*([^*\n]+)\*(?!\*)/g,
+            "<em>$1</em>"
+        )
+        .replace(
+            /(?<!_)_([^_\n]+)_(?!_)/g,
+            "<em>$1</em>"
+        )
+        .replace(
+            /\n/g,
+            "<br>"
+        );
+
+    inlineCode.forEach(
+        (html, index) => {
+            text = text.replace(
+                `__INLINECODE_${index}__`,
+                html
+            );
+        }
+    );
+
+    codeBlocks.forEach(
+        (html, index) => {
+            text = text.replace(
+                `__CODEBLOCK_${index}__`,
+                html
+            );
+        }
+    );
+
+    return text;
 }
 
 function formatDate(value) {
@@ -375,12 +450,15 @@ document.addEventListener(
 
         if (
             page === "tickets" ||
-            page === "etiquette" ||
+            page === "etiquette"
+        ) {
+            renderDocumentPage(page);
+        }
+
+        if (
             page === "promosDemos"
         ) {
-            renderDocumentPage(
-                page
-            );
+            renderStaffUpdates();
         }
 
         if (
@@ -566,13 +644,56 @@ async function uploadImages(
             );
 
         images.push(
-            result.image
+            result.attachment
         );
     }
 
     return images;
 }
+async function uploadAttachments(files, page) {
+    const attachments = [];
 
+    for (const file of files) {
+        if (file.size > 8 * 1024 * 1024) {
+            alert(`${file.name} is larger than 8MB.`);
+            continue;
+        }
+
+        const data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+
+            reader.readAsDataURL(file);
+        });
+
+        const result = await api(
+            "/api/staffhub/upload",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    page,
+                    name: file.name,
+                    type: file.type,
+                    data
+                })
+            }
+        );
+
+        if (!result?.attachment?.url) {
+            throw new Error(
+                `Upload failed for ${file.name}.`
+            );
+        }
+
+        attachments.push(
+            result.attachment
+        );
+    }
+
+    return attachments;
+}
 /*
 ==================================================
 DOCUMENT PAGES
@@ -1369,7 +1490,7 @@ function closeDocumentEditor(
 ==================================================
 ANNOUNCEMENTS
 ==================================================
-*/
+*/  
 
 async function renderAnnouncements() {
     const list =
@@ -3091,53 +3212,341 @@ STAFF ACTIVITY
 ==================================================
 */
 
-async function renderStaffUpdates() {
-    const list =
-        qs(
-            "staff-updates-list"
-        );
+let staffActivityFilters = {
+    type: "all",
+    member: "all",
+    executor: "all"
+};
 
-    if (!list) {
+function renderStaffUpdates() {
+    const container =
+        qs("staff-updates-list");
+
+    if (!container) {
         return;
     }
 
-    try {
-        const data =
-            await api(
-                "/api/staffhub/staff-updates"
+    api("/api/staffhub/staff-updates")
+        .then(data => {
+            const updates =
+                Array.isArray(data.updates)
+                    ? data.updates
+                    : [];
+
+            renderActivityFilters(
+                container,
+                updates
             );
 
-        const updates =
-            data.updates || [];
-
-        if (!updates.length) {
-            list.innerHTML = `
+            renderActivityResults(
+                container,
+                updates
+            );
+        })
+        .catch(error => {
+            container.innerHTML = `
                 <div class="empty-state">
-                    No staff activity has been recorded yet.
+                    ${escapeHtml(error.message)}
                 </div>
             `;
+        });
+}
 
-            return;
-        }
+function renderActivityFilters(
+    container,
+    updates
+) {
+    const types = [
+        ["all", "All"],
+        ["promotion", "Promotions"],
+        ["demotion", "Demotions"],
+        ["hire", "Hires"],
+        ["removal", "Fires / Removals"],
+        ["resignation", "Resignations"],
+        ["demo", "Demos"]
+    ];
 
-        list.innerHTML =
+    const members = [
+        ...new Map(
             updates
-                .map(
-                    update =>
-                        staffUpdateHtml(
-                            update
-                        )
+                .map(update => [
+                    update.memberId,
+                    update.displayName ||
+                    update.username ||
+                    update.memberId
+                ])
+        )
+    ];
+
+    const executors = [
+        ...new Map(
+            updates
+                .filter(update =>
+                    update.updatedBy?.id
                 )
-                .join("");
-    } catch (error) {
+                .map(update => [
+                    update.updatedBy.id,
+                    update.updatedBy.displayName ||
+                    update.updatedBy.username ||
+                    update.updatedBy.id
+                ])
+        )
+    ];
+
+    let filters =
+        container.querySelector(
+            ".staff-activity-filters"
+        );
+
+    if (!filters) {
+        filters =
+            document.createElement("div");
+
+        filters.className =
+            "staff-activity-filters";
+
+        container.prepend(filters);
+    }
+
+    filters.innerHTML = `
+        <div class="activity-filter">
+            <label>TYPE</label>
+            <select id="activity-type-filter">
+                ${types.map(
+                    ([value, label]) => `
+                        <option
+                            value="${value}"
+                            ${staffActivityFilters.type === value ? "selected" : ""}
+                        >
+                            ${label}
+                        </option>
+                    `
+                ).join("")}
+            </select>
+        </div>
+
+        <div class="activity-filter">
+            <label>STAFF MEMBER</label>
+            <select id="activity-member-filter">
+                <option value="all">Everyone</option>
+
+                ${members.map(
+                    ([id, name]) => `
+                        <option
+                            value="${escapeHtml(id)}"
+                            ${staffActivityFilters.member === id ? "selected" : ""}
+                        >
+                            ${escapeHtml(name)}
+                        </option>
+                    `
+                ).join("")}
+            </select>
+        </div>
+
+        <div class="activity-filter">
+            <label>PERFORMED BY</label>
+            <select id="activity-executor-filter">
+                <option value="all">Anyone</option>
+
+                ${executors.map(
+                    ([id, name]) => `
+                        <option
+                            value="${escapeHtml(id)}"
+                            ${staffActivityFilters.executor === id ? "selected" : ""}
+                        >
+                            ${escapeHtml(name)}
+                        </option>
+                    `
+                ).join("")}
+            </select>
+        </div>
+    `;
+
+    qs("activity-type-filter").onchange =
+        event => {
+            staffActivityFilters.type =
+                event.target.value;
+
+            renderActivityResults(
+                container,
+                updates
+            );
+        };
+
+    qs("activity-member-filter").onchange =
+        event => {
+            staffActivityFilters.member =
+                event.target.value;
+
+            renderActivityResults(
+                container,
+                updates
+            );
+        };
+
+    qs("activity-executor-filter").onchange =
+        event => {
+            staffActivityFilters.executor =
+                event.target.value;
+
+            renderActivityResults(
+                container,
+                updates
+            );
+        };
+}
+
+function renderActivityResults(
+    container,
+    updates
+) {
+    let results =
+        updates.filter(update => {
+            if (
+                staffActivityFilters.type !==
+                "all" &&
+                update.type !==
+                staffActivityFilters.type
+            ) {
+                return false;
+            }
+
+            if (
+                staffActivityFilters.member !==
+                "all" &&
+                update.memberId !==
+                staffActivityFilters.member
+            ) {
+                return false;
+            }
+
+            if (
+                staffActivityFilters.executor !==
+                "all" &&
+                update.updatedBy?.id !==
+                staffActivityFilters.executor
+            ) {
+                return false;
+            }
+
+            return true;
+        });
+
+    const list =
+        container.querySelector(
+            ".staff-activity-results"
+        ) ||
+        (() => {
+            const element =
+                document.createElement("div");
+
+            element.className =
+                "staff-activity-results";
+
+            container.appendChild(element);
+
+            return element;
+        })();
+
+    if (!results.length) {
         list.innerHTML = `
             <div class="empty-state">
-                ${escapeHtml(
-                    error.message
-                )}
+                No activity matches those filters.
             </div>
         `;
+
+        return;
     }
+
+    list.innerHTML =
+        results.map(update => {
+            const oldRoles =
+                Array.isArray(update.oldRoles)
+                    ? update.oldRoles
+                    : [];
+
+            const newRoles =
+                Array.isArray(update.newRoles)
+                    ? update.newRoles
+                    : [];
+
+            const oldText =
+                oldRoles.length
+                    ? oldRoles
+                        .map(role =>
+                            role.name
+                        )
+                        .join(", ")
+                    : "None";
+
+            const newText =
+                newRoles.length
+                    ? newRoles
+                        .map(role =>
+                            role.name
+                        )
+                        .join(", ")
+                    : "None";
+
+            const executor =
+                update.updatedBy
+                    ? update.updatedBy.displayName ||
+                      update.updatedBy.username
+                    : "Unknown";
+
+            return `
+                <article class="staff-update-card">
+
+                    <div class="staff-update-header">
+                        <strong>
+                            ${escapeHtml(
+                                update.displayName ||
+                                update.username
+                            )}
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(
+                                String(
+                                    update.type ||
+                                    "activity"
+                                ).toUpperCase()
+                            )}
+                        </span>
+                    </div>
+
+                    <div class="staff-update-roles">
+                        <div>
+                            <small>FROM</small>
+                            <strong>
+                                ${escapeHtml(oldText)}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <small>TO</small>
+                            <strong>
+                                ${escapeHtml(newText)}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="staff-update-meta">
+                        <span>
+                            Performed by:
+                            ${escapeHtml(executor)}
+                        </span>
+
+                        <span>
+                            ${escapeHtml(
+                                formatDate(update.date)
+                            )}
+                        </span>
+                    </div>
+
+                </article>
+            `;
+        }).join("");
 }
 
 function staffUpdateHtml(
