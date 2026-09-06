@@ -844,29 +844,9 @@ function renderDocument(
                             : ""
                     }
 
-                    ${
-                        category.images?.length
-                            ? `
-                                <div class="document-images">
-                                    ${
-                                        category.images
-                                            .map(
-                                                image => `
-                                                    <img
-                                                        src="${escapeHtml(
-                                                            image.url
-                                                        )}"
-                                                        alt="${escapeHtml(
-                                                            image.name
-                                                        )}">
-                                                `
-                                            )
-                                            .join("")
-                                    }
-                                </div>
-                            `
-                            : ""
-                    }
+                    ${renderAttachments(
+                        getAttachments(category)
+                    )   }
                 </article>
             `
         ).join("");
@@ -1485,7 +1465,17 @@ function closeDocumentEditor(
         editor.hidden = true;
     }
 }
+function openTicketsEditor() {
+    return openDocumentEditor("tickets");
+}
 
+function closeTicketsEditor() {
+    return closeDocumentEditor("tickets");
+}
+
+function openTicketsPermissions() {
+    return openPagePermissions("tickets");
+}
 /*
 ==================================================
 ANNOUNCEMENTS
@@ -1792,16 +1782,20 @@ function previewAnnouncementFiles(
 }
 
 async function createAnnouncement() {
+    if (announcementSaving) {
+        return;
+    }
+
     try {
         const title =
-            qs(
-                "announcement-title"
-            ).value.trim();
+            qs("announcement-title")
+                ?.value
+                .trim();
 
         const content =
-            qs(
-                "announcement-content"
-            ).value.trim();
+            qs("announcement-content")
+                ?.value
+                .trim();
 
         if (!title || !content) {
             alert(
@@ -1811,15 +1805,26 @@ async function createAnnouncement() {
             return;
         }
 
-        const files =
-            [
-                ...(qs(
-                    "announcement-files"
-                ).files || [])
-            ];
+        const files = [
+            ...(qs(
+                "announcement-files"
+            )?.files || [])
+        ];
 
-        const images =
-            await uploadImages(
+        const button =
+            document.querySelector(
+                "#announcements-editor .btn:not(.btn-secondary)"
+            );
+
+        announcementSaving = true;
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = "PUBLISHING...";
+        }
+
+        const attachments =
+            await uploadAttachments(
                 files,
                 "announcements"
             );
@@ -1833,7 +1838,7 @@ async function createAnnouncement() {
                     JSON.stringify({
                         title,
                         content,
-                        images
+                        attachments
                     })
             }
         );
@@ -1842,79 +1847,441 @@ async function createAnnouncement() {
 
         await renderAnnouncements();
 
-        alert(
-            "Announcement published."
+    } catch (error) {
+        alert(error.message);
+
+    } finally {
+        announcementSaving = false;
+    }
+}
+
+let announcementSaving = false;
+
+async function editAnnouncement(id) {
+    try {
+        const data = await api(
+            "/api/staffhub/announcements"
         );
+
+        const item =
+            (data.announcements || [])
+                .find(
+                    announcement =>
+                        announcement.id === id
+                );
+
+        if (!item) {
+            return;
+        }
+
+        const editor =
+            qs("announcements-editor");
+
+        if (!editor) {
+            return;
+        }
+
+        const attachments =
+            getAttachments(item);
+
+        editor.hidden = false;
+
+        editor.innerHTML = `
+            <div class="editor-panel">
+
+                <div class="editor-header">
+
+                    <div>
+                        <div class="section-label">
+                            ANNOUNCEMENT EDITOR
+                        </div>
+
+                        <h2>
+                            Edit Announcement
+                        </h2>
+
+                        <p>
+                            Edit the announcement and its attachments.
+                        </p>
+                    </div>
+
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                        onclick="closeAnnouncementsEditor()">
+                        CLOSE
+                    </button>
+
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-full">
+
+                        <label>
+                            TITLE
+                        </label>
+
+                        <input
+                            id="announcement-title"
+                            value="${escapeHtml(
+                                item.title
+                            )}">
+                    </div>
+
+                    <div class="form-full">
+
+                        <label>
+                            CONTENT
+                        </label>
+
+                        <textarea
+                            id="announcement-content"
+                            style="min-height:220px">${escapeHtml(
+                                item.content || ""
+                            )}</textarea>
+
+                        <small class="editor-help">
+                            Supports Discord formatting:
+                            **bold**, *italic*, ~~strikethrough~~,
+                            __underline__, \`code\`, and code blocks.
+                        </small>
+
+                    </div>
+
+                    <div class="form-full">
+
+                        <label>
+                            ATTACHMENTS
+                        </label>
+
+                        <input
+                            id="announcement-files"
+                            type="file"
+                            multiple
+                            onchange="handleAnnouncementAttachments(this.files)">
+
+                        <div
+                            id="announcement-images-preview"
+                            class="image-preview">
+
+                            ${attachments.map(
+                                attachment => `
+                                    <div
+                                        class="image-item"
+                                        data-attachment-id="${escapeHtml(
+                                            attachment.id
+                                        )}">
+
+                                        ${
+                                            attachment.type?.startsWith(
+                                                "image/"
+                                            )
+                                                ? `
+                                                    <img
+                                                        src="${escapeHtml(
+                                                            attachment.url
+                                                        )}"
+                                                        alt="${escapeHtml(
+                                                            attachment.name
+                                                        )}">
+                                                `
+                                                : `
+                                                    <div class="attachment-file-preview">
+                                                        ${escapeHtml(
+                                                            attachment.name
+                                                        )}
+                                                    </div>
+                                                `
+                                        }
+
+                                        <button
+                                            type="button"
+                                            onclick="removeAnnouncementAttachment(
+                                                '${escapeHtml(
+                                                    attachment.id
+                                                )}'
+                                            )">
+                                            ×
+                                        </button>
+
+                                    </div>
+                                `
+                            ).join("")}
+
+                        </div>
+
+                        <input
+                            type="hidden"
+                            id="announcement-attachment-data"
+                            value="${escapeHtml(
+                                JSON.stringify(
+                                    attachments
+                                )
+                            )}">
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        id="announcement-save-button"
+                        class="btn"
+                        type="button"
+                        onclick="saveAnnouncementEdit(
+                            '${escapeHtml(id)}'
+                        )">
+                        SAVE CHANGES
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+        editor.scrollIntoView({
+            behavior: "smooth"
+        });
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+async function handleAnnouncementAttachments(files) {
+    try {
+        const uploaded =
+            await uploadAttachments(
+                [...files],
+                "announcements"
+            );
+
+        const input =
+            qs("announcement-attachment-data");
+
+        if (!input) {
+            return;
+        }
+
+        let existing = [];
+
+        try {
+            existing =
+                JSON.parse(
+                    input.value || "[]"
+                );
+        } catch {
+            existing = [];
+        }
+
+        input.value =
+            JSON.stringify(
+                existing.concat(uploaded)
+            );
+
+        renderAnnouncementAttachmentPreview();
+
     } catch (error) {
         alert(error.message);
     }
 }
 
-async function editAnnouncement(
-    id
-) {
-    const data =
-        await api(
-            "/api/staffhub/announcements"
-        );
+function removeAnnouncementAttachment(id) {
+    const input =
+        qs("announcement-attachment-data");
 
-    const item =
-        (data.announcements || [])
-            .find(
-                announcement =>
-                    announcement.id ===
-                    id
+    if (!input) {
+        return;
+    }
+
+    let attachments = [];
+
+    try {
+        attachments =
+            JSON.parse(
+                input.value || "[]"
             );
+    } catch {
+        attachments = [];
+    }
 
-    if (!item) {
+    attachments =
+        attachments.filter(
+            attachment =>
+                attachment.id !== id
+        );
+
+    input.value =
+        JSON.stringify(
+            attachments
+        );
+
+    renderAnnouncementAttachmentPreview();
+}
+
+function renderAnnouncementAttachmentPreview() {
+    const input =
+        qs("announcement-attachment-data");
+
+    const preview =
+        qs("announcement-images-preview");
+
+    if (!input || !preview) {
         return;
     }
 
-    const title =
-        prompt(
-            "Announcement title:",
-            item.title
-        );
+    let attachments = [];
 
-    if (!title?.trim()) {
+    try {
+        attachments =
+            JSON.parse(
+                input.value || "[]"
+            );
+    } catch {
+        attachments = [];
+    }
+
+    preview.innerHTML =
+        attachments.map(
+            attachment => `
+                <div
+                    class="image-item"
+                    data-attachment-id="${escapeHtml(
+                        attachment.id
+                    )}">
+
+                    ${
+                        attachment.type?.startsWith(
+                            "image/"
+                        )
+                            ? `
+                                <img
+                                    src="${escapeHtml(
+                                        attachment.url
+                                    )}"
+                                    alt="${escapeHtml(
+                                        attachment.name
+                                    )}">
+                            `
+                            : `
+                                <div class="attachment-file-preview">
+                                    ${escapeHtml(
+                                        attachment.name
+                                    )}
+                                </div>
+                            `
+                    }
+
+                    <button
+                        type="button"
+                        onclick="removeAnnouncementAttachment(
+                            '${escapeHtml(
+                                attachment.id
+                            )}'
+                        )">
+                        ×
+                    </button>
+
+                </div>
+            `
+        ).join("");
+}
+
+async function saveAnnouncementEdit(id) {
+    if (announcementSaving) {
         return;
     }
 
-    const content =
-        prompt(
-            "Announcement content:",
-            item.content
-        );
+    const titleInput =
+        qs("announcement-title");
+
+    const contentInput =
+        qs("announcement-content");
+
+    const attachmentInput =
+        qs("announcement-attachment-data");
 
     if (
-        content === null ||
-        !content.trim()
+        !titleInput ||
+        !contentInput
     ) {
         return;
     }
 
-    await api(
-        `/api/staffhub/announcements/${id}`,
-        {
-            method: "PUT",
+    const title =
+        titleInput.value.trim();
 
-            body:
-                JSON.stringify({
-                    title:
-                        title.trim(),
+    const content =
+        contentInput.value.trim();
 
-                    content:
-                        content.trim(),
+    if (!title || !content) {
+        alert(
+            "Title and content are required."
+        );
 
-                    images:
-                        item.images || []
-                })
+        return;
+    }
+
+    let attachments = [];
+
+    try {
+        attachments =
+            JSON.parse(
+                attachmentInput?.value ||
+                "[]"
+            );
+    } catch {
+        attachments = [];
+    }
+
+    const button =
+        qs("announcement-save-button");
+
+    announcementSaving = true;
+
+    if (button) {
+        button.disabled = true;
+        button.textContent = "SAVING...";
+    }
+
+    try {
+        await api(
+            `/api/staffhub/announcements/${id}`,
+            {
+                method: "PUT",
+
+                body:
+                    JSON.stringify({
+                        title,
+                        content,
+                        attachments
+                    })
+            }
+        );
+
+        await renderAnnouncements();
+
+        const editor =
+            qs("announcements-editor");
+
+        if (editor) {
+            editor.hidden = true;
+            editor.innerHTML = "";
         }
-    );
 
-    renderAnnouncements();
+    } catch (error) {
+        alert(error.message);
+
+        if (button) {
+            button.disabled = false;
+            button.textContent =
+                "SAVE CHANGES";
+        }
+
+    } finally {
+        announcementSaving = false;
+    }
 }
-
 async function deleteAnnouncement(
     id
 ) {
@@ -2031,16 +2398,7 @@ async function renderCommands() {
                                                                 )}
                                                             </p>
 
-                                                            <span
-                                                                class="command-audience">
-
-                                                                ${escapeHtml(
-                                                                    formatCommandAudience(
-                                                                        command.audience
-                                                                    )
-                                                                )}
-
-                                                            </span>
+                                                           
                                                         </article>
                                                     `
                                                 )
@@ -2802,11 +3160,11 @@ async function openPagePermissions(
                 : `${pageName}-permissions`;
 
     const containerId =
-        pageName === "commands"
-            ? "command-permissions-content"
-            : pageName === "promosDemos"
-                ? "promos-demos-permissions"
-                : `${pageName}-permissions`;
+    pageName === "commands"
+        ? "command-permissions-content"
+        : pageName === "promosDemos"
+            ? "promos-demos-permissions"
+            : `${pageName}-permissions-content`;
 
     const section =
         qs(editorId);
@@ -3206,11 +3564,11 @@ async function savePagePermission(
     }
 }
 
-/*
-==================================================
-STAFF ACTIVITY
-==================================================
-*/
+/* ==================================================
+   STAFF ACTIVITY
+================================================== */
+
+let staffActivityData = [];
 
 let staffActivityFilters = {
     type: "all",
@@ -3218,44 +3576,68 @@ let staffActivityFilters = {
     executor: "all"
 };
 
-function renderStaffUpdates() {
-    const container =
-        qs("staff-updates-list");
+async function renderStaffUpdates() {
+    const container = qs("staff-updates-list");
 
     if (!container) {
         return;
     }
 
-    api("/api/staffhub/staff-updates")
-        .then(data => {
-            const updates =
-                Array.isArray(data.updates)
-                    ? data.updates
-                    : [];
+    try {
+        const data = await api(
+            "/api/staffhub/staff-updates"
+        );
 
-            renderActivityFilters(
-                container,
-                updates
-            );
+        staffActivityData =
+            Array.isArray(data.updates)
+                ? data.updates
+                : [];
 
-            renderActivityResults(
-                container,
-                updates
-            );
-        })
-        .catch(error => {
-            container.innerHTML = `
-                <div class="empty-state">
-                    ${escapeHtml(error.message)}
-                </div>
-            `;
-        });
+        renderActivityUI(container);
+
+    } catch (error) {
+        container.innerHTML = `
+            <div class="empty-state">
+                ${escapeHtml(error.message)}
+            </div>
+        `;
+    }
 }
 
-function renderActivityFilters(
-    container,
-    updates
-) {
+function getActivityLabel(type) {
+    switch (
+        String(type || "").toLowerCase()
+    ) {
+        case "promotion":
+            return "PROMOTION";
+
+        case "demotion":
+            return "DEMOTION";
+
+        case "hire":
+            return "HIRE";
+
+        case "removal":
+            return "FIRE / REMOVAL";
+
+        case "resignation":
+            return "RESIGNATION";
+
+        case "demo":
+        case "demos":
+        case "demonstration":
+            return "DEMO";
+
+        default:
+            return String(
+                type || "ACTIVITY"
+            )
+                .replaceAll("_", " ")
+                .toUpperCase();
+    }
+}
+
+function renderActivityUI(container) {
     const types = [
         ["all", "All"],
         ["promotion", "Promotions"],
@@ -3268,7 +3650,8 @@ function renderActivityFilters(
 
     const members = [
         ...new Map(
-            updates
+            staffActivityData
+                .filter(update => update.memberId)
                 .map(update => [
                     update.memberId,
                     update.displayName ||
@@ -3276,14 +3659,14 @@ function renderActivityFilters(
                     update.memberId
                 ])
         )
-    ];
+    ].sort((a, b) =>
+        a[1].localeCompare(b[1])
+    );
 
     const executors = [
         ...new Map(
-            updates
-                .filter(update =>
-                    update.updatedBy?.id
-                )
+            staffActivityData
+                .filter(update => update.updatedBy?.id)
                 .map(update => [
                     update.updatedBy.id,
                     update.updatedBy.displayName ||
@@ -3291,140 +3674,158 @@ function renderActivityFilters(
                     update.updatedBy.id
                 ])
         )
-    ];
+    ].sort((a, b) =>
+        a[1].localeCompare(b[1])
+    );
 
-    let filters =
-        container.querySelector(
-            ".staff-activity-filters"
-        );
+    container.innerHTML = `
+        <div class="staff-activity-filters">
 
-    if (!filters) {
-        filters =
-            document.createElement("div");
+            <div class="activity-filter">
+                <label>ACTIVITY TYPE</label>
 
-        filters.className =
-            "staff-activity-filters";
+                <select id="activity-type-filter">
+                    ${types.map(
+                        ([value, label]) => `
+                            <option
+                                value="${value}"
+                                ${staffActivityFilters.type === value
+                                    ? "selected"
+                                    : ""}
+                            >
+                                ${label}
+                            </option>
+                        `
+                    ).join("")}
+                </select>
+            </div>
 
-        container.prepend(filters);
-    }
+            <div class="activity-filter">
+                <label>STAFF MEMBER</label>
 
-    filters.innerHTML = `
-        <div class="activity-filter">
-            <label>TYPE</label>
-            <select id="activity-type-filter">
-                ${types.map(
-                    ([value, label]) => `
-                        <option
-                            value="${value}"
-                            ${staffActivityFilters.type === value ? "selected" : ""}
-                        >
-                            ${label}
-                        </option>
-                    `
-                ).join("")}
-            </select>
+                <select id="activity-member-filter">
+                    <option value="all">
+                        Everyone
+                    </option>
+
+                    ${members.map(
+                        ([id, name]) => `
+                            <option
+                                value="${escapeHtml(id)}"
+                                ${staffActivityFilters.member === id
+                                    ? "selected"
+                                    : ""}
+                            >
+                                ${escapeHtml(name)}
+                            </option>
+                        `
+                    ).join("")}
+                </select>
+            </div>
+
+            <div class="activity-filter">
+                <label>PERFORMED BY</label>
+
+                <select id="activity-executor-filter">
+                    <option value="all">
+                        Anyone
+                    </option>
+
+                    ${executors.map(
+                        ([id, name]) => `
+                            <option
+                                value="${escapeHtml(id)}"
+                                ${staffActivityFilters.executor === id
+                                    ? "selected"
+                                    : ""}
+                            >
+                                ${escapeHtml(name)}
+                            </option>
+                        `
+                    ).join("")}
+                </select>
+            </div>
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="activity-clear-filters">
+                CLEAR FILTERS
+            </button>
+
         </div>
 
-        <div class="activity-filter">
-            <label>STAFF MEMBER</label>
-            <select id="activity-member-filter">
-                <option value="all">Everyone</option>
-
-                ${members.map(
-                    ([id, name]) => `
-                        <option
-                            value="${escapeHtml(id)}"
-                            ${staffActivityFilters.member === id ? "selected" : ""}
-                        >
-                            ${escapeHtml(name)}
-                        </option>
-                    `
-                ).join("")}
-            </select>
-        </div>
-
-        <div class="activity-filter">
-            <label>PERFORMED BY</label>
-            <select id="activity-executor-filter">
-                <option value="all">Anyone</option>
-
-                ${executors.map(
-                    ([id, name]) => `
-                        <option
-                            value="${escapeHtml(id)}"
-                            ${staffActivityFilters.executor === id ? "selected" : ""}
-                        >
-                            ${escapeHtml(name)}
-                        </option>
-                    `
-                ).join("")}
-            </select>
+        <div
+            id="staff-activity-results"
+            class="staff-activity-results">
         </div>
     `;
 
-    qs("activity-type-filter").onchange =
-        event => {
-            staffActivityFilters.type =
-                event.target.value;
+    qs("activity-type-filter").onchange = event => {
+        staffActivityFilters.type =
+            event.target.value;
 
-            renderActivityResults(
-                container,
-                updates
-            );
+        renderActivityResults();
+    };
+
+    qs("activity-member-filter").onchange = event => {
+        staffActivityFilters.member =
+            event.target.value;
+
+        renderActivityResults();
+    };
+
+    qs("activity-executor-filter").onchange = event => {
+        staffActivityFilters.executor =
+            event.target.value;
+
+        renderActivityResults();
+    };
+
+    qs("activity-clear-filters").onclick = () => {
+        staffActivityFilters = {
+            type: "all",
+            member: "all",
+            executor: "all"
         };
 
-    qs("activity-member-filter").onchange =
-        event => {
-            staffActivityFilters.member =
-                event.target.value;
+        renderActivityUI(container);
+    };
 
-            renderActivityResults(
-                container,
-                updates
-            );
-        };
-
-    qs("activity-executor-filter").onchange =
-        event => {
-            staffActivityFilters.executor =
-                event.target.value;
-
-            renderActivityResults(
-                container,
-                updates
-            );
-        };
+    renderActivityResults();
 }
 
-function renderActivityResults(
-    container,
-    updates
-) {
-    let results =
-        updates.filter(update => {
+function renderActivityResults() {
+    const list =
+        qs("staff-activity-results");
+
+    if (!list) {
+        return;
+    }
+
+    const filtered =
+        staffActivityData.filter(update => {
+
             if (
-                staffActivityFilters.type !==
-                "all" &&
-                update.type !==
-                staffActivityFilters.type
+                staffActivityFilters.type !== "all" &&
+                String(update.type || "").toLowerCase() !==
+                    staffActivityFilters.type
             ) {
                 return false;
             }
 
             if (
-                staffActivityFilters.member !==
-                "all" &&
+                staffActivityFilters.member !== "all" &&
                 update.memberId !==
-                staffActivityFilters.member
+                    staffActivityFilters.member
             ) {
                 return false;
             }
 
             if (
-                staffActivityFilters.executor !==
-                "all" &&
+                staffActivityFilters.executor !== "all" &&
                 update.updatedBy?.id !==
-                staffActivityFilters.executor
+                    staffActivityFilters.executor
             ) {
                 return false;
             }
@@ -3432,23 +3833,7 @@ function renderActivityResults(
             return true;
         });
 
-    const list =
-        container.querySelector(
-            ".staff-activity-results"
-        ) ||
-        (() => {
-            const element =
-                document.createElement("div");
-
-            element.className =
-                "staff-activity-results";
-
-            container.appendChild(element);
-
-            return element;
-        })();
-
-    if (!results.length) {
+    if (!filtered.length) {
         list.innerHTML = `
             <div class="empty-state">
                 No activity matches those filters.
@@ -3459,872 +3844,111 @@ function renderActivityResults(
     }
 
     list.innerHTML =
-        results.map(update => {
-            const oldRoles =
-                Array.isArray(update.oldRoles)
-                    ? update.oldRoles
-                    : [];
+        filtered
+            .map(update => {
 
-            const newRoles =
-                Array.isArray(update.newRoles)
-                    ? update.newRoles
-                    : [];
+                const oldRoles =
+                    Array.isArray(update.oldRoles)
+                        ? update.oldRoles
+                        : [];
 
-            const oldText =
-                oldRoles.length
-                    ? oldRoles
-                        .map(role =>
-                            role.name
-                        )
-                        .join(", ")
-                    : "None";
+                const newRoles =
+                    Array.isArray(update.newRoles)
+                        ? update.newRoles
+                        : [];
 
-            const newText =
-                newRoles.length
-                    ? newRoles
-                        .map(role =>
-                            role.name
-                        )
-                        .join(", ")
-                    : "None";
+                const oldText =
+                    oldRoles.length
+                        ? oldRoles
+                            .map(role => role.name)
+                            .join(", ")
+                        : "None";
 
-            const executor =
-                update.updatedBy
-                    ? update.updatedBy.displayName ||
-                      update.updatedBy.username
-                    : "Unknown";
+                const newText =
+                    newRoles.length
+                        ? newRoles
+                            .map(role => role.name)
+                            .join(", ")
+                        : "None";
 
-            return `
-                <article class="staff-update-card">
-
-                    <div class="staff-update-header">
-                        <strong>
-                            ${escapeHtml(
-                                update.displayName ||
-                                update.username
-                            )}
-                        </strong>
-
-                        <span>
-                            ${escapeHtml(
-                                String(
-                                    update.type ||
-                                    "activity"
-                                ).toUpperCase()
-                            )}
-                        </span>
-                    </div>
-
-                    <div class="staff-update-roles">
-                        <div>
-                            <small>FROM</small>
-                            <strong>
-                                ${escapeHtml(oldText)}
-                            </strong>
-                        </div>
-
-                        <div>
-                            <small>TO</small>
-                            <strong>
-                                ${escapeHtml(newText)}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="staff-update-meta">
-                        <span>
-                            Performed by:
-                            ${escapeHtml(executor)}
-                        </span>
-
-                        <span>
-                            ${escapeHtml(
-                                formatDate(update.date)
-                            )}
-                        </span>
-                    </div>
-
-                </article>
-            `;
-        }).join("");
-}
-
-function staffUpdateHtml(
-    update
-) {
-    const type =
-        String(
-            update.type ||
-            "role_change"
-        );
-
-    const label =
-        {
-            hire:
-                "HIRED",
-
-            promotion:
-                "PROMOTED",
-
-            demotion:
-                "DEMOTED",
-
-            removal:
-                "REMOVED",
-
-            resignation:
-                "LEFT STAFF",
-
-            role_change:
-                "STAFF ROLE CHANGE"
-        }[type] ||
-        "STAFF UPDATE";
-
-    const oldRoles =
-        (update.oldRoles || [])
-            .map(
-                role =>
-                    `${role.name} (Level ${role.level})`
-            )
-            .join(", ") ||
-        "No staff role";
-
-    const newRoles =
-        (update.newRoles || [])
-            .map(
-                role =>
-                    `${role.name} (Level ${role.level})`
-            )
-            .join(", ") ||
-        "No staff role";
-
-    const executor =
-        update.updatedBy;
-
-    return `
-        <article
-            class="update-card update-${escapeHtml(
-                type
-            )}">
-
-            <div class="update-top">
-
-                <div>
-                    <div class="update-type">
-                        ${label}
-                    </div>
-
-                    <h2>
-                        ${escapeHtml(
-                            update.displayName ||
-                            update.username ||
-                            "Unknown"
-                        )}
-                    </h2>
-                </div>
-
-                <div class="update-meta">
-                    ${escapeHtml(
-                        formatDate(
-                            update.date
-                        )
-                    )}
-                </div>
-
-            </div>
-
-            <div class="role-change">
-
-                <div class="role-box">
-
-                    <strong>
-                        Previous
-                    </strong>
-
-                    <span>
-                        ${escapeHtml(
-                            oldRoles
-                        )}
-                    </span>
-
-                </div>
-
-                <div class="role-box">
-
-                    <strong>
-                        New
-                    </strong>
-
-                    <span>
-                        ${escapeHtml(
-                            newRoles
-                        )}
-                    </span>
-
-                </div>
-
-            </div>
-
-            <div
-                class="update-meta"
-                style="margin-top:14px">
-
-                Updated by:
-                ${
-                    executor
-                        ? escapeHtml(
-                            executor.displayName ||
-                            executor.username ||
+                const executor =
+                    update.updatedBy
+                        ? (
+                            update.updatedBy.displayName ||
+                            update.updatedBy.username ||
                             "Unknown"
                         )
-                        : "Unknown / Discord audit log unavailable"
-                }
+                        : "Unknown";
 
-            </div>
+                return `
+                    <article
+                        class="staff-update-card">
 
-        </article>
-    `;
-}
+                        <div class="staff-update-header">
 
-/*
-==================================================
-CURRENT STAFF
-==================================================
-*/
-
-async function renderCurrentStaff() {
-    const list =
-        qs(
-            "current-staff-list"
-        );
-
-    if (!list) {
-        return;
-    }
-
-    try {
-        const data =
-            await api(
-                "/api/staffhub/current-staff"
-            );
-
-        const staff =
-            data.staff || [];
-
-        if (!staff.length) {
-            list.innerHTML = `
-                <div class="empty-state">
-                    No current staff members found.
-                </div>
-            `;
-
-            return;
-        }
-
-        list.innerHTML =
-            staff.map(
-                member => `
-                    <article class="staff-card">
-
-                        <img
-                            src="${escapeHtml(
-                                member.avatar
-                            )}"
-                            alt="">
-
-                        <div class="staff-card-info">
-
-                            <div class="staff-card-name">
-                                ${escapeHtml(
-                                    member.displayName
-                                )}
-                            </div>
-
-                            <div class="staff-card-role">
-                                ${escapeHtml(
-                                    member.role?.name ||
-                                    "Staff"
-                                )}
-                            </div>
-
-                            <div class="staff-card-level">
-                                LEVEL
-                                ${escapeHtml(
-                                    member.level
-                                )}
-                            </div>
-
-                        </div>
-
-                    </article>
-                `
-            ).join("");
-    } catch (error) {
-        list.innerHTML = `
-            <div class="empty-state">
-                ${escapeHtml(
-                    error.message
-                )}
-            </div>
-        `;
-    }
-}
-/*
-==================================================
-STAFFHUB ATTACHMENTS
-==================================================
-*/
-
-async function uploadAttachments(
-    files,
-    page
-) {
-    const attachments = [];
-
-    for (
-        const file of Array.from(
-            files || []
-        )
-    ) {
-        if (
-            file.size >
-            8 * 1024 * 1024
-        ) {
-            alert(
-                `${file.name} is larger than 8MB.`
-            );
-
-            continue;
-        }
-
-        const data =
-            await new Promise(
-                (resolve, reject) => {
-                    const reader =
-                        new FileReader();
-
-                    reader.onload =
-                        () =>
-                            resolve(
-                                reader.result
-                            );
-
-                    reader.onerror =
-                        reject;
-
-                    reader.readAsDataURL(
-                        file
-                    );
-                }
-            );
-
-        const result =
-            await api(
-                "/api/staffhub/upload",
-                {
-                    method: "POST",
-
-                    body:
-                        JSON.stringify({
-                            page,
-
-                            name:
-                                file.name,
-
-                            type:
-                                file.type,
-
-                            data
-                        })
-                }
-            );
-
-        if (
-            result.attachment
-        ) {
-            attachments.push(
-                result.attachment
-            );
-        }
-    }
-
-    return attachments;
-}
-
-function getAttachments(
-    item
-) {
-    if (
-        Array.isArray(
-            item?.attachments
-        )
-    ) {
-        return item.attachments;
-    }
-
-    if (
-        Array.isArray(
-            item?.images
-        )
-    ) {
-        return item.images.map(
-            image => ({
-                ...image,
-
-                type:
-                    "image/*"
-            })
-        );
-    }
-
-    return [];
-}
-
-function renderAttachments(
-    attachments
-) {
-    if (
-        !attachments?.length
-    ) {
-        return "";
-    }
-
-    return `
-        <div class="staffhub-attachments">
-
-            ${attachments.map(
-                file => {
-                    const name =
-                        escapeHtml(
-                            file.name ||
-                            "Attachment"
-                        );
-
-                    const url =
-                        escapeHtml(
-                            file.url ||
-                            ""
-                        );
-
-                    const type =
-                        escapeHtml(
-                            file.type ||
-                            ""
-                        );
-
-                    if (
-                        (
-                            file.type ||
-                            ""
-                        ).startsWith(
-                            "image/"
-                        )
-                    ) {
-                        return `
-                            <a
-                                class="staffhub-attachment-image"
-                                href="${url}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <img
-                                    src="${url}"
-                                    alt="${name}"
-                                    loading="lazy"
-                                >
-                            </a>
-                        `;
-                    }
-
-                    const size =
-                        file.size
-                            ? `${Math.max(
-                                1,
-                                Math.round(
-                                    file.size /
-                                    1024
-                                )
-                            )} KB`
-                            : "";
-
-                    return `
-                        <a
-                            class="staffhub-attachment-file"
-                            href="${url}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <span
-                                class="staffhub-attachment-icon"
-                            >
-                                FILE
-                            </span>
-
-                            <span
-                                class="staffhub-attachment-info"
-                            >
-                                <strong>
-                                    ${name}
-                                </strong>
-
-                                <small>
-                                    ${type}
-                                    ${
-                                        size
-                                            ? ` • ${size}`
-                                            : ""
-                                    }
-                                </small>
-                            </span>
-
-                            <span>
-                                ↗
-                            </span>
-                        </a>
-                    `;
-                }
-            ).join("")}
-
-        </div>
-    `;
-}
-function activityGroup(
-    type
-) {
-    switch (
-        String(
-            type || ""
-        ).toLowerCase()
-    ) {
-        case "promotion":
-        case "demotion":
-            return "promotions";
-
-        case "hire":
-            return "hires";
-
-        case "removal":
-        case "resignation":
-            return "fires";
-
-        case "demo":
-        case "demos":
-        case "demonstration":
-            return "demos";
-
-        default:
-            return "all";
-    }
-}
-
-function activityLabel(
-    type
-) {
-    switch (
-        String(
-            type || ""
-        ).toLowerCase()
-    ) {
-        case "promotion":
-            return "PROMOTION";
-
-        case "demotion":
-            return "DEMOTION";
-
-        case "hire":
-            return "HIRE";
-
-        case "removal":
-            return "FIRED / REMOVED";
-
-        case "resignation":
-            return "RESIGNATION";
-
-        case "demo":
-        case "demos":
-        case "demonstration":
-            return "DEMO";
-
-        default:
-            return String(
-                type ||
-                "ROLE CHANGE"
-            )
-                .replaceAll(
-                    "_",
-                    " "
-                )
-                .toUpperCase();
-    }
-}
-async function renderActivityLog() {
-    const list =
-        qs(
-            "staff-updates-list"
-        );
-
-    if (!list) {
-        return;
-    }
-
-    try {
-        const data =
-            await api(
-                "/api/staffhub/staff-updates"
-            );
-
-        const updates =
-            Array.isArray(
-                data.updates
-            )
-                ? data.updates
-                : [];
-
-        const typeFilter =
-            qs(
-                "activity-type-filter"
-            );
-
-        const userFilter =
-            qs(
-                "activity-user-filter"
-            );
-
-        if (
-            userFilter
-        ) {
-            const users =
-                [
-                    ...new Map(
-                        updates
-                            .filter(
-                                update =>
-                                    update.memberId
-                            )
-                            .map(
-                                update => [
-                                    update.memberId,
-
-                                    update.displayName ||
-                                    update.username ||
-                                    update.memberId
-                                ]
-                            )
-                    )
-                ]
-                    .sort(
-                        (a, b) =>
-                            a[1].localeCompare(
-                                b[1]
-                            )
-                    );
-
-            userFilter.innerHTML = `
-                <option value="all">
-                    All Staff
-                </option>
-
-                ${users.map(
-                    ([id, name]) => `
-                        <option
-                            value="${escapeHtml(id)}"
-                        >
-                            ${escapeHtml(name)}
-                        </option>
-                    `
-                ).join("")}
-            `;
-        }
-
-        function draw() {
-            const selectedType =
-                typeFilter?.value ||
-                "all";
-
-            const selectedUser =
-                userFilter?.value ||
-                "all";
-
-            const filtered =
-                updates.filter(
-                    update => {
-                        const typeOkay =
-                            selectedType ===
-                                "all" ||
-                            activityGroup(
-                                update.type
-                            ) ===
-                                selectedType;
-
-                        const userOkay =
-                            selectedUser ===
-                                "all" ||
-                            update.memberId ===
-                                selectedUser;
-
-                        return (
-                            typeOkay &&
-                            userOkay
-                        );
-                    }
-                );
-
-            if (
-                !filtered.length
-            ) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        No matching staff activity.
-                    </div>
-                `;
-
-                return;
-            }
-
-            list.innerHTML =
-                filtered.map(
-                    update => `
-                        <article
-                            class="staff-update-card"
-                        >
-                            <div
-                                class="staff-update-top"
-                            >
-                                <span
-                                    class="staff-update-type"
-                                >
-                                    ${escapeHtml(
-                                        activityLabel(
-                                            update.type
-                                        )
-                                    )}
-                                </span>
-
-                                <time>
-                                    ${escapeHtml(
-                                        formatDate(
-                                            update.date
-                                        )
-                                    )}
-                                </time>
-                            </div>
-
-                            <h3>
+                            <strong>
                                 ${escapeHtml(
                                     update.displayName ||
                                     update.username ||
                                     "Unknown"
                                 )}
-                            </h3>
+                            </strong>
 
-                            <p>
-                                ${
-                                    update.oldRoles?.length
-                                        ? escapeHtml(
-                                            update.oldRoles
-                                                .map(
-                                                    role =>
-                                                        role.name
-                                                )
-                                                .join(
-                                                    ", "
-                                                )
-                                        ) +
-                                        " → "
-                                        : ""
-                                }
+                            <span>
+                                ${escapeHtml(
+                                    getActivityLabel(
+                                        update.type
+                                    )
+                                )}
+                            </span>
 
-                                ${
-                                    update.newRoles?.length
-                                        ? escapeHtml(
-                                            update.newRoles
-                                                .map(
-                                                    role =>
-                                                        role.name
-                                                )
-                                                .join(
-                                                    ", "
-                                                )
-                                        )
-                                        : ""
-                                }
-                            </p>
+                        </div>
 
-                            ${
-                                update.updatedBy
-                                    ? `
-                                        <small>
-                                            Updated by
-                                            ${escapeHtml(
-                                                update.updatedBy.displayName ||
-                                                update.updatedBy.username ||
-                                                "Unknown"
-                                            )}
-                                        </small>
-                                    `
-                                    : ""
-                            }
-                        </article>
-                    `
-                ).join("");
-        }
+                        <div class="staff-update-roles">
 
-        typeFilter?.addEventListener(
-            "change",
-            draw
-        );
+                            <div>
+                                <small>FROM</small>
 
-        userFilter?.addEventListener(
-            "change",
-            draw
-        );
+                                <strong>
+                                    ${escapeHtml(
+                                        oldText
+                                    )}
+                                </strong>
+                            </div>
 
-        draw();
+                            <div>
+                                <small>TO</small>
 
-    } catch (error) {
-        list.innerHTML = `
-            <div class="empty-state">
-                ${escapeHtml(
-                    error.message
-                )}
-            </div>
-        `;
-    }
+                                <strong>
+                                    ${escapeHtml(
+                                        newText
+                                    )}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        <div class="staff-update-meta">
+
+                            <span>
+                                Performed by:
+                                ${escapeHtml(
+                                    executor
+                                )}
+                            </span>
+
+                            <span>
+                                ${escapeHtml(
+                                    formatDate(
+                                        update.date
+                                    )
+                                )}
+                            </span>
+
+                        </div>
+
+                    </article>
+                `;
+            })
+            .join("");
 }
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-        const page =
-            document.body.dataset.page;
-
-        if (
-            page ===
-            "promosDemos"
-        ) {
-            const edit =
-                qs(
-                    "promos-demos-edit-button"
-                );
-
-            const permissions =
-                qs(
-                    "promos-demos-permissions-button"
-                );
-
-            if (edit) {
-                edit.remove();
-            }
-
-            if (permissions) {
-                permissions.remove();
-            }
-
-            setTimeout(
-                () => {
-                    renderActivityLog();
-                },
-                100
-            );
-        }
-    }
-);
