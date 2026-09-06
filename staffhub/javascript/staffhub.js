@@ -694,6 +694,281 @@ async function uploadAttachments(files, page) {
 
     return attachments;
 }
+/* ==================================================
+   ATTACHMENTS
+================================================== */
+
+function getAttachments(item) {
+    if (!item || typeof item !== "object") {
+        return [];
+    }
+
+    if (Array.isArray(item.attachments)) {
+        return item.attachments.filter(
+            attachment =>
+                attachment &&
+                typeof attachment.url === "string" &&
+                attachment.url
+        );
+    }
+
+    if (Array.isArray(item.images)) {
+        return item.images
+            .filter(image => image)
+            .map(image => {
+                if (typeof image === "string") {
+                    return {
+                        id: crypto.randomUUID
+                            ? crypto.randomUUID()
+                            : `image-${Date.now()}-${Math.random()}`,
+                        url: image,
+                        name: "Image",
+                        type: "image/*",
+                        size: 0
+                    };
+                }
+
+                return {
+                    id:
+                        image.id ||
+                        `image-${Date.now()}-${Math.random()}`,
+                    url: image.url,
+                    name:
+                        image.name ||
+                        "Image",
+                    type:
+                        image.type ||
+                        "image/*",
+                    size:
+                        Number(image.size) || 0
+                };
+            })
+            .filter(image => image.url);
+    }
+
+    return [];
+}
+
+
+function getAttachmentUrl(url) {
+    if (!url) {
+        return "";
+    }
+
+    if (
+        url.startsWith("http://") ||
+        url.startsWith("https://") ||
+        url.startsWith("data:")
+    ) {
+        return url;
+    }
+
+    return `${API_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+
+function renderAttachments(attachments) {
+    if (!Array.isArray(attachments) || !attachments.length) {
+        return "";
+    }
+
+    return `
+        <div class="document-attachments">
+            ${attachments
+                .map(attachment => {
+                    const url =
+                        getAttachmentUrl(
+                            attachment.url
+                        );
+
+                    const type =
+                        String(
+                            attachment.type || ""
+                        ).toLowerCase();
+
+                    const isImage =
+                        type.startsWith("image/") ||
+                        /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(
+                            attachment.name || ""
+                        );
+
+                    if (isImage) {
+                        return `
+                            <div class="document-attachment-image">
+                                <img
+                                    src="${escapeHtml(url)}"
+                                    alt="${escapeHtml(
+                                        attachment.name ||
+                                        "Attachment"
+                                    )}"
+                                    loading="lazy"
+                                    onclick="openImageViewer('${escapeHtml(
+                                        url
+                                    )}')"
+                                    onerror="this.parentElement.classList.add('attachment-error')"
+                                >
+
+                                <div class="attachment-name">
+                                    ${escapeHtml(
+                                        attachment.name ||
+                                        "Image"
+                                    )}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <a
+                            class="document-attachment-file"
+                            href="${escapeHtml(url)}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <div class="attachment-file-icon">
+                                FILE
+                            </div>
+
+                            <div>
+                                <strong>
+                                    ${escapeHtml(
+                                        attachment.name ||
+                                        "Attachment"
+                                    )}
+                                </strong>
+
+                                ${
+                                    attachment.size
+                                        ? `
+                                            <span>
+                                                ${formatFileSize(
+                                                    attachment.size
+                                                )}
+                                            </span>
+                                        `
+                                        : ""
+                                }
+                            </div>
+                        </a>
+                    `;
+                })
+                .join("")}
+        </div>
+    `;
+}
+
+
+function formatFileSize(bytes) {
+    const size = Number(bytes);
+
+    if (!Number.isFinite(size) || size <= 0) {
+        return "";
+    }
+
+    if (size < 1024) {
+        return `${size} B`;
+    }
+
+    if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+/* ==================================================
+   IMAGE VIEWER
+================================================== */
+
+function openImageViewer(url) {
+    if (!url) {
+        return;
+    }
+
+    let viewer = qs("image-viewer");
+
+    if (!viewer) {
+        viewer = document.createElement("div");
+
+        viewer.id = "image-viewer";
+        viewer.className = "image-viewer";
+
+        viewer.innerHTML = `
+            <button
+                type="button"
+                class="image-viewer-close"
+                aria-label="Close image"
+                onclick="closeImageViewer()">
+                ×
+            </button>
+
+            <img
+                id="image-viewer-image"
+                src=""
+                alt=""
+                onclick="event.stopPropagation()"
+            >
+        `;
+
+        viewer.addEventListener(
+            "click",
+            event => {
+                if (
+                    event.target === viewer
+                ) {
+                    closeImageViewer();
+                }
+            }
+        );
+
+        document.body.appendChild(viewer);
+    }
+
+    const image =
+        qs("image-viewer-image");
+
+    image.src = url;
+
+    viewer.classList.add("open");
+
+    document.body.classList.add(
+        "image-viewer-open"
+    );
+}
+
+
+function closeImageViewer() {
+    const viewer =
+        qs("image-viewer");
+
+    if (!viewer) {
+        return;
+    }
+
+    viewer.classList.remove("open");
+
+    document.body.classList.remove(
+        "image-viewer-open"
+    );
+
+    const image =
+        qs("image-viewer-image");
+
+    if (image) {
+        image.src = "";
+    }
+}
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+        if (
+            event.key === "Escape"
+        ) {
+            closeImageViewer();
+        }
+    }
+);
 /*
 ==================================================
 DOCUMENT PAGES
@@ -987,7 +1262,70 @@ function renderDocumentEditor(
         </div>
     `;
 }
+/* ==================================================
+   TICKETS / ETIQUETTE EDITOR HELPERS
+================================================== */
 
+function openTicketsEditor() {
+    return openDocumentEditor(
+        "tickets"
+    );
+}
+
+
+function closeTicketsEditor() {
+    return closeDocumentEditor(
+        "tickets"
+    );
+}
+
+
+function openTicketsPermissions() {
+    return openPagePermissions(
+        "tickets"
+    );
+}
+
+
+function closeTicketsPermissions() {
+    const section =
+        qs("tickets-permissions");
+
+    if (section) {
+        section.hidden = true;
+    }
+}
+
+
+function openEtiquetteEditor() {
+    return openDocumentEditor(
+        "etiquette"
+    );
+}
+
+
+function closeEtiquetteEditor() {
+    return closeDocumentEditor(
+        "etiquette"
+    );
+}
+
+
+function openEtiquettePermissions() {
+    return openPagePermissions(
+        "etiquette"
+    );
+}
+
+
+function closeEtiquettePermissions() {
+    const section =
+        qs("etiquette-permissions");
+
+    if (section) {
+        section.hidden = true;
+    }
+}
 function documentCategoryEditorHtml(
     pageName,
     category
