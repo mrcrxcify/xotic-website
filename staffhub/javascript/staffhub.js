@@ -768,12 +768,16 @@ function getAttachmentUrl(url) {
 
 
 function renderAttachments(attachments) {
-    if (!Array.isArray(attachments) || !attachments.length) {
+    if (
+        !Array.isArray(attachments) ||
+        !attachments.length
+    ) {
         return "";
     }
 
     return `
         <div class="document-attachments">
+
             ${attachments
                 .map(attachment => {
                     const url =
@@ -794,42 +798,65 @@ function renderAttachments(attachments) {
 
                     if (isImage) {
                         return `
-                            <div class="document-attachment-image">
-                                <img
-                                    src="${escapeHtml(url)}"
-                                    alt="${escapeHtml(
-                                        attachment.name ||
-                                        "Attachment"
-                                    )}"
-                                    loading="lazy"
-                                    onclick="openImageViewer('${escapeHtml(
-                                        url
-                                    )}')"
-                                    onerror="this.parentElement.classList.add('attachment-error')"
-                                >
+                            <div
+                                class="attachment-card">
 
-                                <div class="attachment-name">
-                                    ${escapeHtml(
-                                        attachment.name ||
-                                        "Image"
-                                    )}
+                                <div
+                                    class="attachment-thumbnail"
+                                    onclick="openImageViewer(
+                                        '${escapeHtml(url)}'
+                                    )">
+
+                                    <img
+                                        src="${escapeHtml(url)}"
+                                        alt="${escapeHtml(
+                                            attachment.name ||
+                                            "Image"
+                                        )}"
+                                        loading="lazy">
+
                                 </div>
+
+                                <div class="attachment-card-info">
+
+                                    <strong>
+                                        ${escapeHtml(
+                                            attachment.name ||
+                                            "Image"
+                                        )}
+                                    </strong>
+
+                                    ${
+                                        attachment.size
+                                            ? `
+                                                <span>
+                                                    ${formatFileSize(
+                                                        attachment.size
+                                                    )}
+                                                </span>
+                                            `
+                                            : ""
+                                    }
+
+                                </div>
+
                             </div>
                         `;
                     }
 
                     return `
                         <a
-                            class="document-attachment-file"
+                            class="attachment-card attachment-file-card"
                             href="${escapeHtml(url)}"
                             target="_blank"
-                            rel="noopener noreferrer"
-                        >
+                            rel="noopener noreferrer">
+
                             <div class="attachment-file-icon">
                                 FILE
                             </div>
 
-                            <div>
+                            <div class="attachment-card-info">
+
                                 <strong>
                                     ${escapeHtml(
                                         attachment.name ||
@@ -848,11 +875,18 @@ function renderAttachments(attachments) {
                                         `
                                         : ""
                                 }
+
                             </div>
+
+                            <span class="attachment-open">
+                                OPEN →
+                            </span>
+
                         </a>
                     `;
                 })
                 .join("")}
+
         </div>
     `;
 }
@@ -1326,53 +1360,48 @@ function closeEtiquettePermissions() {
         section.hidden = true;
     }
 }
-function documentCategoryEditorHtml(
-    pageName,
-    category
-) {
+function documentCategoryEditorHtml(pageName, category) {
+    const attachments = getAttachments(category);
+
     return `
         <div
             class="editor-category"
-            id="category-${escapeHtml(
-                category.id
-            )}">
+            id="category-${escapeHtml(category.id)}">
 
             <div class="editor-category-header">
 
                 <div style="flex:1">
-
                     <label>
                         Category title
                     </label>
 
                     <input
-                        id="title-${escapeHtml(
-                            category.id
-                        )}"
+                        id="title-${escapeHtml(category.id)}"
                         value="${escapeHtml(
                             category.title ||
                             category.name ||
                             ""
                         )}">
-
                 </div>
 
                 <div class="editor-actions">
 
                     <button
                         class="btn"
+                        type="button"
                         onclick="saveDocumentCategory(
-                            '${pageName}',
-                            '${category.id}'
+                            '${escapeHtml(pageName)}',
+                            '${escapeHtml(category.id)}'
                         )">
                         SAVE
                     </button>
 
                     <button
                         class="btn btn-danger"
+                        type="button"
                         onclick="deleteDocumentCategory(
-                            '${pageName}',
-                            '${category.id}'
+                            '${escapeHtml(pageName)}',
+                            '${escapeHtml(category.id)}'
                         )">
                         DELETE
                     </button>
@@ -1384,220 +1413,318 @@ function documentCategoryEditorHtml(
             <div class="form-grid" style="margin-top:15px">
 
                 <div class="form-full">
+
                     <label>
                         Description
                     </label>
 
                     <textarea
-                        id="description-${escapeHtml(
-                            category.id
-                        )}"
+                        id="description-${escapeHtml(category.id)}"
                         style="min-height:100px">${escapeHtml(
-                            category.description ||
-                            ""
+                            category.description || ""
                         )}</textarea>
+
                 </div>
 
                 <div class="form-full">
+
                     <label>
                         Content
                     </label>
 
                     <textarea
-                        id="content-${escapeHtml(
-                            category.id
-                        )}">${escapeHtml(
-                            category.content ||
-                            ""
+                        id="content-${escapeHtml(category.id)}"
+                        style="min-height:220px">${escapeHtml(
+                            category.content || ""
                         )}</textarea>
+
+                    <small class="editor-help">
+                        Supports Discord formatting:
+                        **bold**, *italic*, ~~strikethrough~~,
+                        __underline__, \`code\`, and code blocks.
+                    </small>
+
                 </div>
 
                 <div class="form-full">
 
                     <label>
-                        Images
+                        ATTACHMENTS
                     </label>
 
                     <input
+                        id="document-files-${escapeHtml(category.id)}"
                         type="file"
-                        accept="image/*"
                         multiple
-                        onchange="handleDocumentImages(
-                            '${pageName}',
-                            '${category.id}',
+                        onchange="handleDocumentAttachments(
+                            '${escapeHtml(pageName)}',
+                            '${escapeHtml(category.id)}',
                             this.files
                         )">
 
                     <div
-                        id="images-${escapeHtml(
+                        id="attachments-${escapeHtml(category.id)}"
+                        class="editor-attachment-list">
+
+                        ${renderEditorAttachments(
+                            attachments,
                             category.id
-                        )}"
-                        class="image-preview">
-
-                        ${
-                            (category.images || [])
-                                .map(
-                                    image =>
-                                        `
-                                            <div class="image-item">
-                                                <img
-                                                    src="${escapeHtml(
-                                                        image.url
-                                                    )}"
-                                                    alt="">
-
-                                                <button
-                                                    type="button"
-                                                    onclick="removeCategoryImage(
-                                                        '${category.id}',
-                                                        '${image.id}'
-                                                    )">
-                                                    ×
-                                                </button>
-                                            </div>
-                                        `
-                                )
-                                .join("")
-                        }
+                        )}
 
                     </div>
 
                     <input
                         type="hidden"
-                        id="image-data-${escapeHtml(
-                            category.id
-                        )}"
+                        id="attachment-data-${escapeHtml(category.id)}"
                         value="${escapeHtml(
-                            JSON.stringify(
-                                category.images || []
-                            )
+                            JSON.stringify(attachments)
                         )}">
+
                 </div>
 
             </div>
+
         </div>
     `;
 }
 
-async function handleDocumentImages(
+async function handleDocumentAttachments(
     pageName,
     categoryId,
     files
 ) {
     try {
-        const images =
-            await uploadImages(
+        const uploaded =
+            await uploadAttachments(
                 [...files],
                 pageName
             );
 
         const input =
             qs(
-                `image-data-${categoryId}`
+                `attachment-data-${categoryId}`
             );
 
-        const existing =
-            JSON.parse(
-                input.value || "[]"
-            );
+        if (!input) {
+            return;
+        }
+
+        let existing = [];
+
+        try {
+            existing =
+                JSON.parse(
+                    input.value || "[]"
+                );
+        } catch {
+            existing = [];
+        }
 
         input.value =
             JSON.stringify(
-                existing.concat(
-                    images
-                )
+                existing.concat(uploaded)
             );
 
-        renderCategoryImages(
+        renderEditorAttachments(
             categoryId
         );
+
     } catch (error) {
         alert(error.message);
     }
 }
 
-function renderCategoryImages(
-    categoryId
-) {
+
+function renderEditorAttachments(categoryId) {
     const input =
         qs(
-            `image-data-${categoryId}`
+            `attachment-data-${categoryId}`
         );
 
     const container =
         qs(
-            `images-${categoryId}`
+            `attachments-${categoryId}`
         );
 
-    if (
-        !input ||
-        !container
-    ) {
+    if (!input || !container) {
         return;
     }
 
-    let images = [];
+    let attachments = [];
 
     try {
-        images =
+        attachments =
             JSON.parse(
                 input.value || "[]"
             );
-    } catch {}
+    } catch {
+        attachments = [];
+    }
 
     container.innerHTML =
-        images.map(
-            image => `
-                <div class="image-item">
-                    <img
-                        src="${escapeHtml(
-                            image.url
-                        )}"
-                        alt="">
-
-                    <button
-                        type="button"
-                        onclick="removeCategoryImage(
-                            '${categoryId}',
-                            '${image.id}'
-                        )">
-                        ×
-                    </button>
-                </div>
-            `
-        ).join("");
+        renderEditorAttachmentsHtml(
+            attachments,
+            categoryId
+        );
 }
 
-function removeCategoryImage(
+
+function renderEditorAttachmentsHtml(
+    attachments,
+    categoryId
+) {
+    if (
+        !Array.isArray(attachments) ||
+        !attachments.length
+    ) {
+        return `
+            <div class="empty-state">
+                No attachments added.
+            </div>
+        `;
+    }
+
+    return attachments
+        .map(
+            attachment => {
+                const url =
+                    getAttachmentUrl(
+                        attachment.url
+                    );
+
+                const type =
+                    String(
+                        attachment.type || ""
+                    ).toLowerCase();
+
+                const isImage =
+                    type.startsWith("image/") ||
+                    /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(
+                        attachment.name || ""
+                    );
+
+                return `
+                    <div
+                        class="editor-attachment"
+                        data-attachment-id="${escapeHtml(
+                            attachment.id
+                        )}">
+
+                        <div class="editor-attachment-preview">
+
+                            ${
+                                isImage
+                                    ? `
+                                        <img
+                                            src="${escapeHtml(url)}"
+                                            alt="${escapeHtml(
+                                                attachment.name ||
+                                                "Attachment"
+                                            )}"
+                                            onclick="openImageViewer(
+                                                '${escapeHtml(url)}'
+                                            )">
+                                    `
+                                    : `
+                                        <div class="editor-file-icon">
+                                            FILE
+                                        </div>
+                                    `
+                            }
+
+                        </div>
+
+                        <div class="editor-attachment-info">
+
+                            <strong>
+                                ${escapeHtml(
+                                    attachment.name ||
+                                    "Attachment"
+                                )}
+                            </strong>
+
+                            ${
+                                attachment.size
+                                    ? `
+                                        <span>
+                                            ${formatFileSize(
+                                                attachment.size
+                                            )}
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            onclick="removeDocumentAttachment(
+                                '${escapeHtml(categoryId)}',
+                                '${escapeHtml(
+                                    attachment.id
+                                )}'
+                            )">
+                            REMOVE
+                        </button>
+
+                    </div>
+                `;
+            }
+        )
+        .join("");
+}
+
+
+function renderEditorAttachments(
+    attachments,
+    categoryId
+) {
+    return renderEditorAttachmentsHtml(
+        attachments,
+        categoryId
+    );
+}
+
+
+function removeDocumentAttachment(
     categoryId,
-    imageId
+    attachmentId
 ) {
     const input =
         qs(
-            `image-data-${categoryId}`
+            `attachment-data-${categoryId}`
         );
 
     if (!input) {
         return;
     }
 
-    let images =
-        JSON.parse(
-            input.value || "[]"
-        );
+    let attachments = [];
 
-    images =
-        images.filter(
-            image =>
-                image.id !== imageId
+    try {
+        attachments =
+            JSON.parse(
+                input.value || "[]"
+            );
+    } catch {
+        attachments = [];
+    }
+
+    attachments =
+        attachments.filter(
+            attachment =>
+                attachment.id !==
+                attachmentId
         );
 
     input.value =
         JSON.stringify(
-            images
+            attachments
         );
 
-    renderCategoryImages(
+    renderEditorAttachments(
         categoryId
     );
 }
@@ -1636,8 +1763,8 @@ async function addDocumentCategory(
             content:
                 "",
 
-            images:
-                []
+            images: [],
+            attachments: []
         });
 
         await saveDocumentPage(
@@ -1699,12 +1826,20 @@ async function saveDocumentCategory(
                 `content-${categoryId}`
             ).value;
 
-        category.images =
-            JSON.parse(
-                qs(
-                    `image-data-${categoryId}`
-                ).value || "[]"
-            );
+        category.attachments =
+    JSON.parse(
+        qs(
+            `attachment-data-${categoryId}`
+        ).value || "[]"
+    );
+
+category.images =
+    category.attachments.filter(
+        attachment =>
+            String(
+                attachment.type || ""
+            ).startsWith("image/")
+    );
 
         await saveDocumentPage(
             pageName,
@@ -1803,17 +1938,11 @@ function closeDocumentEditor(
         editor.hidden = true;
     }
 }
-function openTicketsEditor() {
-    return openDocumentEditor("tickets");
-}
 
-function closeTicketsEditor() {
-    return closeDocumentEditor("tickets");
-}
 
-function openTicketsPermissions() {
-    return openPagePermissions("tickets");
-}
+
+
+
 /*
 ==================================================
 ANNOUNCEMENTS
@@ -1931,30 +2060,9 @@ function announcementHtml(
                 )}
             </div>
 
-            ${
-                item.images?.length
-                    ? `
-                        <div class="announcement-images">
-                            ${
-                                item.images
-                                    .map(
-                                        image =>
-                                            `
-                                                <img
-                                                    src="${escapeHtml(
-                                                        image.url
-                                                    )}"
-                                                    alt="${escapeHtml(
-                                                        image.name
-                                                    )}">
-                                            `
-                                    )
-                                    .join("")
-                            }
-                        </div>
-                    `
-                    : ""
-            }
+            ${renderAttachments(
+    getAttachments(item)
+)}
 
             ${
                 pagePermission(
@@ -3563,17 +3671,9 @@ function closeCommandPermissions() {
     );
 }
 
-function closeTicketsPermissions() {
-    closePagePermissions(
-        "tickets"
-    );
-}
 
-function closeEtiquettePermissions() {
-    closePagePermissions(
-        "etiquette"
-    );
-}
+
+
 
 function closeAnnouncementsPermissions() {
     closePagePermissions(
