@@ -233,40 +233,146 @@ AUTH
 ==================================================
 */
 
-if (qs("staff-user")) {
+async function requireStaff() {
+
+    try {
+
+        const data = await api(
+            "/api/staffhub/me"
+        );
+
+        if (
+            !data ||
+            !data.user
+        ) {
+            window.location.href =
+                `${API_URL}/auth/discord`;
+
+            return false;
+        }
+
+        staffMe = data;
+
+        renderStaffUser();
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "Staff authentication failed:",
+            error
+        );
+
+        if (
+            error.status === 401 ||
+            error.status === 403
+        ) {
+            window.location.href =
+                `${API_URL}/auth/discord`;
+
+            return false;
+        }
+
+        const user =
+            qs("staff-user");
+
+        if (user) {
+
+            user.innerHTML = `
+                <span class="staff-user-profile">
+
+                    <img
+                        class="staff-user-avatar"
+                        src="../images/whitelogo.PNG"
+                        alt=""
+                    >
+
+                    <span class="staff-user-details">
+
+                        <strong class="staff-user-name">
+                            Authentication error
+                        </strong>
+
+                        <span class="staff-user-username">
+                            Please refresh the page
+                        </span>
+
+                    </span>
+
+                </span>
+            `;
+
+        }
+
+        return false;
+    }
+}
+
+
+function renderStaffUser() {
+
+    const element =
+        qs("staff-user");
+
+    if (!element) {
+        return;
+    }
+
+    const user =
+        staffMe?.user;
+
+    if (!user) {
+
+        element.textContent =
+            "Unknown User";
+
+        return;
+    }
+
     const avatar =
-        staffMe?.user?.avatar ||
-        "assets/whitelogo.png";
+        user.avatar ||
+        "../images/whitelogo.PNG";
 
     const displayName =
-        staffMe?.user?.displayName ||
-        staffMe?.user?.username ||
+        user.displayName ||
+        user.globalName ||
+        user.username ||
         "Unknown User";
 
     const username =
-        staffMe?.user?.username ||
+        user.username ||
         "";
 
-    qs("staff-user").innerHTML = `
+    element.innerHTML = `
         <span class="staff-user-profile">
+
             <img
                 class="staff-user-avatar"
                 src="${escapeHtml(avatar)}"
                 alt=""
-                onerror="this.onerror=null;this.src='assets/whitelogo.png';"
+                onerror="
+                    this.onerror=null;
+                    this.src='../images/whitelogo.PNG';
+                "
             >
 
             <span class="staff-user-details">
+
                 <strong class="staff-user-name">
                     ${escapeHtml(displayName)}
                 </strong>
 
-                ${
-                    username
-                        ? `<span class="staff-user-username">@${escapeHtml(username)}</span>`
-                        : `<span class="staff-user-username">Staff Member</span>`
-                }
+                <span class="staff-user-username">
+                    ${
+                        username
+                            ? `@${escapeHtml(username)}`
+                            : "Staff Member"
+                    }
+                </span>
+
             </span>
+
         </span>
     `;
 }
@@ -4368,224 +4474,242 @@ CURRENT STAFF
 */
 
 /*
-    Use the exact Xotic staff hierarchy from
-    the public staff.html page.
+    XOTIC STAFF HIERARCHY
 
     Lower order = higher position.
+
+    This matches the public staff.html page.
 */
 
-const STAFF_ROLES = {
+const CURRENT_STAFF_ROLES = {
+
     "1539785169102442677": {
         name: "FOUNDER",
-        order: 1
+        order: 1,
+        category: "FOUNDER"
     },
 
     "1539785171983933521": {
         name: "CHIEF OF OPERATIONS",
-        order: 2
+        order: 2,
+        category: "CHIEFS"
     },
 
     "1539785176471576707": {
         name: "BOARD OF DIRECTORS",
-        order: 3
+        order: 3,
+        category: "BOARD OF DIRECTORS"
     },
 
     "1539785177436258334": {
         name: "BOARD MEMBER",
-        order: 4
+        order: 4,
+        category: "BOARD MEMBER"
     },
 
     "1539785181999927396": {
         name: "CHIEF TECHNOLOGY OFFICER",
-        order: 5
+        order: 5,
+        category: "CHIEFS"
     },
 
     "1539785183052570746": {
         name: "CHIEF OF STAFF",
-        order: 6
+        order: 6,
+        category: "CHIEFS"
     },
 
     "1539785184201941054": {
         name: "CHIEF FINANCIAL OFFICER",
-        order: 7
+        order: 7,
+        category: "CHIEFS"
     },
 
     "1539785188836384860": {
         name: "CHIEF CONTENT OFFICER",
-        order: 8
+        order: 8,
+        category: "CHIEFS"
     },
 
     "1539785187997786142": {
         name: "CHIEF COMMUNITY OFFICER",
-        order: 9
+        order: 9,
+        category: "CHIEFS"
     },
 
     "1539785186496090133": {
         name: "CHIEF MARKETING OFFICER",
-        order: 10
+        order: 10,
+        category: "CHIEFS"
     },
 
     "1539785192355397662": {
         name: "DIRECTOR",
-        order: 11
+        order: 11,
+        category: "DIRECTOR"
     },
 
     "1539785195870363741": {
         name: "OPERATIONS",
-        order: 12
+        order: 12,
+        category: "OPERATIONS"
     },
 
     "1539785200869838910": {
         name: "HIGH AUTH ASSISTANT",
-        order: 13
+        order: 13,
+        category: "HIGH AUTH ASSISTANT"
     },
 
     "1539785203302662154": {
         name: "EXECUTIVE",
-        order: 14
+        order: 14,
+        category: "EXECUTIVE"
     },
 
     "1539785209405243543": {
         name: "UPPER MANAGEMENT",
-        order: 15
+        order: 15,
+        category: "UPPER MANAGEMENT"
     },
 
     "1539785210487640115": {
         name: "MANAGEMENT",
-        order: 16
+        order: 16,
+        category: "MANAGEMENT"
     },
 
     "1539785212588720269": {
         name: "TRIAL MANAGEMENT",
-        order: 17
+        order: 17,
+        category: "TRIAL MANAGEMENT"
     },
 
     "1539785215914934343": {
         name: "SENIOR ADMIN",
-        order: 18
+        order: 18,
+        category: "SENIOR ADMIN"
     },
 
     "1539785218662080593": {
         name: "ADMIN",
-        order: 19
+        order: 19,
+        category: "ADMIN"
     },
 
     "1539785220255916083": {
         name: "TRIAL ADMIN",
-        order: 20
+        order: 20,
+        category: "TRIAL ADMIN"
     },
 
     "1539785223376470148": {
         name: "SENIOR STAFF",
-        order: 21
+        order: 21,
+        category: "SENIOR STAFF"
     },
 
     "1539785224412725339": {
         name: "STAFF",
-        order: 22
+        order: 22,
+        category: "STAFF"
     },
 
     "1539785226211827763": {
         name: "JUNIOR STAFF",
-        order: 23
+        order: 23,
+        category: "JUNIOR STAFF"
     },
 
     "1539785227897933867": {
         name: "TRIAL STAFF",
-        order: 24
+        order: 24,
+        category: "TRIAL STAFF"
     }
+
 };
 
 
 /*
-    Category grouping.
-
-    Multiple Chief roles all belong
-    to the same CHIEFS category.
+==================================================
+GET RECOGNIZED STAFF ROLES
+==================================================
 */
 
-function getStaffCategory(role) {
+function getCurrentStaffRoles(
+    discordRoles
+) {
 
-    if (!role) {
-        return "STAFF";
-    }
-
-    const name =
-        role.name.toUpperCase();
-
-    if (name.startsWith("CHIEF")) {
-        return "CHIEFS";
-    }
-
-    return name;
-}
-
-
-/*
-    Escape HTML.
-*/
-
-function escapeHTML(value) {
-
-    const element =
-        document.createElement("div");
-
-    element.textContent =
-        value == null ? "" : String(value);
-
-    return element.innerHTML;
-}
-
-
-/*
-    Get only actual Xotic staff roles.
-
-    The API returns Discord roles as objects:
-    {
-        id,
-        name,
-        color
-    }
-*/
-
-function getStaffRoles(roles) {
-
-    if (!Array.isArray(roles)) {
+    if (
+        !Array.isArray(
+            discordRoles
+        )
+    ) {
         return [];
     }
 
-    return roles
-        .filter(role =>
-            role &&
-            STAFF_ROLES[role.id]
+    return discordRoles
+
+        .filter(
+            role =>
+                role &&
+                CURRENT_STAFF_ROLES[
+                    role.id
+                ]
         )
-        .map(role => ({
-            id: role.id,
-            name:
-                STAFF_ROLES[role.id].name ||
-                role.name,
-            order:
-                STAFF_ROLES[role.id].order,
-            category:
-                getStaffCategory(
-                    STAFF_ROLES[role.id]
-                )
-        }))
+
+        .map(
+            role => {
+
+                const config =
+                    CURRENT_STAFF_ROLES[
+                        role.id
+                    ];
+
+                return {
+
+                    id:
+                        role.id,
+
+                    name:
+                        config.name,
+
+                    order:
+                        config.order,
+
+                    category:
+                        config.category,
+
+                    color:
+                        role.color || null
+
+                };
+
+            }
+        )
+
         .sort(
             (a, b) =>
-                a.order - b.order
+                a.order -
+                b.order
         );
 }
 
 
 /*
-    Find the highest staff role.
+==================================================
+HIGHEST STAFF ROLE
+==================================================
 */
 
-function getHighestStaffRole(member) {
+function getHighestCurrentStaffRole(
+    member
+) {
 
     const roles =
-        getStaffRoles(member.roles);
+        getCurrentStaffRoles(
+            member.roles
+        );
 
     return roles.length
         ? roles[0]
@@ -4594,858 +4718,548 @@ function getHighestStaffRole(member) {
 
 
 /*
-    Render one staff card.
-
-    This intentionally uses the same classes
-    as the public staff.html page.
+==================================================
+STAFF CARD
+==================================================
 */
 
-function createStaffCard(member, index) {
+function currentStaffCard(
+    member
+) {
 
     const roles =
-        getStaffRoles(member.roles);
+        getCurrentStaffRoles(
+            member.roles
+        );
 
-    const roleHTML =
-        roles.length
-            ? roles
-                .map(role => `
-                    <div class="player-position">
-                        ${escapeHTML(role.name)}
-                    </div>
-                `)
-                .join("")
-            : `
-                <div class="player-position">
-                    STAFF
-                </div>
-            `;
+    if (!roles.length) {
+        return "";
+    }
 
     const displayName =
         member.displayName ||
         member.globalName ||
         member.username ||
-        "Unknown";
+        "Unknown User";
 
     const avatar =
         member.avatar ||
-        "";
+        "../images/whitelogo.PNG";
+
+
+    const rolesHTML =
+        roles
+            .map(
+                role => {
+
+                    const style =
+                        role.color &&
+                        role.color !== "#000000"
+                            ? `style="--role-color:${escapeHtml(role.color)}"`
+                            : "";
+
+                    return `
+                        <div
+                            class="player-position"
+                            ${style}
+                        >
+                            ${escapeHtml(role.name)}
+                        </div>
+                    `;
+
+                }
+            )
+            .join("");
+
 
     return `
-        <div
-            class="player-card roster-player-enter"
-            style="animation-delay: ${index * 0.08}s;"
-        >
+        <article class="player-card">
 
             <img
                 class="player-avatar"
-                src="${escapeHTML(avatar)}"
-                alt="${escapeHTML(displayName)}"
+                src="${escapeHtml(avatar)}"
+                alt="${escapeHtml(displayName)}"
                 loading="lazy"
                 decoding="async"
+                onerror="
+                    this.onerror=null;
+                    this.src='../images/whitelogo.PNG';
+                "
             >
 
             <div class="player-info">
 
                 <div class="player-name">
-                    ${escapeHTML(displayName)}
+                    ${escapeHtml(displayName)}
                 </div>
 
                 <div class="staff-role-list">
-                    ${roleHTML}
+                    ${rolesHTML}
                 </div>
 
             </div>
 
-        </div>
+        </article>
     `;
 }
 
 
 /*
-    Render Current Staff.
+==================================================
+CURRENT STAFF
+==================================================
 */
 
-function renderCurrentStaff() {
+async function renderCurrentStaff() {
 
-    const container = qs("staff");
-    const loading = qs("staff-loading");
-    const errorBox = qs("staff-error");
-    const memberCount = qs("member-count");
-    const roleCount = qs("role-count");
-    const lastUpdated = qs("staff-last-updated");
+    const container =
+        qs("staff");
+
+    const loading =
+        qs("staff-loading");
+
+    const errorBox =
+        qs("staff-error");
+
+    const memberCount =
+        qs("member-count");
+
+    const roleCount =
+        qs("role-count");
+
+    const lastUpdated =
+        qs("staff-last-updated");
+
 
     if (!container) {
         return;
     }
 
-    /*
-    ==================================================
-    XOTIC STAFF HIERARCHY
 
-    Lower order = higher position.
+    try {
 
-    This is copied from the public staff page so
-    StaffHub and the public staff page use the
-    exact same hierarchy.
-    ==================================================
-    */
-
-    const STAFF_ROLES = {
-
-        "1539785169102442677": {
-            name: "FOUNDER",
-            order: 1,
-            category: "FOUNDER"
-        },
-
-        "1539785171983933521": {
-            name: "CHIEF OF OPERATIONS",
-            order: 2,
-            category: "CHIEFS"
-        },
-
-        "1539785176471576707": {
-            name: "BOARD OF DIRECTORS",
-            order: 3,
-            category: "BOARD OF DIRECTORS"
-        },
-
-        "1539785177436258334": {
-            name: "BOARD MEMBER",
-            order: 4,
-            category: "BOARD MEMBER"
-        },
-
-        "1539785181999927396": {
-            name: "CHIEF TECHNOLOGY OFFICER",
-            order: 5,
-            category: "CHIEFS"
-        },
-
-        "1539785183052570746": {
-            name: "CHIEF OF STAFF",
-            order: 6,
-            category: "CHIEFS"
-        },
-
-        "1539785184201941054": {
-            name: "CHIEF FINANCIAL OFFICER",
-            order: 7,
-            category: "CHIEFS"
-        },
-
-        "1539785188836384860": {
-            name: "CHIEF CONTENT OFFICER",
-            order: 8,
-            category: "CHIEFS"
-        },
-
-        "1539785187997786142": {
-            name: "CHIEF COMMUNITY OFFICER",
-            order: 9,
-            category: "CHIEFS"
-        },
-
-        "1539785186496090133": {
-            name: "CHIEF MARKETING OFFICER",
-            order: 10,
-            category: "CHIEFS"
-        },
-
-        "1539785192355397662": {
-            name: "DIRECTOR",
-            order: 11,
-            category: "DIRECTOR"
-        },
-
-        "1539785195870363741": {
-            name: "OPERATIONS",
-            order: 12,
-            category: "OPERATIONS"
-        },
-
-        "1539785200869838910": {
-            name: "HIGH AUTH ASSISTANT",
-            order: 13,
-            category: "HIGH AUTH ASSISTANT"
-        },
-
-        "1539785203302662154": {
-            name: "EXECUTIVE",
-            order: 14,
-            category: "EXECUTIVE"
-        },
-
-        "1539785209405243543": {
-            name: "UPPER MANAGEMENT",
-            order: 15,
-            category: "UPPER MANAGEMENT"
-        },
-
-        "1539785210487640115": {
-            name: "MANAGEMENT",
-            order: 16,
-            category: "MANAGEMENT"
-        },
-
-        "1539785212588720269": {
-            name: "TRIAL MANAGEMENT",
-            order: 17,
-            category: "TRIAL MANAGEMENT"
-        },
-
-        "1539785215914934343": {
-            name: "SENIOR ADMIN",
-            order: 18,
-            category: "SENIOR ADMIN"
-        },
-
-        "1539785218662080593": {
-            name: "ADMIN",
-            order: 19,
-            category: "ADMIN"
-        },
-
-        "1539785220255916083": {
-            name: "TRIAL ADMIN",
-            order: 20,
-            category: "TRIAL ADMIN"
-        },
-
-        "1539785223376470148": {
-            name: "SENIOR STAFF",
-            order: 21,
-            category: "SENIOR STAFF"
-        },
-
-        "1539785224412725339": {
-            name: "STAFF",
-            order: 22,
-            category: "STAFF"
-        },
-
-        "1539785226211827763": {
-            name: "JUNIOR STAFF",
-            order: 23,
-            category: "JUNIOR STAFF"
-        },
-
-        "1539785227897933867": {
-            name: "TRIAL STAFF",
-            order: 24,
-            category: "TRIAL STAFF"
+        if (loading) {
+            loading.hidden = false;
         }
 
-    };
+        if (errorBox) {
+            errorBox.hidden = true;
+            errorBox.innerHTML = "";
+        }
 
 
-    /*
-    ==================================================
-    HELPERS
-    ==================================================
-    */
+        /*
+        ==================================================
+        THIS IS THE EXACT SAME ENDPOINT AS PUBLIC STAFF
+        ==================================================
+        */
 
-    const safe = value =>
-        escapeHtml(
-            value ?? ""
+        const data =
+            await api(
+                "/api/server/1490116751927546089/staff"
+            );
+
+
+        const members =
+            Array.isArray(
+                data?.members
+            )
+                ? data.members
+                : [];
+
+
+        /*
+        ==================================================
+        ONLY KEEP REAL XOTIC STAFF
+        ==================================================
+        */
+
+        const staff =
+            members
+                .map(
+                    member => ({
+                        member,
+
+                        roles:
+                            getCurrentStaffRoles(
+                                member.roles
+                            )
+                    })
+                )
+                .filter(
+                    entry =>
+                        entry.roles.length > 0
+                );
+
+
+        /*
+        ==================================================
+        REMOVE DUPLICATES
+        ==================================================
+        */
+
+        const unique =
+            new Map();
+
+
+        staff.forEach(
+            entry => {
+
+                const member =
+                    entry.member;
+
+                const id =
+                    member.id ||
+                    member.userId ||
+                    member.username ||
+                    member.displayName;
+
+
+                if (
+                    !unique.has(id)
+                ) {
+                    unique.set(
+                        id,
+                        entry
+                    );
+                }
+
+            }
         );
 
 
-    function getRecognizedRoles(member) {
+        const cleanStaff =
+            [...unique.values()];
 
-        if (
-            !member ||
-            !Array.isArray(member.roles)
-        ) {
-            return [];
-        }
 
-        return member.roles
+        /*
+        ==================================================
+        SORT BY HIGHEST ROLE
+        ==================================================
+        */
 
-            .filter(
-                role =>
-                    role &&
-                    STAFF_ROLES[role.id]
-            )
+        cleanStaff.sort(
+            (a, b) => {
 
-            .map(
-                role => {
+                const roleA =
+                    a.roles[0];
 
-                    const config =
-                        STAFF_ROLES[role.id];
+                const roleB =
+                    b.roles[0];
 
-                    return {
-                        id: role.id,
-                        name:
-                            role.name ||
-                            config.name,
-                        color:
-                            role.color ||
-                            null,
-                        order:
-                            config.order,
-                        category:
-                            config.category
-                    };
 
+                if (
+                    roleA.order !==
+                    roleB.order
+                ) {
+                    return (
+                        roleA.order -
+                        roleB.order
+                    );
                 }
-            )
-
-            .sort(
-                (a, b) =>
-                    a.order - b.order
-            );
-
-    }
 
 
-    function getHighestRole(member) {
+                const nameA =
+                    a.member.displayName ||
+                    a.member.username ||
+                    "";
 
-        const roles =
-            getRecognizedRoles(member);
-
-        return roles.length
-            ? roles[0]
-            : null;
-
-    }
-
-
-    /*
-    ==================================================
-    LOAD STAFF
-    ==================================================
-    */
-
-    async function load() {
-
-        try {
-
-            loading?.removeAttribute(
-                "hidden"
-            );
-
-            if (errorBox) {
-                errorBox.hidden = true;
-                errorBox.innerHTML = "";
-            }
-
-            container.innerHTML = "";
+                const nameB =
+                    b.member.displayName ||
+                    b.member.username ||
+                    "";
 
 
-            const data =
-                await api(
-                    `/api/server/1490116751927546089/staff`
+                return nameA.localeCompare(
+                    nameB
                 );
 
-
-            const members =
-                Array.isArray(data?.members)
-                    ? data.members
-                    : [];
+            }
+        );
 
 
-            /*
-            ==================================================
-            CLEAN MEMBER LIST
+        /*
+        ==================================================
+        STATS
+        ==================================================
+        */
 
-            Only keep members who have at least one
-            recognized Xotic staff role.
-            ==================================================
-            */
+        if (memberCount) {
 
-            const staffMembers =
-                members
+            memberCount.textContent =
+                cleanStaff.length;
 
-                    .map(
-                        member => ({
-                            member,
-                            roles:
-                                getRecognizedRoles(member)
-                        })
-                    )
-
-                    .filter(
-                        entry =>
-                            entry.roles.length > 0
-                    );
+        }
 
 
-            /*
-            ==================================================
-            REMOVE DUPLICATES
-
-            A person must only appear once.
-            ==================================================
-            */
-
-            const uniqueMembers =
-                new Map();
+        const allRoles =
+            new Set();
 
 
-            staffMembers.forEach(
-                entry => {
+        cleanStaff.forEach(
+            entry => {
 
-                    const id =
-                        entry.member.id ||
-                        entry.member.userId ||
-                        entry.member.username ||
-                        entry.member.displayName;
-
-                    if (
-                        !uniqueMembers.has(id)
-                    ) {
-                        uniqueMembers.set(
-                            id,
-                            entry
-                        );
-                    }
-
-                }
-            );
-
-
-            const cleanedMembers =
-                [...uniqueMembers.values()];
-
-
-            /*
-            ==================================================
-            SORT MEMBERS
-
-            Highest-ranking role first.
-
-            People with the same highest role are
-            alphabetically sorted.
-            ==================================================
-            */
-
-            cleanedMembers.sort(
-                (a, b) => {
-
-                    const roleA =
-                        a.roles[0];
-
-                    const roleB =
-                        b.roles[0];
-
-
-                    if (
-                        roleA.order !==
-                        roleB.order
-                    ) {
-                        return (
-                            roleA.order -
-                            roleB.order
-                        );
-                    }
-
-
-                    return (
-                        String(
-                            a.member.displayName ||
-                            a.member.username ||
-                            ""
-                        ).localeCompare(
-                            String(
-                                b.member.displayName ||
-                                b.member.username ||
-                                ""
-                            )
+                entry.roles.forEach(
+                    role =>
+                        allRoles.add(
+                            role.id
                         )
-                    );
-
-                }
-            );
-
-
-            /*
-            ==================================================
-            STATS
-            ==================================================
-            */
-
-            if (memberCount) {
-
-                memberCount.textContent =
-                    cleanedMembers.length;
+                );
 
             }
+        );
 
 
-            const uniqueRoleIds =
-                new Set();
+        if (roleCount) {
 
-            cleanedMembers.forEach(
-                entry => {
+            roleCount.textContent =
+                allRoles.size;
 
-                    entry.roles.forEach(
-                        role => {
+        }
 
-                            uniqueRoleIds.add(
-                                role.id
-                            );
 
-                        }
-                    );
+        /*
+        ==================================================
+        NO STAFF
+        ==================================================
+        */
 
-                }
-            );
+        if (!cleanStaff.length) {
 
+            container.innerHTML = `
+                <div class="staff-empty-state">
 
-            if (roleCount) {
-
-                roleCount.textContent =
-                    uniqueRoleIds.size;
-
-            }
-
-
-            /*
-            ==================================================
-            NO STAFF
-            ==================================================
-            */
-
-            if (!cleanedMembers.length) {
-
-                container.innerHTML = `
-                    <div class="staff-empty-state">
-
-                        <strong>
-                            No staff members found
-                        </strong>
-
-                        <span>
-                            The StaffHub API returned no recognized staff roles.
-                        </span>
-
-                    </div>
-                `;
-
-                return;
-
-            }
-
-
-            /*
-            ==================================================
-            GROUP STAFF
-
-            A member belongs to the category determined
-            by their highest-ranking role.
-
-            Example:
-
-            Chief of Operations
-            Chief of Staff
-            Operations Manager
-            Senior Staff
-
-            Highest role = Chief of Operations
-
-            Category = CHIEFS
-
-            The member appears ONCE, while every
-            recognized role is displayed.
-            ==================================================
-            */
-
-            const groups =
-                new Map();
-
-
-            cleanedMembers.forEach(
-                entry => {
-
-                    const highestRole =
-                        getHighestRole(
-                            entry.member
-                        );
-
-                    if (!highestRole) {
-                        return;
-                    }
-
-
-                    const category =
-                        highestRole.category;
-
-
-                    if (!groups.has(category)) {
-
-                        groups.set(
-                            category,
-                            {
-                                name:
-                                    category,
-                                order:
-                                    highestRole.order,
-                                members: []
-                            }
-                        );
-
-                    }
-
-
-                    groups
-                        .get(category)
-                        .members
-                        .push(entry);
-
-                }
-            );
-
-
-            /*
-            ==================================================
-            SORT GROUPS
-            ==================================================
-            */
-
-            const sortedGroups =
-                [...groups.values()]
-                    .sort(
-                        (a, b) =>
-                            a.order -
-                            b.order
-                    );
-
-
-            /*
-            ==================================================
-            RENDER
-            ==================================================
-            */
-
-            container.innerHTML =
-                sortedGroups
-                    .map(
-                        group => {
-
-                            const memberCards =
-                                group.members
-                                    .map(
-                                        entry => {
-
-                                            const member =
-                                                entry.member;
-
-                                            const roles =
-                                                entry.roles;
-
-
-                                            const avatar =
-                                                member.avatar ||
-                                                "assets/whitelogo.png";
-
-
-                                            const displayName =
-                                                member.displayName ||
-                                                member.username ||
-                                                "Unknown User";
-
-
-                                            /*
-                                            All recognized staff
-                                            roles are displayed.
-
-                                            Highest role is NOT
-                                            duplicated separately.
-                                            */
-
-                                            const roleHTML =
-                                                roles
-                                                    .map(
-                                                        role => {
-
-                                                            const roleColor =
-                                                                role.color &&
-                                                                role.color !== "#000000"
-                                                                    ? role.color
-                                                                    : null;
-
-
-                                                            return `
-                                                                <div
-                                                                    class="player-position"
-                                                                    ${
-                                                                        roleColor
-                                                                            ? `style="--role-color:${safe(roleColor)};"`
-                                                                            : ""
-                                                                    }
-                                                                >
-                                                                    ${safe(role.name)}
-                                                                </div>
-                                                            `;
-
-                                                        }
-                                                    )
-                                                    .join("");
-
-
-                                            return `
-                                                <article
-                                                    class="staff-member"
-                                                >
-
-                                                    <img
-                                                        class="staff-member-avatar"
-                                                        src="${safe(avatar)}"
-                                                        alt="${safe(displayName)}"
-                                                        loading="lazy"
-                                                        onerror="this.onerror=null;this.src='assets/whitelogo.png';"
-                                                    >
-
-                                                    <div class="staff-member-info">
-
-                                                        <div class="staff-member-name">
-                                                            ${safe(displayName)}
-                                                        </div>
-
-                                                        <div class="staff-member-username">
-                                                            ${
-                                                                member.username
-                                                                    ? `@${safe(member.username)}`
-                                                                    : ""
-                                                            }
-                                                        </div>
-
-                                                        <div class="staff-member-roles">
-                                                            ${roleHTML}
-                                                        </div>
-
-                                                    </div>
-
-                                                </article>
-                                            `;
-
-                                        }
-                                    )
-                                    .join("");
-
-
-                            return `
-                                <section
-                                    class="staff-role-group"
-                                    data-category="${safe(group.name)}"
-                                >
-
-                                    <header class="staff-role-header">
-
-                                        <div class="staff-role-header-left">
-
-                                            <div class="staff-role-icon">
-                                                ${group.name === "CHIEFS" ? "★" : "◆"}
-                                            </div>
-
-                                            <div>
-
-                                                <h3 class="staff-role-title">
-                                                    ${safe(group.name)}
-                                                </h3>
-
-                                                <span class="staff-role-count">
-                                                    ${
-                                                        group.members.length
-                                                    }
-                                                    ${
-                                                        group.members.length === 1
-                                                            ? "MEMBER"
-                                                            : "MEMBERS"
-                                                    }
-                                                </span>
-
-                                            </div>
-
-                                        </div>
-
-                                    </header>
-
-
-                                    <div class="staff-member-grid">
-
-                                        ${memberCards}
-
-                                    </div>
-
-                                </section>
-                            `;
-
-                        }
-                    )
-                    .join("");
-
-
-            if (lastUpdated) {
-
-                lastUpdated.textContent =
-                    `Updated ${new Date().toLocaleString(
-                        [],
-                        {
-                            dateStyle: "medium",
-                            timeStyle: "short"
-                        }
-                    )}`;
-
-            }
-
-
-        } catch (error) {
-
-            console.error(
-                "Current Staff loading error:",
-                error
-            );
-
-
-            if (memberCount) {
-                memberCount.textContent = "—";
-            }
-
-            if (roleCount) {
-                roleCount.textContent = "—";
-            }
-
-
-            if (errorBox) {
-
-                errorBox.hidden = false;
-
-                errorBox.innerHTML = `
                     <strong>
-                        Unable to load staff
+                        No staff members found
                     </strong>
 
                     <span>
-                        ${
-                            safe(
-                                error?.message ||
-                                "The staff roster could not be loaded."
-                            )
-                        }
+                        No recognized Xotic staff roles were returned by the API.
                     </span>
-                `;
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        /*
+        ==================================================
+        GROUP BY HIGHEST ROLE CATEGORY
+        ==================================================
+
+        Chiefs are ONE category.
+
+        A person appears ONLY ONCE.
+
+        All their staff roles are shown
+        inside their card.
+        */
+
+        const groups =
+            new Map();
+
+
+        cleanStaff.forEach(
+            entry => {
+
+                const highest =
+                    entry.roles[0];
+
+                const category =
+                    highest.category;
+
+
+                if (!groups.has(category)) {
+
+                    groups.set(
+                        category,
+                        {
+                            category,
+                            order:
+                                highest.order,
+                            members: []
+                        }
+                    );
+
+                }
+
+
+                groups
+                    .get(category)
+                    .members
+                    .push(
+                        entry.member
+                    );
 
             }
+        );
 
 
-            container.innerHTML = "";
-
-        } finally {
-
-            if (loading) {
-                loading.setAttribute(
-                    "hidden",
-                    ""
+        const sortedGroups =
+            [...groups.values()]
+                .sort(
+                    (a, b) =>
+                        a.order -
+                        b.order
                 );
-            }
+
+
+        /*
+        ==================================================
+        RENDER
+        ==================================================
+        */
+
+        container.innerHTML =
+            sortedGroups
+                .map(
+                    group => {
+
+                        const cards =
+                            group.members
+                                .map(
+                                    member =>
+                                        currentStaffCard(
+                                            member
+                                        )
+                                )
+                                .join("");
+
+
+                        return `
+                            <section
+                                class="staff-role-group"
+                            >
+
+                                <div
+                                    class="staff-role-header"
+                                >
+
+                                    <div
+                                        class="staff-role-header-left"
+                                    >
+
+                                        <div
+                                            class="staff-role-icon"
+                                        >
+                                            ${
+                                                group.category ===
+                                                "CHIEFS"
+                                                    ? "★"
+                                                    : "◆"
+                                            }
+                                        </div>
+
+                                        <div>
+
+                                            <h2
+                                                class="staff-role-title"
+                                            >
+                                                ${escapeHtml(
+                                                    group.category
+                                                )}
+                                            </h2>
+
+                                            <span
+                                                class="staff-role-count"
+                                            >
+                                                ${
+                                                    group.members.length
+                                                }
+                                                ${
+                                                    group.members.length === 1
+                                                        ? "MEMBER"
+                                                        : "MEMBERS"
+                                                }
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="staff-member-grid"
+                                >
+                                    ${cards}
+                                </div>
+
+                            </section>
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        if (lastUpdated) {
+
+            lastUpdated.textContent =
+                `Updated ${new Date().toLocaleString(
+                    [],
+                    {
+                        dateStyle:
+                            "medium",
+
+                        timeStyle:
+                            "short"
+                    }
+                )}`;
 
         }
 
+
+    } catch (error) {
+
+        console.error(
+            "Current Staff error:",
+            error
+        );
+
+
+        if (memberCount) {
+            memberCount.textContent =
+                "—";
+        }
+
+        if (roleCount) {
+            roleCount.textContent =
+                "—";
+        }
+
+
+        container.innerHTML = "";
+
+
+        if (errorBox) {
+
+            errorBox.hidden = false;
+
+            errorBox.innerHTML = `
+                <strong>
+                    Unable to load staff
+                </strong>
+
+                <span>
+                    ${escapeHtml(
+                        error.message ||
+                        "Unknown error"
+                    )}
+                </span>
+            `;
+
+        }
+
+
+    } finally {
+
+        if (loading) {
+            loading.hidden = true;
+        }
+
     }
-
-
-    load();
-
 }
