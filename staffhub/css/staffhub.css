@@ -103,24 +103,19 @@ img {
 }
 
 .logo {
-    width: 42px;
-    height: 42px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex: 0 0 42px;
-    overflow: hidden;
+    gap: 11px;
+    color: var(--white);
+    font-family: "Orbitron", sans-serif;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 3px;
 }
-
 .logo img {
-    width: 42px !important;
-    height: 42px !important;
-    max-width: 42px !important;
-    max-height: 42px !important;
-    min-width: 42px;
-    min-height: 42px;
+    width: 42px;
+    height: 42px;
     object-fit: contain;
-    display: block;
 }
 
 .staff-nav {
