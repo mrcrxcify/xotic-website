@@ -4490,22 +4490,22 @@ const CURRENT_STAFF_ROLES = {
         category: "FOUNDER"
     },
 
-    "1539785171983933521": {
-        name: "CHIEF OF OPERATIONS",
+    "1539785192355397662": {
+        name: "PRESIDENT",
         order: 2,
-        category: "CHIEFS"
+        category: "DIRECTOR"
     },
 
     "1539785176471576707": {
         name: "BOARD OF DIRECTORS",
         order: 3,
-        category: "BOARD OF DIRECTORS"
+        category: "BOARD"
     },
 
     "1539785177436258334": {
         name: "BOARD MEMBER",
         order: 4,
-        category: "BOARD MEMBER"
+        category: "BOARD"
     },
 
     "1539785181999927396": {
@@ -4520,34 +4520,34 @@ const CURRENT_STAFF_ROLES = {
         category: "CHIEFS"
     },
 
+    "1539785171983933521": {
+        name: "CHIEF OF OPERATIONS",
+        order: 7,
+        category: "CHIEFS"
+    },
+
     "1539785184201941054": {
         name: "CHIEF FINANCIAL OFFICER",
-        order: 7,
+        order: 8,
         category: "CHIEFS"
     },
 
     "1539785188836384860": {
         name: "CHIEF CONTENT OFFICER",
-        order: 8,
+        order: 9,
         category: "CHIEFS"
     },
 
     "1539785187997786142": {
         name: "CHIEF COMMUNITY OFFICER",
-        order: 9,
+        order: 10,
         category: "CHIEFS"
     },
 
     "1539785186496090133": {
         name: "CHIEF MARKETING OFFICER",
-        order: 10,
-        category: "CHIEFS"
-    },
-
-    "1539785192355397662": {
-        name: "DIRECTOR",
         order: 11,
-        category: "DIRECTOR"
+        category: "CHIEFS"
     },
 
     "1539785195870363741": {
@@ -4556,75 +4556,90 @@ const CURRENT_STAFF_ROLES = {
         category: "OPERATIONS"
     },
 
-    "1539785200869838910": {
-        name: "HIGH AUTH ASSISTANT",
-        order: 13,
-        category: "HIGH AUTH ASSISTANT"
-    },
-
     "1539785203302662154": {
         name: "EXECUTIVE",
-        order: 14,
+        order: 13,
         category: "EXECUTIVE"
+    },
+
+
+    "1547914731812167772": {
+        name: "TIKTOK MANAGER",
+        order: 14,
+        category: "SOCIAL PLATFORMS MANAGERS"
+    },
+
+
+    "1547914850355650632": {
+        name: "YOUTUBE MANAGER",
+        order: 15,
+        category: "SOCIAL PLATFORMS MANAGERS"
+    },
+
+
+    "1547914536265187348": {
+        name: "X(TWITTER) MANAGER",
+        order: 16,
+        category: "SOCIAL PLATFORMS MANAGERS"
     },
 
     "1539785209405243543": {
         name: "UPPER MANAGEMENT",
-        order: 15,
+        order: 17,
         category: "UPPER MANAGEMENT"
     },
 
     "1539785210487640115": {
         name: "MANAGEMENT",
-        order: 16,
+        order: 18,
         category: "MANAGEMENT"
     },
 
     "1539785212588720269": {
         name: "TRIAL MANAGEMENT",
-        order: 17,
+        order: 19,
         category: "TRIAL MANAGEMENT"
     },
 
     "1539785215914934343": {
         name: "SENIOR ADMIN",
-        order: 18,
+        order: 20,
         category: "SENIOR ADMIN"
     },
 
     "1539785218662080593": {
         name: "ADMIN",
-        order: 19,
+        order: 21,
         category: "ADMIN"
     },
 
     "1539785220255916083": {
         name: "TRIAL ADMIN",
-        order: 20,
+        order: 22,
         category: "TRIAL ADMIN"
     },
 
     "1539785223376470148": {
         name: "SENIOR STAFF",
-        order: 21,
+        order: 23,
         category: "SENIOR STAFF"
     },
 
     "1539785224412725339": {
         name: "STAFF",
-        order: 22,
+        order: 24,
         category: "STAFF"
     },
 
     "1539785226211827763": {
         name: "JUNIOR STAFF",
-        order: 23,
+        order: 25,
         category: "JUNIOR STAFF"
     },
 
     "1539785227897933867": {
         name: "TRIAL STAFF",
-        order: 24,
+        order: 26,
         category: "TRIAL STAFF"
     }
 
