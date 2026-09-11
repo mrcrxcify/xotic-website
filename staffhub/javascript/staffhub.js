@@ -410,6 +410,7 @@ STARTUP
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
+
         const ok =
             await requireStaff();
 
@@ -429,22 +430,16 @@ document.addEventListener(
         }
 
         if (
-            !redirectIfNoAccess(
-                page
-            )
+            !redirectIfNoAccess(page)
         ) {
             return;
         }
 
-        if (
-            page === "home"
-        ) {
+        if (page === "home") {
             renderHome();
         }
 
-        if (
-            page === "commands"
-        ) {
+        if (page === "commands") {
             renderCommands();
         }
 
@@ -472,6 +467,7 @@ document.addEventListener(
         ) {
             renderCurrentStaff();
         }
+
     }
 );
 
@@ -4389,4 +4385,652 @@ function renderActivityResults() {
                 `;
             })
             .join("");
+}
+/* ==================================================
+   CURRENT STAFF
+================================================== */
+
+const CURRENT_STAFF_ROLES = [
+    {
+        name: "Founder",
+        level: 1000
+    },
+    {
+        name: "President",
+        level: 990
+    },
+    {
+        name: "Vice President",
+        level: 980
+    },
+    {
+        name: "Board of Directors",
+        level: 970
+    },
+    {
+        name: "Board Member",
+        level: 960
+    },
+    {
+        name: "Chief Technology Officer",
+        level: 950
+    },
+    {
+        name: "Chief Operating Officer",
+        level: 940
+    },
+    {
+        name: "Chief of Staff",
+        level: 930
+    },
+    {
+        name: "Chief Financial Officer",
+        level: 920
+    },
+    {
+        name: "Chief Marketing Officer",
+        level: 910
+    },
+    {
+        name: "Chief Community Officer",
+        level: 900
+    },
+    {
+        name: "Chief of Content",
+        level: 890
+    },
+    {
+        name: "Operations",
+        level: 850
+    },
+    {
+        name: "Executive",
+        level: 800
+    },
+    {
+        name: "Director",
+        level: 780
+    },
+    {
+        name: "Upper Management",
+        level: 750
+    },
+    {
+        name: "Management",
+        level: 700
+    },
+    {
+        name: "Trial Management",
+        level: 650
+    },
+    {
+        name: "Senior Admin",
+        level: 600
+    },
+    {
+        name: "Admin",
+        level: 550
+    },
+    {
+        name: "Trial Admin",
+        level: 500
+    },
+    {
+        name: "Senior Staff",
+        level: 450
+    },
+    {
+        name: "Staff",
+        level: 400
+    },
+    {
+        name: "Junior Staff",
+        level: 350
+    },
+    {
+        name: "Trial Staff",
+        level: 300
+    }
+];
+
+
+function getCurrentStaffRoleOrder() {
+
+    const roleNames =
+        new Map(
+            CURRENT_STAFF_ROLES.map(
+                role => [
+                    role.name.toLowerCase(),
+                    role.level
+                ]
+            )
+        );
+
+    return role => {
+
+        const name =
+            String(
+                role?.name || ""
+            )
+                .trim()
+                .toLowerCase();
+
+        return (
+            roleNames.get(name) ??
+            Number(
+                role?.position ??
+                role?.level ??
+                0
+            )
+        );
+    };
+}
+
+
+function getStaffMemberName(member) {
+
+    return (
+        member?.displayName ||
+        member?.globalName ||
+        member?.username ||
+        member?.user?.globalName ||
+        member?.user?.username ||
+        "Unknown"
+    );
+}
+
+
+function getStaffMemberUsername(member) {
+
+    const username =
+        member?.username ||
+        member?.user?.username ||
+        "";
+
+    if (!username) {
+        return "";
+    }
+
+    return username.startsWith("@")
+        ? username
+        : `@${username}`;
+}
+
+
+function getStaffMemberAvatar(member) {
+
+    return (
+        member?.avatar ||
+        member?.avatarURL ||
+        member?.avatarUrl ||
+        member?.user?.avatar ||
+        member?.user?.avatarURL ||
+        member?.user?.avatarUrl ||
+        "https://cdn.discordapp.com/embed/avatars/0.png"
+    );
+}
+
+
+function getStaffMemberRoles(member) {
+
+    if (Array.isArray(member?.roles)) {
+        return member.roles;
+    }
+
+    if (Array.isArray(member?.staffRoles)) {
+        return member.staffRoles;
+    }
+
+    if (Array.isArray(member?.discordRoles)) {
+        return member.discordRoles;
+    }
+
+    return [];
+}
+
+
+function normalizeStaffRole(role) {
+
+    if (typeof role === "string") {
+        return {
+            id: role,
+            name: role,
+            position: 0
+        };
+    }
+
+    return {
+        id:
+            role?.id ||
+            role?.roleId ||
+            role?.name ||
+            crypto.randomUUID(),
+
+        name:
+            role?.name ||
+            role?.roleName ||
+            "Unknown Role",
+
+        position:
+            Number(
+                role?.position ??
+                role?.level ??
+                0
+            )
+    };
+}
+
+
+function normalizeStaffMember(member) {
+
+    const roles =
+        getStaffMemberRoles(member)
+            .map(normalizeStaffRole);
+
+    return {
+        id:
+            member?.id ||
+            member?.user?.id ||
+            "",
+
+        name:
+            getStaffMemberName(member),
+
+        username:
+            getStaffMemberUsername(member),
+
+        avatar:
+            getStaffMemberAvatar(member),
+
+        roles
+    };
+}
+
+
+function normalizeStaffResponse(data) {
+
+    /*
+     * Your API has historically returned staff in slightly
+     * different shapes. This handles the common ones without
+     * requiring the Current Staff page to know which one was used.
+     */
+
+    let members = [];
+
+    if (Array.isArray(data)) {
+        members = data;
+    }
+
+    else if (Array.isArray(data?.staff)) {
+        members = data.staff;
+    }
+
+    else if (Array.isArray(data?.members)) {
+        members = data.members;
+    }
+
+    else if (Array.isArray(data?.users)) {
+        members = data.users;
+    }
+
+    else if (Array.isArray(data?.data)) {
+        members = data.data;
+    }
+
+    return members
+        .map(normalizeStaffMember)
+        .filter(member => member.id || member.name);
+}
+
+
+async function loadCurrentStaff() {
+
+    const container =
+        qs("staff");
+
+    const loading =
+        qs("staff-loading");
+
+    const errorBox =
+        qs("staff-error");
+
+    const count =
+        qs("member-count");
+
+    const roleCount =
+        qs("role-count");
+
+    const updated =
+        qs("staff-last-updated");
+
+    if (!container) {
+        return;
+    }
+
+    if (loading) {
+        loading.hidden = false;
+    }
+
+    if (errorBox) {
+        errorBox.hidden = true;
+        errorBox.innerHTML = "";
+    }
+
+    container.innerHTML = "";
+
+    try {
+
+        /*
+         * This is the actual StaffHub endpoint.
+         *
+         * Do NOT use the old inline /api/server/.../staff
+         * implementation on current-staff.html.
+         */
+
+        const data =
+            await api(
+                `/api/staffhub/staff`
+            );
+
+        const members =
+            normalizeStaffResponse(data);
+
+        if (count) {
+            count.textContent =
+                members.length;
+        }
+
+        const roleMap =
+            new Map();
+
+        members.forEach(member => {
+
+            member.roles.forEach(role => {
+
+                if (!roleMap.has(role.id)) {
+
+                    roleMap.set(
+                        role.id,
+                        {
+                            ...role,
+                            members: []
+                        }
+                    );
+
+                }
+
+                roleMap
+                    .get(role.id)
+                    .members
+                    .push(member);
+
+            });
+
+        });
+
+        const getRoleOrder =
+            getCurrentStaffRoleOrder();
+
+        const roleGroups =
+            [...roleMap.values()]
+                .sort(
+                    (a, b) =>
+                        getRoleOrder(b) -
+                        getRoleOrder(a)
+                );
+
+        if (roleCount) {
+            roleCount.textContent =
+                roleGroups.length;
+        }
+
+        if (!members.length) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    No staff members were returned by the API.
+                </div>
+            `;
+
+            if (updated) {
+                updated.textContent =
+                    `Updated ${formatDate(new Date())}`;
+            }
+
+            return;
+        }
+
+        container.innerHTML =
+            roleGroups
+                .map(
+                    role =>
+                        renderStaffRoleGroup(
+                            role
+                        )
+                )
+                .join("");
+
+        if (updated) {
+            updated.textContent =
+                `Updated ${formatDate(new Date())}`;
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load current staff:",
+            error
+        );
+
+        if (errorBox) {
+
+            errorBox.hidden = false;
+
+            errorBox.innerHTML = `
+                <strong>
+                    Failed to load staff.
+                </strong>
+
+                <br>
+
+                ${escapeHtml(
+                    error.message ||
+                    "Unknown error"
+                )}
+            `;
+
+        } else {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    ${escapeHtml(
+                        error.message ||
+                        "Failed to load staff."
+                    )}
+                </div>
+            `;
+
+        }
+
+    } finally {
+
+        if (loading) {
+            loading.hidden = true;
+        }
+
+    }
+}
+
+
+function renderStaffRoleGroup(role) {
+
+    const members =
+        [...role.members]
+            .sort(
+                (a, b) =>
+                    a.name.localeCompare(
+                        b.name
+                    )
+            );
+
+    return `
+        <section
+            class="staff-role-group"
+        >
+
+            <div
+                class="staff-role-header"
+            >
+
+                <div
+                    class="staff-role-header-left"
+                >
+
+                    <div
+                        class="staff-role-icon"
+                    >
+                        ✦
+                    </div>
+
+                    <div>
+
+                        <h3
+                            class="staff-role-title"
+                        >
+                            ${escapeHtml(
+                                role.name
+                            )}
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <span
+                    class="staff-role-count"
+                >
+                    ${members.length}
+                    ${
+                        members.length === 1
+                            ? "MEMBER"
+                            : "MEMBERS"
+                    }
+                </span>
+
+            </div>
+
+
+            <div
+                class="staff-member-grid"
+            >
+
+                ${members
+                    .map(
+                        member =>
+                            renderStaffMember(
+                                member
+                            )
+                    )
+                    .join("")}
+
+            </div>
+
+        </section>
+    `;
+}
+
+
+function renderStaffMember(member) {
+
+    const username =
+        member.username;
+
+    return `
+        <article
+            class="staff-member"
+        >
+
+            <img
+                class="staff-member-avatar"
+                src="${escapeHtml(
+                    member.avatar
+                )}"
+                alt=""
+                loading="lazy"
+                onerror="
+                    this.onerror=null;
+                    this.src='https://cdn.discordapp.com/embed/avatars/0.png';
+                "
+            >
+
+            <div
+                class="staff-member-info"
+            >
+
+                <span
+                    class="staff-member-name"
+                >
+                    ${escapeHtml(
+                        member.name
+                    )}
+                </span>
+
+                ${
+                    username
+                        ? `
+                            <span
+                                class="staff-member-username"
+                            >
+                                ${escapeHtml(
+                                    username
+                                )}
+                            </span>
+                        `
+                        : ""
+                }
+
+                ${
+                    member.id
+                        ? `
+                            <span
+                                class="staff-member-discord"
+                            >
+                                Discord ID:
+                                ${escapeHtml(
+                                    member.id
+                                )}
+                            </span>
+                        `
+                        : ""
+                }
+
+            </div>
+
+        </article>
+    `;
+}
+
+
+async function renderCurrentStaff() {
+
+    await loadCurrentStaff();
+
+    /*
+     * Keep the page live. This is intentionally much simpler
+     * than the old current-staff implementation.
+     */
+
+    if (
+        window.currentStaffRefreshTimer
+    ) {
+        clearInterval(
+            window.currentStaffRefreshTimer
+        );
+    }
+
+    window.currentStaffRefreshTimer =
+        setInterval(
+            loadCurrentStaff,
+            60000
+        );
 }

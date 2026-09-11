@@ -1,598 +1,269 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Staff | Xotic Esports™</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <meta name="description" content="Xotic Esports™. Where the competition begins. Established August 2026.">
-    <meta property="og:title" content="Xotic Esports™ Staff">
-    <meta property="og:image" content="https://xoticesports.com/images/banner2.png">
+    <title>Current Staff | Xotic Esports</title>
 
-    <meta property="og:description" content="Xotic Esports™ | Full Staff Team">
-    
-    <meta property="og:url" content="https://xoticesports.com/staff">
-    
-    <meta property="og:type" content="website">
+    <link
+        rel="stylesheet"
+        href="css/staffhub.css"
+    >
 
-
-    <link rel="icon" type="image/png" href="../images/purplogo.PNG">
-    <link rel="stylesheet" href="css/staffhub.css">
-    <link rel="stylesheet" href="../CSS/style.css">
-
+    <script
+        src="javascript/staffhub.js"
+        defer
+    ></script>
 </head>
 
-<body>
+<body data-page="currentStaff">
 
-        <nav id="staff-nav" class="staff-nav">
-            <a data-page-link="home" href="index.html">Home</a>
-            <a data-page-link="commands" href="commands.html">Commands</a>
-            <a data-page-link="tickets" href="tickets.html">Tickets</a>
-            <a data-page-link="etiquette" href="etiquette.html">Etiquette</a>
-            <a data-page-link="announcements" href="announcements.html">Announcements</a>
-            <a data-page-link="promosDemos" href="promos-demos.html">Promos &amp; Demos</a>
-            <a data-page-link="currentStaff" href="current-staff.html">Current Staff</a>
-            <button class="nav-logout" onclick="logout()">Logout</button>
-        </nav>
+    <header class="navbar">
+
+        <div class="nav-container">
+
+            <a
+                href="index.html"
+                class="logo"
+            >
+                <img
+                    src="../images/purplogo.PNG"
+                    alt="Xotic Esports"
+                >
+            </a>
+
+            <button
+                type="button"
+                class="mobile-menu-button"
+                onclick="toggleMobileMenu()"
+                aria-label="Open navigation"
+            >
+                ☰
+            </button>
+
+            <nav
+                id="staff-nav"
+                class="staff-nav"
+            >
+
+                <a
+                    href="index.html"
+                    data-page-link="home"
+                >
+                    Home
+                </a>
+
+                <a
+                    href="commands.html"
+                    data-page-link="commands"
+                >
+                    Commands
+                </a>
+
+                <a
+                    href="tickets.html"
+                    data-page-link="tickets"
+                >
+                    Tickets
+                </a>
+
+                <a
+                    href="etiquette.html"
+                    data-page-link="etiquette"
+                >
+                    Etiquette
+                </a>
+
+                <a
+                    href="announcements.html"
+                    data-page-link="announcements"
+                >
+                    Announcements
+                </a>
+
+                <a
+                    href="promos-demos.html"
+                    data-page-link="promosDemos"
+                >
+                    Promos & Demos
+                </a>
+
+                <a
+                    href="current-staff.html"
+                    data-page-link="currentStaff"
+                >
+                    Current Staff
+                </a>
+
+                <button
+                    type="button"
+                    class="nav-logout"
+                    onclick="logout()"
+                >
+                    Logout
+                </button>
+
+            </nav>
+
+            <div
+                id="staff-user"
+                class="staff-user"
+            ></div>
+
+        </div>
+
+    </header>
 
 
-<main>
-    <div class="container">
+    <main class="hub-main current-staff-page">
 
-        <div class="page-head">
-            <div class="eyebrow">XOTIC STAFF</div>
+        <section class="current-staff-hero">
 
-            <div class="page-title-row">
-                <div>
-                    <h1>CURRENT STAFF</h1>
-                    <p>
-                        The current Xotic staff team, automatically synced with Discord.
-                    </p>
+            <div class="current-staff-hero-content">
+
+                <div class="section-label">
+                    XOTIC ESPORTS
                 </div>
-            </div>
-        </div>
 
+                <h1>
+                    CURRENT STAFF
+                </h1>
 
+                <p>
+                    Meet the people currently helping run
+                    and manage Xotic Esports.
+                </p>
 
-<section class="section roster-section">
+                <div class="current-staff-stats">
 
-    <div class="container">
+                    <div class="current-staff-stat">
 
-        <div class="section-header roster-section-header">
-
-            <div class="section-label">
-                Xotic Esports™
-            </div>
-
-            <h2 class="section-title">
-                STAFF
-            </h2>
-
-            <p class="section-description">
-
-                <span id="member-count">
-                    Loading...
-                </span>
-
-            </p>
-
-        </div>
-
-
-        <div
-            id="staff"
-            class="player-grid"
-        >
-
-            <div class="roster-loading">
-                Loading staff...
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-</main>
-
-
-<footer>
-    <div class="container">
-        <span id="staff-server">Xotic Esports</span>
-        <span> • Internal Staff Portal</span>
-    </div>
-</footer>
-
-<script src="javascript/staffhub.js"></script>
-<script>
-
-function toggleMenu() {
-
-    document
-        .getElementById("navLinks")
-        .classList
-        .toggle("show");
-
-}
-
-
-/*
-    XOTIC STAFF API
-*/
-
-const API_URL = "https://api.xoticesports.com";
-const SERVER_ID="1490116751927546089";
-
-const STAFF_API = `${API_URL}/api/server/${SERVER_ID}/staff`;
-
-
-/*
-    Staff hierarchy.
-
-    Lower number = higher position.
-*/
-
-const STAFF_ROLES = {
-
-    "1539785169102442677": {
-        name: "FOUNDER",
-        order: 1
-    },
-
-    "1539785192355397662": {
-        name: "President",
-        order: 2
-    },
-
-
-    "1539785176471576707": {
-        name: "BOARD OF DIRECTORS",
-        order: 3
-    },
-
-    "1539785177436258334": {
-        name: "BOARD MEMBER",
-        order: 4
-    },
-
-
-    "1539785181999927396": {
-        name: "CHIEF TECHNOLOGY OFFICER",
-        order: 5
-    },
-
-    "1539785171983933521": {
-        name: "CHIEF OF OPERATIONS",
-        order: 6
-    },
-
-    "1539785183052570746": {
-        name: "CHIEF OF STAFF",
-        order: 7
-    },
-
-    "1539785184201941054": {
-        name: "CHIEF FINANCIAL OFFICER",
-        order: 8
-    },
-
-    "1539785188836384860": {
-        name: "CHIEF CONTENT OFFICER",
-        order: 9
-    },
-
-    "1539785187997786142": {
-        name: "CHIEF COMMUNITY OFFICER",
-        order: 10
-    },
-
-    "1539785186496090133": {
-        name: "CHIEF MARKETING OFFICER",
-        order: 11
-    },
-
-    "1539785195870363741": {
-        name: "OPERATIONS",
-        order: 12
-    },
-
-    "1539785203302662154": {
-        name: "EXECUTIVE",
-        order: 13
-    },
-
-
-    "1547914731812167772": {
-        name: "TokTok Manager",
-        order: 14
-    },
-
-
-    "1547914850355650632": {
-        name: "YouTube Manager",
-        order: 15
-    },
-
-
-    "1547914536265187348": {
-        name: "X(Twitter) Manager",
-        order: 16
-    },
-
-
-    "1539785209405243543": {
-        name: "UPPER MANAGEMENT",
-        order: 17
-    },
-
-    "1539785210487640115": {
-        name: "MANAGEMENT",
-        order: 18
-    },
-
-    "1539785212588720269": {
-        name: "TRIAL MANAGEMENT",
-        order: 19
-    },
-
-
-    "1539785215914934343": {
-        name: "SENIOR ADMIN",
-        order: 20
-    },
-
-    "1539785218662080593": {
-        name: "ADMIN",
-        order: 21
-    },
-
-    "1539785220255916083": {
-        name: "TRIAL ADMIN",
-        order: 22
-    },
-
-    "1539785223376470148": {
-        name: "SENIOR STAFF",
-        order: 23
-    },
-
-    "1539785224412725339": {
-        name: "STAFF",
-        order: 24
-    },
-
-    "1539785226211827763": {
-        name: "JUNIOR STAFF",
-        order: 25
-    },
-
-    "1539785227897933867": {
-        name: "TRIAL STAFF",
-        order: 26
-    }
-
-};
-
-
-/*
-    Escape HTML so Discord names
-    cannot break the page.
-*/
-
-function escapeHTML(text) {
-
-    const element =
-        document.createElement("div");
-
-    element.textContent = text;
-
-    return element.innerHTML;
-
-}
-
-
-/*
-    Convert role IDs into role names.
-*/
-
-function getStaffRoles(roles) {
-
-    return roles
-        .filter(role => STAFF_ROLES[role.id])
-        .map(role => ({
-            id: role.id,
-            name: role.name,
-            color: role.color,
-            order: STAFF_ROLES[role.id].order
-        }))
-        .sort((a, b) => a.order - b.order);
-
-}
-
-
-/*
-    Load staff from the API.
-*/
-
-async function loadStaff() {
-
-    const staffContainer =
-        document.getElementById("staff");
-
-    const memberCount =
-        document.getElementById("member-count");
-
-
-    try {
-
-        const response =
-            await fetch(STAFF_API);
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Staff API request failed"
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        memberCount.textContent =
-            `${data.count} ${data.count === 1 ? "MEMBER" : "MEMBERS"}`;
-
-
-        if (
-            !data.members ||
-            data.members.length === 0
-        ) {
-
-            staffContainer.innerHTML = `
-                <div class="roster-empty">
-                    No staff members currently assigned.
-                </div>
-            `;
-
-            return;
-
-        }
-
-
-        /*
-            Sort staff members by their
-            highest-ranking staff role.
-        */
-
-        const sortedMembers =
-            [...data.members].sort((a, b) => {
-
-                const rolesA =
-                    getStaffRoles(a.roles);
-
-                const rolesB =
-                    getStaffRoles(b.roles);
-
-
-                const orderA =
-                    rolesA.length > 0
-                        ? rolesA[0].order
-                        : 999;
-
-
-                const orderB =
-                    rolesB.length > 0
-                        ? rolesB[0].order
-                        : 999;
-
-
-                return orderA - orderB;
-
-            });
-
-
-        staffContainer.innerHTML =
-            sortedMembers.map((member, index) => {
-
-
-                const roles =
-                    getStaffRoles(member.roles);
-
-
-                const roleHTML =
-                    roles.length > 0
-
-                        ? roles.map(role => `
-                            <div class="player-position">
-                                ${escapeHTML(role.name)}
-                            </div>
-                        `).join("")
-
-                        : `
-                            <div class="player-position">
-                                STAFF
-                            </div>
-                        `;
-
-
-                return `
-
-                    <div
-                        class="player-card roster-player-enter"
-                        style="animation-delay: ${index * 0.08}s;"
-                    >
-
-                        <img
-                            class="player-avatar"
-                            src="${escapeHTML(member.avatar)}"
-                            alt="${escapeHTML(member.displayName)}"
+                        <span
+                            id="member-count"
+                            class="current-staff-stat-number"
                         >
+                            0
+                        </span>
 
-
-                        <div class="player-info">
-
-                            <div class="player-name">
-                                ${escapeHTML(member.displayName)}
-                            </div>
-
-
-                            <div class="staff-role-list">
-
-                                ${roleHTML}
-
-                            </div>
-
-                        </div>
+                        <span class="current-staff-stat-label">
+                            STAFF MEMBERS
+                        </span>
 
                     </div>
 
-                `;
+                    <div class="current-staff-stat">
 
-            }).join("");
+                        <span
+                            id="role-count"
+                            class="current-staff-stat-number"
+                        >
+                            0
+                        </span>
 
+                        <span class="current-staff-stat-label">
+                            STAFF ROLES
+                        </span>
 
-    } catch (error) {
+                    </div>
 
-        console.error(
-            "Staff loading error:",
-            error
-        );
+                </div>
 
-
-        memberCount.textContent =
-            "UNAVAILABLE";
-
-
-        staffContainer.innerHTML = `
-
-            <div class="roster-error">
-                Unable to load staff.
             </div>
 
-        `;
+            <div class="current-staff-hero-glow"></div>
 
-    }
-
-}
+        </section>
 
 
-/*
-    ESCAPE button fade.
-*/
+        <section class="current-staff-section">
 
-const escapeButton =
-    document.getElementById("rosterEscape");
+            <div class="page-head">
 
+                <div>
 
-function updateEscapeButton() {
+                    <div class="section-label">
+                        STAFF DIRECTORY
+                    </div>
 
-    if (!escapeButton) {
-        return;
-    }
+                    <h2>
+                        Xotic Staff Team
+                    </h2>
 
+                    <p>
+                        Staff are displayed by hierarchy
+                        and automatically synced with Discord.
+                    </p>
 
-    const hero =
-        document.querySelector(".hero");
+                </div>
 
+                <div class="current-staff-refresh">
 
-    if (!hero) {
-        return;
-    }
+                    <span
+                        id="staff-last-updated"
+                    >
+                        Loading...
+                    </span>
 
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="loadCurrentStaff()"
+                    >
+                        REFRESH
+                    </button>
 
-    const scrollY =
-        window.scrollY;
+                </div>
 
-
-    const heroHeight =
-        hero.offsetHeight;
-
-
-    const fadeStart = 50;
-
-
-    const fadeEnd =
-        Math.max(
-            100,
-            heroHeight - 180
-        );
-
-
-    let opacity = 1;
+            </div>
 
 
-    if (scrollY > fadeStart) {
+            <div
+                id="staff-loading"
+                class="staff-loading"
+            >
+                <div class="staff-loading-spinner"></div>
 
-        opacity =
-            1 -
-            (
-                (scrollY - fadeStart) /
-                (fadeEnd - fadeStart)
-            );
-
-    }
-
-
-    opacity =
-        Math.max(
-            0,
-            Math.min(1, opacity)
-        );
+                <span>
+                    LOADING STAFF...
+                </span>
+            </div>
 
 
-    escapeButton.style.opacity =
-        opacity;
+            <div
+                id="staff-error"
+                class="empty-state"
+                hidden
+            ></div>
 
 
-    escapeButton.style.pointerEvents =
-        opacity <= 0.05
-            ? "none"
-            : "auto";
+            <div
+                id="staff"
+                class="current-staff-list"
+            ></div>
 
-}
+        </section>
 
-
-window.addEventListener(
-    "scroll",
-    updateEscapeButton,
-    { passive: true }
-);
+    </main>
 
 
-window.addEventListener(
-    "resize",
-    updateEscapeButton
-);
+    <footer>
 
+        <div>
+            Xotic Esports
+        </div>
 
-updateEscapeButton();
+        <div
+            id="staff-server"
+        >
+            StaffHub
+        </div>
 
-
-/*
-    Initial staff load.
-*/
-
-loadStaff();
-
-
-/*
-    Refresh every 60 seconds.
-*/
-
-setInterval(
-    loadStaff,
-    60000
-);
-
-</script>
+    </footer>
 
 </body>
-
 </html>
