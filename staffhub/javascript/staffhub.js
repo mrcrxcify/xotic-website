@@ -4859,7 +4859,11 @@ async function renderCurrentStaff() {
             await api(
                 "/api/server/1490116751927546089/staff"
             );
+        const updated = qs("staff-last-updated");
 
+        if (updated) {
+            updated.textContent = "LIVE STAFF ROSTER";
+        }    
 
         const members =
             Array.isArray(
