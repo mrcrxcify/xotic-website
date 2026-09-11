@@ -2383,3 +2383,333 @@ textarea {
     }
 
 }
+/* =========================================================
+   STAFFHUB UI FIXES
+   ========================================================= */
+
+/* -------------------------
+   HOME PAGE CARDS
+   ------------------------- */
+
+.hub-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 26px;
+}
+
+.hub-card {
+    position: relative;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: rgba(7, 11, 20, 0.8);
+
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.hub-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+
+    background: var(--gradient);
+    opacity: 0.7;
+}
+
+.hub-card:hover {
+    transform: translateY(-3px);
+
+    border-color: rgba(96, 165, 250, 0.28);
+
+    background: rgba(7, 11, 20, 0.92);
+
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.26);
+}
+
+.hub-card-label {
+    color: var(--blue-light);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.hub-card h2 {
+    margin: 9px 0 7px;
+
+    color: var(--white);
+
+    font-size: 19px;
+    line-height: 1.25;
+}
+
+.hub-card p {
+    margin: 0;
+
+    color: var(--gray);
+
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.hub-card-arrow {
+    margin-top: auto;
+    padding-top: 18px;
+
+    color: var(--white);
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+
+/* -------------------------
+   CURRENT STAFF CARDS
+   ------------------------- */
+
+/*
+   currentStaffCard() generates:
+   
+   .player-card
+   .player-avatar
+   .player-info
+   .player-name
+   .staff-role-list
+   .player-position
+
+   The old CSS was styling .staff-member instead,
+   which is why these cards looked broken.
+*/
+
+.current-staff-list .player-card {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    min-width: 0;
+    min-height: 82px;
+
+    padding: 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 11px;
+
+    background: rgba(3, 5, 10, 0.45);
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.current-staff-list .player-card:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(96, 165, 250, 0.28);
+
+    background: rgba(59, 130, 246, 0.045);
+}
+
+.current-staff-list .player-avatar {
+    width: 52px;
+    height: 52px;
+
+    flex: 0 0 52px;
+
+    display: block;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border: 1px solid var(--border-strong);
+
+    background: var(--dark-3);
+}
+
+.current-staff-list .player-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.current-staff-list .player-name {
+    overflow: hidden;
+
+    color: var(--white);
+
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.3;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.current-staff-list .staff-role-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+
+    margin-top: 7px;
+}
+
+.current-staff-list .staff-role-list .player-position {
+    width: fit-content;
+    max-width: 100%;
+
+    overflow: hidden;
+
+    padding: 3px 7px;
+
+    border: 1px solid
+        color-mix(
+            in srgb,
+            var(--role-color, var(--blue)) 30%,
+            transparent
+        );
+
+    border-radius: 5px;
+
+    background:
+        color-mix(
+            in srgb,
+            var(--role-color, var(--blue)) 10%,
+            transparent
+        );
+
+    color: var(--role-color, var(--blue-light));
+
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    line-height: 1.25;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* -------------------------
+   LOADING STATE
+   ------------------------- */
+
+.staff-loading {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    margin: 16px 0;
+    padding: 18px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.staff-loading-spinner {
+    width: 22px;
+    height: 22px;
+
+    flex: 0 0 22px;
+
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-top-color: var(--blue-light);
+
+    border-radius: 50%;
+
+    animation: staffhub-spin 0.8s linear infinite;
+}
+
+.staff-loading strong {
+    display: block;
+
+    color: var(--white);
+
+    font-size: 13px;
+}
+
+.staff-loading span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+@keyframes staffhub-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* -------------------------
+   ERROR STATE
+   ------------------------- */
+
+.staff-error {
+    margin: 16px 0;
+    padding: 16px;
+
+    border: 1px solid rgba(239, 68, 68, 0.22);
+    border-radius: 11px;
+
+    background: rgba(239, 68, 68, 0.06);
+
+    color: #fca5a5;
+}
+
+
+/* -------------------------
+   RESPONSIVE
+   ------------------------- */
+
+@media (max-width: 900px) {
+    .hub-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .hub-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hub-card {
+        min-height: 165px;
+        padding: 20px;
+    }
+
+    .current-staff-list .player-card {
+        padding: 12px;
+    }
+
+    .current-staff-list .player-avatar {
+        width: 46px;
+        height: 46px;
+
+        flex-basis: 46px;
+    }
+}
