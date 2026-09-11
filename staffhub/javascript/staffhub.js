@@ -4729,7 +4729,7 @@ async function loadCurrentStaff() {
 
         const data =
             await api(
-                `/api/staffhub/staff`
+                `/api/server/1490116751927546089/staff`
             );
 
         const members =
