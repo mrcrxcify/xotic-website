@@ -233,67 +233,42 @@ AUTH
 ==================================================
 */
 
-async function requireStaff() {
-    try {
-        staffMe =
-            await api(
-                "/api/staffhub/me"
-            );
+if (qs("staff-user")) {
+    const avatar =
+        staffMe?.user?.avatar ||
+        "assets/whitelogo.png";
 
-        if (qs("staff-user")) {
-            qs("staff-user").innerHTML = `
-                <img
-                    src="${escapeHtml(
-                        staffMe.user.avatar
-                    )}"
-                    alt=""
-                >
-                <span>
-                    ${escapeHtml(
-                        staffMe.user.displayName
-                    )}
-                </span>
-            `;
-        }
+    const displayName =
+        staffMe?.user?.displayName ||
+        staffMe?.user?.username ||
+        "Unknown User";
 
-        if (qs("staff-server")) {
-            qs("staff-server").textContent =
-                staffMe.serverName;
-        }
+    const username =
+        staffMe?.user?.username ||
+        "";
 
-        return true;
-    } catch (error) {
-        if (error.status === 401) {
-            window.location.href =
-                `${API_URL}/auth/discord?server=${encodeURIComponent(
-                    SERVER_SLUG
-                )}`;
+    qs("staff-user").innerHTML = `
+        <span class="staff-user-profile">
+            <img
+                class="staff-user-avatar"
+                src="${escapeHtml(avatar)}"
+                alt=""
+                onerror="this.onerror=null;this.src='assets/whitelogo.png';"
+            >
 
-            return false;
-        }
+            <span class="staff-user-details">
+                <strong class="staff-user-name">
+                    ${escapeHtml(displayName)}
+                </strong>
 
-        document.body.innerHTML = `
-            <main class="access-error">
-                <div class="container">
-                    <div class="section-label">
-                        STAFFHUB ERROR
-                    </div>
-
-                    <h1>
-                        UNABLE TO VERIFY ACCESS
-                    </h1>
-
-                    <p>
-                        ${escapeHtml(
-                            error.message
-                        )}
-                    </p>
-                </div>
-            </main>
-        `;
-
-        return false;
-    }
+                ${
+                    username
+                        ? `<span class="staff-user-username">@${escapeHtml(username)}</span>`
+                        : `<span class="staff-user-username">Staff Member</span>`
+                }
+            </span>
+        </span>
+    `;
 }
 
 async function loadContent() {
@@ -4386,776 +4361,822 @@ function renderActivityResults() {
             })
             .join("");
 }
-// ============================================================
-// CURRENT STAFF
-// ============================================================
+/*
+==================================================
+CURRENT STAFF
+==================================================
+*/
 
-const CURRENT_STAFF_HIERARCHY = [
-  {
-    title: "Founder",
-    roles: ["Founder"],
-    icon: "F"
-  },
-
-  {
-    title: "President",
-    roles: ["President"],
-    icon: "P"
-  },
-
-  {
-    title: "Vice President",
-    roles: ["Vice President", "Vice-President"],
-    icon: "VP"
-  },
-
-  {
-    title: "Board of Directors",
-    roles: ["Board of Directors"],
-    icon: "BOD"
-  },
-
-  {
-    title: "Board Member",
-    roles: ["Board Member"],
-    icon: "BM"
-  },
-
-  // ALL CHIEF ROLES ARE ONE CATEGORY / ONE LEVEL
-  {
-    title: "Chiefs",
-    roles: [
-      "Chief of Operations",
-      "Chief of Ops",
-      "Chief Operating Officer",
-
-      "Chief of Technology",
-      "Chief of Tech",
-      "Chief Technology Officer",
-
-      "Chief of Finance",
-      "Chief Finance",
-      "Chief Financial Officer",
-
-      "Chief of Marketing",
-      "Chief Marketing",
-      "Chief Marketing Officer",
-
-      "Chief of Community",
-      "Chief Community",
-      "Chief Community Officer",
-
-      "Chief of Staff",
-
-      "Chief of Content",
-      "Chief Content Officer",
-
-      "Chief Executive Officer"
-    ],
-    icon: "C"
-  },
-
-  {
-    title: "Operations",
-    roles: ["Operations"],
-    icon: "O"
-  },
-
-  {
-    title: "Executive",
-    roles: ["Executive"],
-    icon: "E"
-  },
-
-  {
-    title: "Director",
-    roles: ["Director"],
-    icon: "D"
-  },
-
-  {
-    title: "Managers",
-    roles: [
-      "TikTok Manager",
-      "YouTube Manager",
-      "X Manager",
-      "Manager"
-    ],
-    icon: "M"
-  },
-
-  {
-    title: "Upper Management",
-    roles: ["Upper Management"],
-    icon: "UM"
-  },
-
-  {
-    title: "Management",
-    roles: ["Management"],
-    icon: "M"
-  },
-
-  {
-    title: "Trial Management",
-    roles: ["Trial Management"],
-    icon: "TM"
-  },
-
-  {
-    title: "Senior Admin",
-    roles: ["Senior Admin"],
-    icon: "SA"
-  },
-
-  {
-    title: "Admin",
-    roles: ["Admin"],
-    icon: "A"
-  },
-
-  {
-    title: "Trial Admin",
-    roles: ["Trial Admin"],
-    icon: "TA"
-  },
-
-  {
-    title: "Senior Staff",
-    roles: ["Senior Staff"],
-    icon: "SS"
-  },
-
-  {
-    title: "Staff",
-    roles: ["Staff"],
-    icon: "S"
-  },
-
-  {
-    title: "Junior Staff",
-    roles: ["Junior Staff"],
-    icon: "JS"
-  },
-
-  {
-    title: "Trial Staff",
-    roles: ["Trial Staff"],
-    icon: "TS"
-  }
+const STAFF_HIERARCHY = [
+    "Founder",
+    "President",
+    "Vice President",
+    "Board of Directors",
+    "Board Member",
+    "Chiefs",
+    "Operations",
+    "Executive",
+    "Director",
+    "Managers",
+    "Upper Management",
+    "Management",
+    "Trial Management",
+    "Senior Admin",
+    "Admin",
+    "Trial Admin",
+    "Senior Staff",
+    "Staff",
+    "Junior Staff",
+    "Trial Staff"
 ];
 
+const CHIEF_ROLE_ALIASES = [
+    "Chief Executive Officer",
+    "Chief Operating Officer",
+    "Chief of Operations",
+    "Chief of Ops",
+    "Chief Technology Officer",
+    "Chief of Technology",
+    "Chief of Tech",
+    "Chief Financial Officer",
+    "Chief of Finance",
+    "Chief Finance",
+    "Chief Marketing Officer",
+    "Chief of Marketing",
+    "Chief Marketing",
+    "Chief Community Officer",
+    "Chief of Community",
+    "Chief Community",
+    "Chief of Staff",
+    "Chief Content Officer",
+    "Chief of Content"
+];
 
-// ------------------------------------------------------------
-// Normalize API response
-// ------------------------------------------------------------
-
-function normalizeCurrentStaffResponse(data) {
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (Array.isArray(data?.staff)) {
-    return data.staff;
-  }
-
-  if (Array.isArray(data?.members)) {
-    return data.members;
-  }
-
-  if (Array.isArray(data?.users)) {
-    return data.users;
-  }
-
-  if (Array.isArray(data?.data)) {
-    return data.data;
-  }
-
-  return [];
+function normalizeRoleName(roleName) {
+    return String(roleName || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
 }
 
-
-// ------------------------------------------------------------
-// Get member roles
-// ------------------------------------------------------------
-
-function getMemberRoles(member) {
-  const roles =
-    member?.roles ??
-    member?.staffRoles ??
-    member?.discordRoles ??
-    [];
-
-  if (!Array.isArray(roles)) {
-    return [];
-  }
-
-  return roles
-    .map(role => {
-      if (typeof role === "string") {
-        return {
-          name: role,
-          id: null
-        };
-      }
-
-      return {
-        name: role?.name ?? "",
-        id: role?.id ?? null
-      };
-    })
-    .filter(role => role.name);
-}
-
-
-// ------------------------------------------------------------
-// Find the highest hierarchy group for a member
-// ------------------------------------------------------------
-
-function getMemberHierarchy(member) {
-  const memberRoles = getMemberRoles(member);
-
-  const normalizedRoles = new Set(
-    memberRoles.map(role =>
-      String(role.name).trim().toLowerCase()
+const STAFF_ROLE_LOOKUP = new Map(
+    STAFF_HIERARCHY.map(
+        (role, index) => [
+            normalizeRoleName(role),
+            {
+                name: role,
+                index
+            }
+        ]
     )
-  );
+);
 
-  /*
-   * IMPORTANT:
-   * We loop through the hierarchy first and the roles inside
-   * each group second.
-   *
-   * This means the Discord API cannot randomly decide someone's
-   * position based on the order it returns their roles.
-   */
-
-  for (const group of CURRENT_STAFF_HIERARCHY) {
-    const matchedRole = group.roles.find(role =>
-      normalizedRoles.has(
-        String(role).trim().toLowerCase()
-      )
+CHIEF_ROLE_ALIASES.forEach(role => {
+    STAFF_ROLE_LOOKUP.set(
+        normalizeRoleName(role),
+        {
+            name: role,
+            index: STAFF_HIERARCHY.indexOf("Chiefs")
+        }
     );
+});
 
-    if (matchedRole) {
-      return {
-        ...group,
-        matchedRole
-      };
-    }
-  }
+function inferStaffHierarchy(roleName) {
+    const role = normalizeRoleName(roleName);
 
-  return null;
-}
-
-
-// ------------------------------------------------------------
-// Get display name
-// ------------------------------------------------------------
-
-function getStaffMemberName(member) {
-  return (
-    member?.displayName ||
-    member?.globalName ||
-    member?.user?.globalName ||
-    member?.username ||
-    member?.user?.username ||
-    member?.name ||
-    "Unknown Member"
-  );
-}
-
-
-// ------------------------------------------------------------
-// Get username
-// ------------------------------------------------------------
-
-function getStaffMemberUsername(member) {
-  return (
-    member?.username ||
-    member?.user?.username ||
-    ""
-  );
-}
-
-
-// ------------------------------------------------------------
-// Get avatar
-// ------------------------------------------------------------
-
-function getStaffMemberAvatar(member) {
-  return (
-    member?.avatarURL ||
-    member?.avatarUrl ||
-    member?.avatar ||
-    member?.user?.avatarURL ||
-    member?.user?.avatarUrl ||
-    member?.user?.avatar ||
-    ""
-  );
-}
-
-
-// ------------------------------------------------------------
-// Sort members
-// ------------------------------------------------------------
-
-function sortStaffMembers(members) {
-  return [...members].sort((a, b) => {
-    const aName =
-      getStaffMemberName(a).toLowerCase();
-
-    const bName =
-      getStaffMemberName(b).toLowerCase();
-
-    return aName.localeCompare(bName);
-  });
-}
-
-
-// ------------------------------------------------------------
-// Load current staff
-// ------------------------------------------------------------
-
-async function loadCurrentStaff() {
-  const loading = qs("staff-loading");
-  const error = qs("staff-error");
-  const container = qs("staff");
-  const count = qs("member-count");
-  const roleCount = qs("role-count");
-
-  if (loading) {
-    loading.hidden = false;
-    loading.style.display = "";
-  }
-
-  if (error) {
-    error.hidden = true;
-    error.style.display = "none";
-    error.innerHTML = "";
-  }
-
-  if (container) {
-    container.innerHTML = "";
-  }
-
-  try {
-    const data = await api(
-      "/api/server/1490116751927546089/staff"
-    );
-
-    console.log(
-      "[StaffHub] Current staff response:",
-      data
-    );
-
-    const members =
-      normalizeCurrentStaffResponse(data);
-
-    console.log(
-      "[StaffHub] Normalized staff:",
-      members
-    );
-
-    if (count) {
-      count.textContent = members.length;
+    if (!role) {
+        return null;
     }
 
-    if (!members.length) {
-      if (roleCount) {
-        roleCount.textContent = "0";
-      }
-
-      if (container) {
-        container.innerHTML = `
-          <div class="staff-empty">
-            <div class="staff-empty-icon">👥</div>
-
-            <h3>No staff members found</h3>
-
-            <p>
-              The staff API returned successfully,
-              but no staff members were found.
-            </p>
-          </div>
-        `;
-      }
-
-      return;
-    }
-
-    renderCurrentStaffMembers(members);
-
-  } catch (err) {
-    console.error(
-      "Failed to load current staff:",
-      err
-    );
-
-    if (error) {
-      error.hidden = false;
-      error.style.display = "";
-
-      error.innerHTML = `
-        <strong>Unable to load staff.</strong>
-        <span>
-          ${escapeHtml(
-            err.message || "Unknown error"
-          )}
-        </span>
-      `;
-    }
-
-  } finally {
     /*
-     * Always remove the loading screen.
-     */
-
-    if (loading) {
-      loading.hidden = true;
-      loading.style.display = "none";
+    Founder
+    */
+    if (
+        role === "founder" ||
+        role.includes("owner")
+    ) {
+        return {
+            name: "Founder",
+            index: STAFF_HIERARCHY.indexOf("Founder")
+        };
     }
-  }
+
+    /*
+    President
+    */
+    if (
+        role === "president" ||
+        role.includes("chief executive")
+    ) {
+        return {
+            name: "President",
+            index: STAFF_HIERARCHY.indexOf("President")
+        };
+    }
+
+    /*
+    Vice President
+    */
+    if (
+        role === "vice president" ||
+        role === "vp" ||
+        role.includes("vice president")
+    ) {
+        return {
+            name: "Vice President",
+            index: STAFF_HIERARCHY.indexOf("Vice President")
+        };
+    }
+
+    /*
+    Board
+    */
+    if (
+        role === "board of directors" ||
+        role.includes("board of directors")
+    ) {
+        return {
+            name: "Board of Directors",
+            index: STAFF_HIERARCHY.indexOf("Board of Directors")
+        };
+    }
+
+    if (
+        role === "board member" ||
+        role.includes("board member")
+    ) {
+        return {
+            name: "Board Member",
+            index: STAFF_HIERARCHY.indexOf("Board Member")
+        };
+    }
+
+    /*
+    Chiefs
+    */
+    if (
+        role.includes("chief") ||
+        role.includes("head of")
+    ) {
+        return {
+            name: "Chiefs",
+            index: STAFF_HIERARCHY.indexOf("Chiefs")
+        };
+    }
+
+    /*
+    Operations
+    */
+    if (
+        role === "operations" ||
+        role.includes("operations") ||
+        role.includes("operating")
+    ) {
+        return {
+            name: "Operations",
+            index: STAFF_HIERARCHY.indexOf("Operations")
+        };
+    }
+
+    /*
+    Executive
+    */
+    if (
+        role === "executive" ||
+        role.includes("executive")
+    ) {
+        return {
+            name: "Executive",
+            index: STAFF_HIERARCHY.indexOf("Executive")
+        };
+    }
+
+    /*
+    Director
+    */
+    if (
+        role === "director" ||
+        role.includes("director")
+    ) {
+        return {
+            name: "Director",
+            index: STAFF_HIERARCHY.indexOf("Director")
+        };
+    }
+
+    /*
+    Managers
+    */
+    if (
+        role.includes("manager") &&
+        !role.includes("upper management") &&
+        !role.includes("trial management")
+    ) {
+        return {
+            name: "Managers",
+            index: STAFF_HIERARCHY.indexOf("Managers")
+        };
+    }
+
+    /*
+    Upper Management
+    */
+    if (
+        role === "upper management" ||
+        role.includes("upper management")
+    ) {
+        return {
+            name: "Upper Management",
+            index: STAFF_HIERARCHY.indexOf("Upper Management")
+        };
+    }
+
+    /*
+    Trial Management
+    */
+    if (
+        role === "trial management" ||
+        role.includes("trial management")
+    ) {
+        return {
+            name: "Trial Management",
+            index: STAFF_HIERARCHY.indexOf("Trial Management")
+        };
+    }
+
+    /*
+    Management
+    */
+    if (
+        role === "management" ||
+        role.includes("management")
+    ) {
+        return {
+            name: "Management",
+            index: STAFF_HIERARCHY.indexOf("Management")
+        };
+    }
+
+    /*
+    Senior Admin
+    */
+    if (
+        role === "senior admin" ||
+        role.includes("senior admin")
+    ) {
+        return {
+            name: "Senior Admin",
+            index: STAFF_HIERARCHY.indexOf("Senior Admin")
+        };
+    }
+
+    /*
+    Trial Admin
+    */
+    if (
+        role === "trial admin" ||
+        role.includes("trial admin")
+    ) {
+        return {
+            name: "Trial Admin",
+            index: STAFF_HIERARCHY.indexOf("Trial Admin")
+        };
+    }
+
+    /*
+    Admin
+    */
+    if (
+        role === "admin" ||
+        role.includes("admin")
+    ) {
+        return {
+            name: "Admin",
+            index: STAFF_HIERARCHY.indexOf("Admin")
+        };
+    }
+
+    /*
+    Senior Staff
+    */
+    if (
+        role === "senior staff" ||
+        role.includes("senior staff")
+    ) {
+        return {
+            name: "Senior Staff",
+            index: STAFF_HIERARCHY.indexOf("Senior Staff")
+        };
+    }
+
+    /*
+    Junior Staff
+    */
+    if (
+        role === "junior staff" ||
+        role.includes("junior staff")
+    ) {
+        return {
+            name: "Junior Staff",
+            index: STAFF_HIERARCHY.indexOf("Junior Staff")
+        };
+    }
+
+    /*
+    Trial Staff
+    */
+    if (
+        role === "trial staff" ||
+        role.includes("trial staff")
+    ) {
+        return {
+            name: "Trial Staff",
+            index: STAFF_HIERARCHY.indexOf("Trial Staff")
+        };
+    }
+
+    /*
+    Normal Staff
+    */
+    if (
+        role === "staff" ||
+        role.includes("staff")
+    ) {
+        return {
+            name: "Staff",
+            index: STAFF_HIERARCHY.indexOf("Staff")
+        };
+    }
+
+    return null;
 }
 
+function getRecognizedStaffRoles(member) {
+    const roles = Array.isArray(member?.roles)
+        ? member.roles
+        : [];
 
-// ------------------------------------------------------------
-// Render current staff
-// ------------------------------------------------------------
+    const recognized = [];
 
-function renderCurrentStaffMembers(members) {
-  const container = qs("staff");
+    for (const role of roles) {
+        const roleName =
+            typeof role === "string"
+                ? role
+                : role?.name;
 
-  if (!container) {
-    console.error(
-      "Current staff container #staff was not found."
-    );
+        if (!roleName) {
+            continue;
+        }
 
-    return;
-  }
+        const normalized =
+            normalizeRoleName(roleName);
 
-  container.innerHTML = "";
+        /*
+        Exact role lookup first.
+        */
+        let hierarchy =
+            STAFF_ROLE_LOOKUP.get(normalized);
 
-  const groups =
-    CURRENT_STAFF_HIERARCHY.map(group => ({
-      ...group,
-      members: []
-    }));
+        /*
+        Then infer from the role name.
+        */
+        if (!hierarchy) {
+            hierarchy =
+                inferStaffHierarchy(roleName);
+        }
 
-  const uncategorized = [];
+        if (!hierarchy) {
+            continue;
+        }
 
-  /*
-   * Put every staff member into their highest
-   * applicable hierarchy category.
-   */
-
-  for (const member of members) {
-    const hierarchy =
-      getMemberHierarchy(member);
-
-    if (!hierarchy) {
-      uncategorized.push(member);
-      continue;
+        recognized.push({
+            name: roleName,
+            category: hierarchy.name,
+            index: hierarchy.index
+        });
     }
 
-    const group =
-      groups.find(
-        item =>
-          item.title === hierarchy.title
-      );
+    /*
+    Remove duplicate role names.
+    */
+    const unique = new Map();
 
-    if (!group) {
-      uncategorized.push(member);
-      continue;
-    }
+    recognized.forEach(role => {
+        const key =
+            normalizeRoleName(role.name);
 
-    group.members.push({
-      ...member,
-      _matchedRole:
-        hierarchy.matchedRole
+        if (!unique.has(key)) {
+            unique.set(key, role);
+        }
     });
-  }
 
-  const visibleGroups =
-    groups.filter(
-      group =>
-        group.members.length > 0
-    );
-
-  /*
-   * Sort every category alphabetically.
-   */
-
-  for (const group of visibleGroups) {
-    group.members =
-      sortStaffMembers(
-        group.members
-      );
-  }
-
-  /*
-   * Update position count.
-   *
-   * This counts actual Discord positions,
-   * not just the number of visual categories.
-   */
-
-  if (qs("role-count")) {
-    const uniqueRoles =
-      new Set(
-        members
-          .map(member =>
-            getMemberHierarchy(member)
-          )
-          .filter(Boolean)
-          .map(hierarchy =>
-            hierarchy.matchedRole
-          )
-      );
-
-    qs("role-count").textContent =
-      uniqueRoles.size;
-  }
-
-  /*
-   * Render each hierarchy category.
-   */
-
-  for (const group of visibleGroups) {
-    const section =
-      document.createElement(
-        "section"
-      );
-
-    section.className =
-      "staff-role-group";
-
-    section.innerHTML = `
-      <div class="staff-role-header">
-
-        <div class="staff-role-header-left">
-
-          <div class="staff-role-icon">
-            ${escapeHtml(group.icon)}
-          </div>
-
-          <div>
-            <h2 class="staff-role-title">
-              ${escapeHtml(group.title)}
-            </h2>
-          </div>
-
-        </div>
-
-        <div class="staff-role-count">
-          ${group.members.length}
-          ${
-            group.members.length === 1
-              ? "member"
-              : "members"
-          }
-        </div>
-
-      </div>
-
-      <div class="staff-member-grid"></div>
-    `;
-
-    const memberGrid =
-      section.querySelector(
-        ".staff-member-grid"
-      );
-
-    for (
-      const member
-      of group.members
-    ) {
-      memberGrid.appendChild(
-        createStaffMemberCard(member)
-      );
-    }
-
-    container.appendChild(
-      section
-    );
-  }
-
-  /*
-   * Anything without a configured hierarchy
-   * goes here instead of disappearing.
-   */
-
-  if (uncategorized.length) {
-    const sorted =
-      sortStaffMembers(
-        uncategorized
-      );
-
-    const section =
-      document.createElement(
-        "section"
-      );
-
-    section.className =
-      "staff-role-group staff-role-group-uncategorized";
-
-    section.innerHTML = `
-      <div class="staff-role-header">
-
-        <div class="staff-role-header-left">
-
-          <div class="staff-role-icon">
-            ?
-          </div>
-
-          <div>
-            <h2 class="staff-role-title">
-              Uncategorized
-            </h2>
-          </div>
-
-        </div>
-
-        <div class="staff-role-count">
-          ${sorted.length}
-          ${
-            sorted.length === 1
-              ? "member"
-              : "members"
-          }
-        </div>
-
-      </div>
-
-      <div class="staff-member-grid"></div>
-    `;
-
-    const memberGrid =
-      section.querySelector(
-        ".staff-member-grid"
-      );
-
-    for (
-      const member
-      of sorted
-    ) {
-      memberGrid.appendChild(
-        createStaffMemberCard(member)
-      );
-    }
-
-    container.appendChild(
-      section
-    );
-  }
+    return Array.from(unique.values());
 }
 
+function getHighestStaffRole(member) {
+    const roles =
+        getRecognizedStaffRoles(member);
 
-// ------------------------------------------------------------
-// Create staff member card
-// ------------------------------------------------------------
+    if (!roles.length) {
+        return {
+            name: "Staff",
+            index: STAFF_HIERARCHY.indexOf("Staff")
+        };
+    }
 
-function createStaffMemberCard(member) {
-  const card =
-    document.createElement(
-      "article"
+    return roles.reduce(
+        (highest, role) =>
+            role.index < highest.index
+                ? role
+                : highest,
+        roles[0]
     );
-
-  card.className =
-    "staff-member";
-
-  const name =
-    getStaffMemberName(
-      member
-    );
-
-  const username =
-    getStaffMemberUsername(
-      member
-    );
-
-  const avatar =
-    getStaffMemberAvatar(
-      member
-    );
-
-  const role =
-    member._matchedRole ||
-    member.role ||
-    member.staffRole ||
-    "";
-
-  let avatarHTML;
-
-  if (avatar) {
-    avatarHTML = `
-      <img
-        class="staff-member-avatar"
-        src="${escapeHtml(avatar)}"
-        alt=""
-        loading="lazy"
-      >
-    `;
-  } else {
-    avatarHTML = `
-      <div class="staff-member-avatar staff-member-avatar-fallback">
-        ${escapeHtml(
-          name
-            .charAt(0)
-            .toUpperCase()
-        )}
-      </div>
-    `;
-  }
-
-  card.innerHTML = `
-    ${avatarHTML}
-
-    <div class="staff-member-info">
-
-      <div class="staff-member-name">
-        ${escapeHtml(name)}
-      </div>
-
-      ${
-        username
-          ? `
-            <div class="staff-member-username">
-              @${escapeHtml(username)}
-            </div>
-          `
-          : ""
-      }
-
-      ${
-        role
-          ? `
-            <div class="staff-member-role">
-              ${escapeHtml(role)}
-            </div>
-          `
-          : ""
-      }
-
-    </div>
-  `;
-
-  return card;
 }
 
+function sortStaffRoles(roles) {
+    return [...roles].sort(
+        (a, b) => {
+            if (a.index !== b.index) {
+                return a.index - b.index;
+            }
 
-// ------------------------------------------------------------
-// Main Current Staff renderer
-// ------------------------------------------------------------
+            return a.name.localeCompare(
+                b.name
+            );
+        }
+    );
+}
+
+function createCurrentStaffCard(member) {
+    const recognizedRoles =
+        sortStaffRoles(
+            getRecognizedStaffRoles(member)
+        );
+
+    const highestRole =
+        getHighestStaffRole(member);
+
+    const displayName =
+        member.displayName ||
+        member.globalName ||
+        member.username ||
+        "Unknown";
+
+    const username =
+        member.username
+            ? `@${member.username}`
+            : "";
+
+    const avatar =
+        member.avatar ||
+        member.user?.avatar ||
+        "";
+
+    return `
+        <article class="staff-member">
+
+            <div class="staff-member-avatar">
+                ${
+                    avatar
+                        ? `
+                            <img
+                                src="${escapeHtml(avatar)}"
+                                alt="${escapeHtml(displayName)}"
+                                loading="lazy"
+                                decoding="async"
+                            >
+                        `
+                        : `
+                            <div class="staff-member-avatar-fallback">
+                                ${escapeHtml(
+                                    displayName
+                                        .charAt(0)
+                                        .toUpperCase()
+                                )}
+                            </div>
+                        `
+                }
+            </div>
+
+            <div class="staff-member-info">
+
+                <div class="staff-member-name">
+                    ${escapeHtml(displayName)}
+                </div>
+
+                ${
+                    username
+                        ? `
+                            <div class="staff-member-username">
+                                ${escapeHtml(username)}
+                            </div>
+                        `
+                        : ""
+                }
+
+                <div class="staff-member-roles">
+                    ${
+                        recognizedRoles
+                            .map(
+                                role => `
+                                    <span class="staff-member-role">
+                                        ${escapeHtml(role.name)}
+                                    </span>
+                                `
+                            )
+                            .join("")
+                    }
+                </div>
+
+            </div>
+
+        </article>
+    `;
+}
 
 async function renderCurrentStaff() {
-  await loadCurrentStaff();
+    const loading =
+        qs("staff-loading");
 
-  const updated =
-    qs("staff-last-updated");
+    const error =
+        qs("staff-error");
 
-  if (updated) {
-    updated.textContent =
-      `Updated ${formatDate(new Date())}`;
-  }
+    const container =
+        qs("staff");
+
+    const memberCount =
+        qs("member-count");
+
+    const roleCount =
+        qs("role-count");
+
+    const lastUpdated =
+        qs("staff-last-updated");
+
+    if (!container) {
+        return;
+    }
+
+    if (loading) {
+        loading.hidden = false;
+    }
+
+    if (error) {
+        error.hidden = true;
+        error.innerHTML = "";
+    }
+
+    try {
+        const result =
+            await api(
+                "/api/server/1490116751927546089/staff"
+            );
+
+        /*
+        Support the different response formats
+        the API may return.
+        */
+        const members =
+            Array.isArray(result)
+                ? result
+                : Array.isArray(result?.staff)
+                    ? result.staff
+                    : Array.isArray(result?.members)
+                        ? result.members
+                        : Array.isArray(result?.users)
+                            ? result.users
+                            : Array.isArray(result?.data)
+                                ? result.data
+                                : [];
+
+        /*
+        Only include people who actually have
+        at least one recognized staff role.
+        */
+        const staffMembers =
+            members
+                .map(member => ({
+                    member,
+                    roles:
+                        getRecognizedStaffRoles(
+                            member
+                        )
+                }))
+                .filter(
+                    item =>
+                        item.roles.length > 0
+                );
+
+        /*
+        Group members by their HIGHEST staff role.
+        A person appears exactly once.
+        */
+        const groups = new Map();
+
+        staffMembers.forEach(
+            ({ member }) => {
+                const highest =
+                    getHighestStaffRole(
+                        member
+                    );
+
+                if (!groups.has(highest.index)) {
+                    groups.set(
+                        highest.index,
+                        {
+                            name:
+                                STAFF_HIERARCHY[
+                                    highest.index
+                                ],
+                            index:
+                                highest.index,
+                            members: []
+                        }
+                    );
+                }
+
+                groups
+                    .get(highest.index)
+                    .members
+                    .push(member);
+            }
+        );
+
+        /*
+        Sort categories from highest
+        to lowest hierarchy.
+        */
+        const sortedGroups =
+            Array.from(
+                groups.values()
+            ).sort(
+                (a, b) =>
+                    a.index - b.index
+            );
+
+        /*
+        Sort people alphabetically
+        within each category.
+        */
+        sortedGroups.forEach(
+            group => {
+                group.members.sort(
+                    (a, b) => {
+                        const nameA =
+                            a.displayName ||
+                            a.globalName ||
+                            a.username ||
+                            "";
+
+                        const nameB =
+                            b.displayName ||
+                            b.globalName ||
+                            b.username ||
+                            "";
+
+                        return nameA.localeCompare(
+                            nameB
+                        );
+                    }
+                );
+            }
+        );
+
+        /*
+        Render.
+        */
+        container.innerHTML =
+            sortedGroups
+                .map(
+                    group => `
+                        <section class="staff-role-group">
+
+                            <div class="staff-role-header">
+
+                                <div class="staff-role-header-left">
+
+                                    <div class="staff-role-icon">
+                                        ◆
+                                    </div>
+
+                                    <div>
+                                        <h2 class="staff-role-title">
+                                            ${escapeHtml(
+                                                group.name
+                                            )}
+                                        </h2>
+
+                                        <span class="staff-role-count">
+                                            ${
+                                                group.members.length
+                                            }
+                                            ${
+                                                group.members.length === 1
+                                                    ? "member"
+                                                    : "members"
+                                            }
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="staff-member-grid">
+                                ${
+                                    group.members
+                                        .map(
+                                            createCurrentStaffCard
+                                        )
+                                        .join("")
+                                }
+                            </div>
+
+                        </section>
+                    `
+                )
+                .join("");
+
+        if (!sortedGroups.length) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    No current staff members were found.
+                </div>
+            `;
+        }
+
+        /*
+        Stats.
+        */
+        if (memberCount) {
+            memberCount.textContent =
+                staffMembers.length;
+        }
+
+        if (roleCount) {
+            const uniqueRoles =
+                new Set();
+
+            staffMembers.forEach(
+                ({ roles }) => {
+                    roles.forEach(
+                        role =>
+                            uniqueRoles.add(
+                                normalizeRoleName(
+                                    role.name
+                                )
+                            )
+                    );
+                }
+            );
+
+            roleCount.textContent =
+                uniqueRoles.size;
+        }
+
+        if (lastUpdated) {
+            lastUpdated.textContent =
+                `Updated ${new Date().toLocaleString(
+                    [],
+                    {
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                    }
+                )}`;
+        }
+
+    } catch (err) {
+        console.error(
+            "Failed to load current staff:",
+            err
+        );
+
+        container.innerHTML = "";
+
+        if (error) {
+            error.hidden = false;
+            error.innerHTML = `
+                <strong>
+                    Unable to load staff
+                </strong>
+
+                <span>
+                    ${escapeHtml(
+                        err.message ||
+                        "An unknown error occurred."
+                    )}
+                </span>
+            `;
+        }
+
+    } finally {
+        /*
+        This is important:
+        loading MUST disappear even if
+        the API fails.
+        */
+        if (loading) {
+            loading.hidden = true;
+        }
+    }
 }
