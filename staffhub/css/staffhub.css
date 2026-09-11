@@ -2552,7 +2552,7 @@ textarea {
 .current-staff-list .player-name {
     overflow: hidden;
 
-    color: var(--white);
+    color: #fff;
 
     font-size: 14px;
     font-weight: 750;
@@ -2712,4 +2712,17 @@ textarea {
 
         flex-basis: 46px;
     }
+}
+/* FINAL STAFFHUB FIXES */
+
+#staff-last-updated {
+    display: none !important;
+}
+
+/* Staff names are ALWAYS white.
+   Role colors are only used by the role badges. */
+.current-staff-list .player-name,
+.current-staff-list .player-name *,
+.current-staff-list .player-name a {
+    color: #ffffff !important;
 }
