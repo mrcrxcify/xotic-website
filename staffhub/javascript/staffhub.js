@@ -270,8 +270,7 @@ async function requireStaff() {
             error.status === 401 ||
             error.status === 403
         ) {
-            window.location.href =
-                `${API_URL}/auth/discord`;
+            window.location.href = `${API_URL}/auth/discord?server=${encodeURIComponent(SERVER_SLUG)}`;
 
             return false;
         }
