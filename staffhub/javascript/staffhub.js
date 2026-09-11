@@ -3,7 +3,9 @@ const API_URL =
 
 const SERVER_SLUG =
     "xotic";
-
+function discordLoginUrl() {
+    return `${API_URL}/auth/discord?server=${encodeURIComponent(SERVER_SLUG)}`;
+}
 let staffMe = null;
 let staffContent = null;
 let commandCategories = [];
@@ -246,7 +248,7 @@ async function requireStaff() {
             !data.user
         ) {
             window.location.href =
-                `${API_URL}/auth/discord`;
+                discordLoginUrl();
 
             return false;
         }
