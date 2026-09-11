@@ -2726,3 +2726,139 @@ textarea {
 .current-staff-list .player-name a {
     color: #ffffff !important;
 }
+/* =========================================================
+   CURRENT STAFF — CLEAN CARD FIX
+   ========================================================= */
+
+.current-staff-list .player-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+    min-height: 82px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: rgba(3, 5, 10, 0.45);
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.current-staff-list .player-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(96, 165, 250, 0.28);
+    background: rgba(59, 130, 246, 0.045);
+}
+
+.current-staff-list .player-avatar {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    flex: 0 0 52px;
+    display: block;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: var(--dark-3);
+}
+
+.current-staff-list .player-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.current-staff-list .player-name {
+    display: block;
+    overflow: hidden;
+
+    /* ALWAYS WHITE — NEVER DISCORD ROLE COLOR */
+    color: #ffffff !important;
+
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.3;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.current-staff-list .player-name *,
+.current-staff-list .player-name a {
+    color: #ffffff !important;
+}
+
+.current-staff-list .staff-role-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 7px;
+}
+
+.current-staff-list .staff-role-list .player-position {
+    width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
+
+    padding: 3px 7px;
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 5px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    /* Neutral readable role text */
+    color: #dbeafe !important;
+
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    line-height: 1.25;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Kill any inherited Discord role coloring */
+.current-staff-list .player-card,
+.current-staff-list .player-card * {
+    --role-color: #60a5fa;
+}
+
+.current-staff-list .player-card .player-name {
+    color: #ffffff !important;
+}
+
+.current-staff-list .player-card .player-position {
+    color: #dbeafe !important;
+}
+
+
+/* =========================================================
+   REMOVE OLD STAFF LOADING STATUS
+   ========================================================= */
+
+#staff-last-updated {
+    display: none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 680px) {
+
+    .current-staff-list .player-card {
+        padding: 12px;
+    }
+
+    .current-staff-list .player-avatar {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        flex-basis: 46px;
+    }
+
+}
