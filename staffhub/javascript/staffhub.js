@@ -379,12 +379,28 @@ function renderStaffUser() {
 }
 
 async function loadContent() {
-    staffContent =
-        await api(
+    try {
+        staffContent = await api(
             "/api/staffhub/content"
         );
 
-    return staffContent;
+        return staffContent;
+
+    } catch (error) {
+        console.error(
+            "StaffHub content failed to load:",
+            error
+        );
+
+        // Do NOT block the entire StaffHub if content fails.
+        staffContent = {
+            pages: {},
+            commands: [],
+            categories: []
+        };
+
+        return staffContent;
+    }
 }
 
 /*
@@ -500,7 +516,7 @@ document.addEventListener(
             return;
         }
 
-        await loadContent();
+        loadContent();
 
         buildNav();
 
