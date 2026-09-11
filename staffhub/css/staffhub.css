@@ -1656,3 +1656,30 @@ textarea {
     font-size: 12px;
     line-height: 1.2;
 }
+/* CURRENT STAFF CATEGORIES */
+
+.staff-category {
+    margin-bottom: 90px;
+}
+
+.staff-category:last-child {
+    margin-bottom: 0;
+}
+
+.staff-category .section-header {
+    margin-bottom: 42px;
+}
+
+.staff-category .section-label {
+    margin-bottom: 12px;
+}
+
+.staff-category .section-title {
+    margin: 0;
+}
+
+.staff-role-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
