@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Current Staff | Xotic StaffHub</title>
+
+    <link rel="icon" href="../images/purplogo.PNG">
+
+    <link
+        rel="stylesheet"
+        href="css/staffhub.css"
+    >
+</head>
+
+<body data-page="currentStaff">
+
+    <!-- ======================================================
+         NAVBAR
+    ======================================================= -->
+
+    <header class="navbar">
+
+        <div class="container nav-container">
+
+            <a href="index.html" class="logo">
+
+            <img
+                src="../images/whitelogo.PNG"
+                alt="Xotic Esports™ Logo"
+            >
+
+            XOTIC
+
+            <span></span>
+
+        </a>
+
+
+            <button
+                class="mobile-menu-button"
+                type="button"
+                aria-label="Open navigation"
+                aria-expanded="false"
+                onclick="toggleMobileMenu()"
+            >
+                ☰
+            </button>
+
+
+            <nav
+                id="staff-nav"
+                class="staff-nav"
+            >
+
+                <a
+                    href="index.html"
+                    data-page-link="home"
+                >
+                    Home
+                </a>
+
+                <a
+                    href="commands.html"
+                    data-page-link="commands"
+                >
+                    Commands
+                </a>
+
+                <a
+                    href="tickets.html"
+                    data-page-link="tickets"
+                >
+                    Tickets
+                </a>
+
+                <a
+                    href="etiquette.html"
+                    data-page-link="etiquette"
+                >
+                    Etiquette
+                </a>
+
+                <a
+                    href="announcements.html"
+                    data-page-link="announcements"
+                >
+                    Announcements
+                </a>
+
+                <a
+                    href="promos-demos.html"
+                    data-page-link="promosDemos"
+                >
+                    Promos &amp; Demos
+                </a>
+
+                <a
+                    href="current-staff.html"
+                    data-page-link="currentStaff"
+                >
+                    Current Staff
+                </a>
+
+                <button
+                    type="button"
+                    class="nav-logout"
+                    onclick="logout()"
+                >
+                    Logout
+                </button>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- ======================================================
+         MAIN
+    ======================================================= -->
+
+    <main class="staff-page">
+
+        <!-- ==================================================
+             SIGNED-IN USER
+        =================================================== -->
+
+        <section class="staff-user-bar">
+
+            <div>
+
+                <span class="staff-user-label">
+                    Signed in as
+                </span>
+
+                <span id="staff-user">
+                    Loading...
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             HERO
+        =================================================== -->
+
+        <section class="current-staff-hero">
+
+            <div class="current-staff-hero-glow"></div>
+
+            <div class="current-staff-hero-content">
+
+                <span class="hero-kicker">
+                    XOTIC ESPORTS
+                </span>
+
+                <h1>
+                    CURRENT STAFF
+                </h1>
+
+                <p>
+                    Meet the people responsible for running,
+                    managing, and supporting Xotic Esports.
+                </p>
+
+                <div class="current-staff-stats">
+
+                    <div class="current-staff-stat">
+
+                        <span
+                            id="member-count"
+                            class="current-staff-stat-number"
+                        >
+                            0
+                        </span>
+
+                        <span class="current-staff-stat-label">
+                            STAFF MEMBERS
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             STAFF SECTION HEADER
+        =================================================== -->
+
+        <section class="current-staff-section">
+
+            <div class="current-staff-section-header">
+
+                <div>
+
+                    <span class="section-label">
+                        XOTIC ESPORTS
+                    </span>
+
+                    <h2 class="current-staff-section-title">
+                        STAFF TEAM
+                    </h2>
+
+                    <p class="current-staff-section-description">
+                        The current leadership, management,
+                        administrative, and staff team.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 LOADING
+            =================================================== -->
+
+            <section
+                id="staff-loading"
+                class="staff-loading"
+            >
+
+                <div class="staff-loading-spinner"></div>
+
+                <div>
+
+                    <strong>
+                        Loading staff
+                    </strong>
+
+                    <span>
+                        Fetching the current Xotic staff roster...
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 ERROR
+            =================================================== -->
+
+            <section
+                id="staff-error"
+                class="staff-error"
+                hidden
+            ></section>
+
+
+            <!-- ==================================================
+                 STAFF GROUPS
+            =================================================== -->
+
+            <section
+                id="staff"
+                class="current-staff-list"
+            ></section>
+
+        </section>
+
+    </main>
+
+
+    <!-- ======================================================
+         FOOTER
+    ======================================================= -->
+
+    <footer class="staff-footer">
+
+        <div class="staff-footer-inner">
+
+            <div class="staff-footer-brand">
+
+                <img
+                    src="../images/whitelogo.png"
+                    alt="Xotic Esports"
+                >
+
+                <div>
+
+                    <strong>
+                        Xotic StaffHub
+                    </strong>
+
+                    <span>
+                        Internal staff portal
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="staff-server"
+                class="staff-footer-server"
+            >
+                Xotic Esports
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <script
+        src="javascript/staffhub.js"
+        defer
+    ></script>
+
+</body>
+
+</html>

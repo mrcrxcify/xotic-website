@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>StaffHub | Xotic Esports</title>
+
+    <link rel="icon" href="../images/purplogo.PNG">
+    <link rel="stylesheet" href="css/staffhub.css">
+</head>
+
+<body data-page="home">
+
+<header class="navbar">
+    <div class="container nav-container">
+
+        <a href="index.html" class="logo">
+            <img src="../images/whitelogo.PNG" alt="Xotic Esports™ Logo">
+            XOTIC
+            <span></span>
+        </a>
+
+        <button
+            id="mobile-menu-button"
+            class="mobile-menu-button"
+            type="button"
+            aria-label="Open menu"
+            onclick="toggleMobileMenu()">
+            ☰
+        </button>
+
+        <nav id="staff-nav" class="staff-nav">
+            <a data-page-link="home" href="index.html">Home</a>
+            <a data-page-link="commands" href="commands.html">Commands</a>
+            <a data-page-link="tickets" href="tickets.html">Tickets</a>
+            <a data-page-link="etiquette" href="etiquette.html">Etiquette</a>
+            <a data-page-link="announcements" href="announcements.html">Announcements</a>
+            <a data-page-link="promosDemos" href="promos-demos.html">Promos &amp; Demos</a>
+            <a data-page-link="currentStaff" href="current-staff.html">Current Staff</a>
+
+            <button class="nav-logout" type="button" onclick="logout()">
+                Logout
+            </button>
+        </nav>
+
+        <div id="staff-user" class="staff-user">
+            <span>Checking...</span>
+        </div>
+
+    </div>
+</header>
+
+<main class="hub-main">
+    <div class="container">
+
+        <section class="hero-panel">
+
+            <div class="hero-panel-glow"></div>
+
+            <div class="eyebrow">
+                XOTIC ESPORTS
+                <span class="eyebrow-dot"></span>
+                STAFFHUB
+            </div>
+
+            <h1>
+                YOUR STAFF.
+                <span>YOUR HUB.</span>
+            </h1>
+
+            <p>
+                Your central place for Xotic staff resources, commands,
+                procedures, announcements and internal information.
+            </p>
+
+            <div class="staff-summary">
+
+                <div class="summary-item">
+                    <span class="summary-label">USER</span>
+                    <strong id="home-welcome">Loading...</strong>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">STAFF ROLE</span>
+                    <strong id="home-role">Loading...</strong>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">LEVEL</span>
+                    <strong id="home-level">Loading...</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="hub-section">
+
+            <div class="section-heading">
+                <div>
+                    <span class="section-label">STAFFHUB</span>
+                    <h2>STAFF RESOURCES</h2>
+                    <p>
+                        Everything you need to operate and manage Xotic.
+                    </p>
+                </div>
+
+                <div class="section-heading-mark">
+                    <span></span>
+                    INTERNAL
+                </div>
+            </div>
+
+            <section id="home-grid" class="hub-grid">
+                <div class="empty-state">
+                    Loading StaffHub...
+                </div>
+            </section>
+
+        </section>
+
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <span id="staff-server">Xotic Esports</span>
+        <span> • Internal Staff Portal</span>
+    </div>
+</footer>
+
+<script src="javascript/staffhub.js"></script>
+
+</body>
+</html>
