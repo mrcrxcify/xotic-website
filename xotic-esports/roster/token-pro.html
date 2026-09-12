@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOKEN PRO Roster | Xotic Esports™</title>
+<link rel="icon" type="image/png" href="../images/purplogo.PNG">
+<link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+<nav class="navbar"><div class="nav-container"><a href="../index.html" class="logo"><img src="../images/whitelogo.PNG" alt="Xotic Esports™ Logo">XOTIC<span></span></a><button class="menu-button" onclick="toggleMenu()" aria-label="Open navigation">☰</button><div class="nav-links" id="navLinks"><a href="../index.html">Home</a><a href="../about.html">About</a><a href="../rosters.html">Rosters</a><a href="../contact.html">Contact</a><a href="../merch.html">Merch</a></div></div></nav>
+<main><section class="hero"><div class="hero-bg"><div class="container"><a href="../rosters.html" class="roster-escape" id="rosterEscape"><span class="roster-escape-icon">x</span><span>ESCAPE</span></a><div class="hero-content roster-hero-content"><div class="section-label">Xotic Esports™</div><h1>TOKEN PRO<br><span>ROSTER</span></h1><p>For Xotic token players competing at the professional level.</p></div></div></div></section>
+<section class="section roster-section"><div class="container"><div class="section-header roster-section-header"><div class="section-label">COMPETITIVE ROSTER</div><h2 class="section-title">TOKEN PRO</h2><p class="section-description"><span id="member-count">Loading...</span></p></div><div id="roster" class="player-grid"><div class="roster-loading">Loading roster...</div></div></div></section></main>
+<footer><div class="container"><div class="footer-grid"><div class="footer-brand"><div class="logo"><img src="../images/whitelogo.PNG" alt="Xotic Esports™">XOTIC<span></span></div><p>Competitive esports organization established in August 2026.</p></div><div class="footer-column"><h3>XOTIC</h3><a href="../index.html">Home</a><a href="../about.html">About</a><a href="../rosters.html">Rosters</a><a href="../contact.html">Contact</a><a href="../merch.html">Merch</a></div><div class="footer-column"><h3>SOCIALS</h3><a href="https://x.com/xtcesports0" target="_blank" rel="noopener">X</a><a href="https://tiktok.com/@xtcesports0" target="_blank" rel="noopener">TikTok</a><a href="https://youtube.com/@xtcesports0" target="_blank">TouTube</a></div><div class="footer-column"><h3>DISCORD</h3><a href="https://discord.gg/xotic" target="_blank" rel="noopener">Main Discord</a></div></div><div class="footer-bottom"><span>EST. 2026</span><span>All rights reserved.</span></div></div></footer>
+<script>
+function toggleMenu(){document.getElementById("navLinks").classList.toggle("show");}
+const API_URL="https://api.xoticesports.com";
+const ROLE_ID="1539785239625474148";
+const SERVER_ID="1490116751927546089";
+async function loadRoster(){
+    const roster=document.getElementById("roster");
+    const memberCount=document.getElementById("member-count");
+    try{const response=await fetch(`${API_URL}/api/server/${SERVER_ID}/role/${ROLE_ID}/members`);
+        if(!response.ok)throw new Error("API request failed");
+        const data=await response.json();memberCount.textContent=`${data.count} ${data.count===1?"MEMBER":"MEMBERS"}`;
+        if(data.members.length===0){roster.innerHTML=`<div class="roster-empty">No members currently assigned to this roster.</div>`;
+        return;
+    }
+    roster.innerHTML=data.members.map((member,index)=>`<div class="player-card roster-player-enter" style="animation-delay:${index*0.08}s;"><img class="player-avatar" src="${member.avatar}" alt="${escapeHTML(member.displayName)}"><div class="player-info"><div class="player-name">${escapeHTML(member.displayName)}</div><div class="player-position">${escapeHTML(data.roleName)}</div></div></div>`).join("");
+}
+catch(error){console.error("Roster loading error:",error);
+memberCount.textContent="UNAVAILABLE";
+roster.innerHTML=`<div class="roster-error">Unable to load roster.</div>`;
+}
+}
+
+function escapeHTML(text) {
+
+    const element =
+        document.createElement("div");
+
+    element.textContent = text;
+
+    return element.innerHTML;
+
+}
+
+
+const escapeButton =
+    document.getElementById("rosterEscape");
+
+
+function updateEscapeButton() {
+
+    const scrollY = window.scrollY;
+
+    const heroHeight =
+        document.querySelector(".hero").offsetHeight;
+
+    const fadeStart = 50;
+
+    const fadeEnd =
+        Math.max(100, heroHeight - 180);
+
+    let opacity = 1;
+
+    if (scrollY > fadeStart) {
+
+        opacity =
+            1 -
+            ((scrollY - fadeStart) /
+            (fadeEnd - fadeStart));
+
+    }
+
+    opacity =
+        Math.max(0, Math.min(1, opacity));
+
+    escapeButton.style.opacity = opacity;
+
+    escapeButton.style.pointerEvents =
+        opacity <= 0.05 ? "none" : "auto";
+
+}
+
+
+window.addEventListener(
+    "scroll",
+    updateEscapeButton,
+    { passive: true }
+);
+
+
+window.addEventListener(
+    "resize",
+    updateEscapeButton
+);
+
+
+updateEscapeButton();
+
+
+loadRoster();
+
+
+setInterval(
+    loadRoster,
+    60000
+);
+</script></body></html>

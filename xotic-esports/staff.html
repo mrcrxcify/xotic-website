@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Staff | Xotic Esports™</title>
+
+    <meta name="description" content="Xotic Esports™. Where the competition begins. Established August 2026.">
+    <meta property="og:title" content="Xotic Esports™ Staff">
+    <meta property="og:image" content="https://xoticesports.com/images/banner2.png">
+
+    <meta property="og:description" content="Xotic Esports™ | Full Staff Team">
+    
+    <meta property="og:url" content="https://xoticesports.com/staff">
+    
+    <meta property="og:type" content="website">
+
+
+    <link rel="icon" type="image/png" href="images/purplogo.PNG">
+    <link rel="stylesheet" href="CSS/style.css">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="nav-container">
+
+        <a href="index.html" class="logo">
+
+            <img
+                src="images/whitelogo.PNG"
+                alt="Xotic Esports™ Logo"
+            >
+
+            XOTIC
+
+            <span></span>
+
+        </a>
+
+        <button
+            class="menu-button"
+            onclick="toggleMenu()"
+            aria-label="Open navigation"
+        >
+            ☰
+        </button>
+
+        <div class="nav-links" id="navLinks">
+
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="rosters.html">Rosters</a>
+            <a href="contact.html">Contact</a>
+            <a href="merch.html">Merch</a>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<main>
+
+<section class="hero">
+
+    <div class="hero-bg">
+
+        <div class="container">
+
+            <a
+                href="index.html"
+                class="roster-escape"
+                id="rosterEscape"
+            >
+
+                <span class="roster-escape-icon">←</span>
+
+                <span>ESCAPE</span>
+
+            </a>
+
+
+            <div class="hero-content roster-hero-content">
+
+                <div class="section-label">
+                    Xotic Esports™
+                </div>
+
+                <h1>
+                    STAFF<br>
+                    <span>TEAM</span>
+                </h1>
+
+                <p>
+                    The people responsible for running and supporting Xotic Esports™.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="section roster-section">
+
+    <div class="container">
+
+        <div class="section-header roster-section-header">
+
+            <div class="section-label">
+                Xotic Esports™
+            </div>
+
+            <h2 class="section-title">
+                STAFF
+            </h2>
+
+            <p class="section-description">
+
+                <span id="member-count">
+                    Loading...
+                </span>
+
+            </p>
+
+        </div>
+
+
+        <div
+            id="staff"
+            class="player-grid"
+        >
+
+            <div class="roster-loading">
+                Loading staff...
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+    <div class="container">
+
+        <div class="footer-grid">
+
+            <div class="footer-brand">
+
+                <div class="logo">
+
+                    <img
+                        src="images/whitelogo.PNG"
+                        alt="Xotic Esports™"
+                    >
+
+                    XOTIC
+
+                    <span></span>
+
+                </div>
+
+                <p>
+                    Competitive esports organization established in August 2026.
+                </p>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>XOTIC</h3>
+
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="rosters.html">Rosters</a>
+                <a href="contact.html">Contact</a>
+                <a href="merch.html">Merch</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>SOCIALS</h3>
+
+                <a
+                    href="https://x.com/xtcesports0"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    X
+                </a>
+
+                <a
+                    href="https://tiktok.com/@xtcesports0"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    TikTok
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>DISCORD</h3>
+
+                <a
+                    href="https://discord.gg/xotic"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    Main Discord
+                </a>
+                
+                <a href="https://youtube.com/@xtcesports0" target="_blank">TouTube</a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <span>EST. 2026</span>
+
+            <span>All rights reserved.</span>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+function toggleMenu() {
+
+    document
+        .getElementById("navLinks")
+        .classList
+        .toggle("show");
+
+}
+
+
+/*
+    XOTIC STAFF API
+*/
+
+const API_URL = "https://api.xoticesports.com";
+const SERVER_ID="1490116751927546089";
+
+const STAFF_API = `${API_URL}/api/server/${SERVER_ID}/staff`;
+
+
+/*
+    Staff hierarchy.
+
+    Lower number = higher position.
+*/
+
+const STAFF_ROLES = {
+
+    "1539785169102442677": {
+        name: "FOUNDER",
+        order: 1
+    },
+
+    "1539785192355397662": {
+        name: "President",
+        order: 2
+    },
+
+
+    "1539785176471576707": {
+        name: "BOARD OF DIRECTORS",
+        order: 3
+    },
+
+    "1539785177436258334": {
+        name: "BOARD MEMBER",
+        order: 4
+    },
+
+
+    "1539785181999927396": {
+        name: "CHIEF TECHNOLOGY OFFICER",
+        order: 5
+    },
+
+    "1539785171983933521": {
+        name: "CHIEF OPERATING OFFICER",
+        order: 6
+    },
+
+    "1539785183052570746": {
+        name: "CHIEF OF STAFF",
+        order: 7
+    },
+
+    "1539785184201941054": {
+        name: "CHIEF FINANCIAL OFFICER",
+        order: 8
+    },
+
+    "1539785188836384860": {
+        name: "CHIEF CONTENT OFFICER",
+        order: 9
+    },
+
+    "1539785187997786142": {
+        name: "CHIEF COMMUNITY OFFICER",
+        order: 10
+    },
+
+    "1539785186496090133": {
+        name: "CHIEF MARKETING OFFICER",
+        order: 11
+    },
+
+    "1539785195870363741": {
+        name: "OPERATIONS",
+        order: 12
+    },
+
+    "1539785203302662154": {
+        name: "EXECUTIVE",
+        order: 13
+    },
+
+
+    "1547914731812167772": {
+        name: "TikTok Manager",
+        order: 14
+    },
+
+
+    "1547914850355650632": {
+        name: "YouTube Manager",
+        order: 15
+    },
+
+
+    "1547914536265187348": {
+        name: "X(Twitter) Manager",
+        order: 16
+    },
+
+
+    "1539785209405243543": {
+        name: "UPPER MANAGEMENT",
+        order: 17
+    },
+
+    "1539785210487640115": {
+        name: "MANAGEMENT",
+        order: 18
+    },
+
+    "1539785212588720269": {
+        name: "TRIAL MANAGEMENT",
+        order: 19
+    },
+
+
+    "1539785215914934343": {
+        name: "SENIOR ADMIN",
+        order: 20
+    },
+
+    "1539785218662080593": {
+        name: "ADMIN",
+        order: 21
+    },
+
+    "1539785220255916083": {
+        name: "TRIAL ADMIN",
+        order: 22
+    },
+
+    "1539785223376470148": {
+        name: "SENIOR STAFF",
+        order: 23
+    },
+
+    "1539785224412725339": {
+        name: "STAFF",
+        order: 24
+    },
+
+    "1539785226211827763": {
+        name: "JUNIOR STAFF",
+        order: 25
+    },
+
+    "1539785227897933867": {
+        name: "TRIAL STAFF",
+        order: 26
+    }
+
+};
+
+
+/*
+    Escape HTML so Discord names
+    cannot break the page.
+*/
+
+function escapeHTML(text) {
+
+    const element =
+        document.createElement("div");
+
+    element.textContent = text;
+
+    return element.innerHTML;
+
+}
+
+
+/*
+    Convert role IDs into role names.
+*/
+
+function getStaffRoles(roles) {
+
+    return roles
+        .filter(role => STAFF_ROLES[role.id])
+        .map(role => ({
+            id: role.id,
+            name: role.name,
+            color: role.color,
+            order: STAFF_ROLES[role.id].order
+        }))
+        .sort((a, b) => a.order - b.order);
+
+}
+
+
+/*
+    Load staff from the API.
+*/
+
+async function loadStaff() {
+
+    const staffContainer =
+        document.getElementById("staff");
+
+    const memberCount =
+        document.getElementById("member-count");
+
+
+    try {
+
+        const response =
+            await fetch(STAFF_API);
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Staff API request failed"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        memberCount.textContent =
+            `${data.count} ${data.count === 1 ? "MEMBER" : "MEMBERS"}`;
+
+
+        if (
+            !data.members ||
+            data.members.length === 0
+        ) {
+
+            staffContainer.innerHTML = `
+                <div class="roster-empty">
+                    No staff members currently assigned.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        /*
+            Sort staff members by their
+            highest-ranking staff role.
+        */
+
+        const sortedMembers =
+            [...data.members].sort((a, b) => {
+
+                const rolesA =
+                    getStaffRoles(a.roles);
+
+                const rolesB =
+                    getStaffRoles(b.roles);
+
+
+                const orderA =
+                    rolesA.length > 0
+                        ? rolesA[0].order
+                        : 999;
+
+
+                const orderB =
+                    rolesB.length > 0
+                        ? rolesB[0].order
+                        : 999;
+
+
+                return orderA - orderB;
+
+            });
+
+
+        staffContainer.innerHTML =
+            sortedMembers.map((member, index) => {
+
+
+                const roles =
+                    getStaffRoles(member.roles);
+
+
+                const roleHTML =
+                    roles.length > 0
+
+                        ? roles.map(role => `
+                            <div class="player-position">
+                                ${escapeHTML(role.name)}
+                            </div>
+                        `).join("")
+
+                        : `
+                            <div class="player-position">
+                                STAFF
+                            </div>
+                        `;
+
+
+                return `
+
+                    <div
+                        class="player-card roster-player-enter"
+                        style="animation-delay: ${index * 0.08}s;"
+                    >
+
+                        <img
+                            class="player-avatar"
+                            src="${escapeHTML(member.avatar)}"
+                            alt="${escapeHTML(member.displayName)}"
+                        >
+
+
+                        <div class="player-info">
+
+                            <div class="player-name">
+                                ${escapeHTML(member.displayName)}
+                            </div>
+
+
+                            <div class="staff-role-list">
+
+                                ${roleHTML}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }).join("");
+
+
+    } catch (error) {
+
+        console.error(
+            "Staff loading error:",
+            error
+        );
+
+
+        memberCount.textContent =
+            "UNAVAILABLE";
+
+
+        staffContainer.innerHTML = `
+
+            <div class="roster-error">
+                Unable to load staff.
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/*
+    ESCAPE button fade.
+*/
+
+const escapeButton =
+    document.getElementById("rosterEscape");
+
+
+function updateEscapeButton() {
+
+    if (!escapeButton) {
+        return;
+    }
+
+
+    const hero =
+        document.querySelector(".hero");
+
+
+    if (!hero) {
+        return;
+    }
+
+
+    const scrollY =
+        window.scrollY;
+
+
+    const heroHeight =
+        hero.offsetHeight;
+
+
+    const fadeStart = 50;
+
+
+    const fadeEnd =
+        Math.max(
+            100,
+            heroHeight - 180
+        );
+
+
+    let opacity = 1;
+
+
+    if (scrollY > fadeStart) {
+
+        opacity =
+            1 -
+            (
+                (scrollY - fadeStart) /
+                (fadeEnd - fadeStart)
+            );
+
+    }
+
+
+    opacity =
+        Math.max(
+            0,
+            Math.min(1, opacity)
+        );
+
+
+    escapeButton.style.opacity =
+        opacity;
+
+
+    escapeButton.style.pointerEvents =
+        opacity <= 0.05
+            ? "none"
+            : "auto";
+
+}
+
+
+window.addEventListener(
+    "scroll",
+    updateEscapeButton,
+    { passive: true }
+);
+
+
+window.addEventListener(
+    "resize",
+    updateEscapeButton
+);
+
+
+updateEscapeButton();
+
+
+/*
+    Initial staff load.
+*/
+
+loadStaff();
+
+
+/*
+    Refresh every 60 seconds.
+*/
+
+setInterval(
+    loadStaff,
+    60000
+);
+
+</script>
+
+</body>
+
+</html>

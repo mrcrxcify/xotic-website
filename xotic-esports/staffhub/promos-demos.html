@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Promos &amp; Demos | Xotic StaffHub</title>
+
+    <link rel="icon" href="../images/purplogo.PNG">
+
+    <link rel="stylesheet" href="css/staffhub.css">
+</head>
+
+<body data-page="promosDemos">
+
+<header class="navbar">
+    <div class="container nav-container">
+
+        
+
+            <a href="index.html" class="logo">
+
+            <img
+                src="../images/whitelogo.PNG"
+                alt="Xotic Esports™ Logo"
+            >
+
+            XOTIC
+
+            <span></span>
+
+        </a>
+
+        <button class="mobile-menu-button" onclick="toggleMobileMenu()">☰</button>
+
+        <nav id="staff-nav" class="staff-nav">
+            <a data-page-link="home" href="index.html">Home</a>
+            <a data-page-link="commands" href="commands.html">Commands</a>
+            <a data-page-link="tickets" href="tickets.html">Tickets</a>
+            <a data-page-link="etiquette" href="etiquette.html">Etiquette</a>
+            <a data-page-link="announcements" href="announcements.html">Announcements</a>
+            <a data-page-link="promosDemos" href="promos-demos.html">Promos &amp; Demos</a>
+            <a data-page-link="currentStaff" href="current-staff.html">Current Staff</a>
+            <button class="nav-logout" onclick="logout()">Logout</button>
+        </nav>
+
+        <div id="staff-user" class="staff-user">
+            <span>Checking...</span>
+        </div>
+
+    </div>
+</header>
+
+<main class="hub-main">
+    <div class="container">
+
+        <div class="page-head">
+            <div class="eyebrow">RESTRICTED RESOURCE</div>
+
+            <div class="page-title-row">
+                <div>
+                    <h1>PROMOS &amp; DEMOS</h1>
+                    <p>
+                    Automatic staff activity history.
+                    </p>
+                </div>
+
+                <div class="page-actions">
+                    
+
+                    
+                </div>
+            </div>
+        </div>
+
+        
+
+        <section class="section">
+            <div class="section-label">
+                STAFF ACTIVITY
+            </div>
+
+            <section
+                id="staff-updates-list"
+                class="updates-list">
+                <div class="empty-state">
+                    Loading staff activity...
+                </div>
+            </section>
+        </section>
+
+        
+
+        
+
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <span id="staff-server">Xotic Esports</span>
+        <span> • Internal Staff Portal</span>
+    </div>
+</footer>
+
+<script src="javascript/staffhub.js"></script>
+
+</body>
+</html>
