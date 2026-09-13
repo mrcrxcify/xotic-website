@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,103 +8,174 @@
     <title>Promos &amp; Demos | Xotic StaffHub</title>
 
     <link rel="icon" href="../images/purplogo.PNG">
-
     <link rel="stylesheet" href="css/staffhub.css">
 </head>
 
 <body data-page="promosDemos">
 
 <header class="navbar">
+
     <div class="container nav-container">
 
-        
-
-            <a href="index.html" class="logo">
+        <a href="index.html" class="logo">
 
             <img
                 src="../images/whitelogo.PNG"
-                alt="Xotic Esports™ Logo"
+                alt="Xotic Esports Logo"
             >
 
             XOTIC
-
             <span></span>
 
         </a>
 
-        <button class="mobile-menu-button" onclick="toggleMobileMenu()">☰</button>
+        <button
+            id="mobile-menu-button"
+            class="mobile-menu-button"
+            type="button"
+            aria-label="Open navigation"
+            aria-expanded="false"
+            onclick="toggleMobileMenu()">
+            ☰
+        </button>
 
-        <nav id="staff-nav" class="staff-nav">
-            <a data-page-link="home" href="index.html">Home</a>
-            <a data-page-link="commands" href="commands.html">Commands</a>
-            <a data-page-link="tickets" href="tickets.html">Tickets</a>
-            <a data-page-link="etiquette" href="etiquette.html">Etiquette</a>
-            <a data-page-link="announcements" href="announcements.html">Announcements</a>
-            <a data-page-link="promosDemos" href="promos-demos.html">Promos &amp; Demos</a>
-            <a data-page-link="currentStaff" href="current-staff.html">Current Staff</a>
-            <button class="nav-logout" onclick="logout()">Logout</button>
+        <nav
+            id="staff-nav"
+            class="staff-nav">
+
+            <a href="index.html" data-page-link="home">
+                Home
+            </a>
+
+            <a href="commands.html" data-page-link="commands">
+                Commands
+            </a>
+
+            <a href="tickets.html" data-page-link="tickets">
+                Tickets
+            </a>
+
+            <a href="etiquette.html" data-page-link="etiquette">
+                Etiquette
+            </a>
+
+            <a href="announcements.html" data-page-link="announcements">
+                Announcements
+            </a>
+
+            <a
+                href="promos-demos.html"
+                data-page-link="promosDemos">
+                Promos &amp; Demos
+            </a>
+
+            <a
+                href="current-staff.html"
+                data-page-link="currentStaff">
+                Current Staff
+            </a>
+
+            <button
+                type="button"
+                class="nav-logout"
+                onclick="logout()">
+                Logout
+            </button>
+
         </nav>
 
-        <div id="staff-user" class="staff-user">
+        <div
+            id="staff-user"
+            class="staff-user">
             <span>Checking...</span>
         </div>
 
     </div>
+
 </header>
 
-<main class="hub-main">
-    <div class="container">
+<main class="staff-page">
 
-        <div class="page-head">
-            <div class="eyebrow">RESTRICTED RESOURCE</div>
+    <section class="page-head">
 
-            <div class="page-title-row">
-                <div>
-                    <h1>PROMOS &amp; DEMOS</h1>
-                    <p>
-                    Automatic staff activity history.
-                    </p>
-                </div>
+        <div class="page-head-glow"></div>
 
-                <div class="page-actions">
-                    
+        <div class="page-head-content">
 
-                    
-                </div>
-            </div>
+            <span class="page-eyebrow">
+                <span class="eyebrow-dot"></span>
+                RESTRICTED RESOURCE
+            </span>
+
+            <h1>
+                PROMOS &amp; DEMOS
+            </h1>
+
+            <p>
+                Staff promotions, hires, removals, resignations,
+                demotions and demos.
+            </p>
+
         </div>
 
-        
+    </section>
 
-        <section class="section">
-            <div class="section-label">
-                STAFF ACTIVITY
+    <section class="content-shell">
+
+        <div class="content-shell-header">
+
+            <div>
+
+                <span class="content-section-label">
+                    STAFF ACTIVITY
+                </span>
+
+                <h2>
+                    Activity History
+                </h2>
+
+                <p>
+                    A live record of staff changes across Xotic Esports.
+                </p>
+
             </div>
 
-            <section
-                id="staff-updates-list"
-                class="updates-list">
-                <div class="empty-state">
-                    Loading staff activity...
-                </div>
-            </section>
-        </section>
+            <div class="content-status">
+                <span class="status-dot"></span>
+                LIVE LOG
+            </div>
 
-        
+        </div>
 
-        
+        <div
+            id="staff-updates-list"
+            class="updates-list">
+        </div>
 
-    </div>
+    </section>
+
 </main>
 
-<footer>
+<footer class="staff-footer">
+
     <div class="container">
-        <span id="staff-server">Xotic Esports</span>
-        <span> • Internal Staff Portal</span>
+
+        <span>
+            Xotic Esports StaffHub
+        </span>
+
+        <span id="staff-server">
+            Xotic Esports
+        </span>
+
     </div>
+
 </footer>
 
-<script src="javascript/staffhub.js"></script>
+<script
+    src="javascript/staffhub.js"
+    defer>
+</script>
 
 </body>
 </html>

@@ -516,7 +516,7 @@ document.addEventListener(
             return;
         }
 
-        loadContent();
+        await loadContent();
 
         buildNav();
 

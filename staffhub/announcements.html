@@ -7,33 +7,36 @@
     <title>Announcements | Xotic StaffHub</title>
 
     <link rel="icon" href="../images/purplogo.PNG">
-
     <link rel="stylesheet" href="css/staffhub.css">
 </head>
 
 <body data-page="announcements">
 
 <header class="navbar">
+
     <div class="container nav-container">
 
-        
-
-            <a href="index.html" class="logo">
-
+        <a href="index.html" class="logo">
             <img
                 src="../images/whitelogo.PNG"
-                alt="Xotic Esports™ Logo"
+                alt="Xotic Esports Logo"
             >
-
             XOTIC
-
             <span></span>
-
         </a>
 
-        <button class="mobile-menu-button" onclick="toggleMobileMenu()">☰</button>
+        <button
+            id="mobile-menu-button"
+            class="mobile-menu-button"
+            type="button"
+            aria-label="Open navigation"
+            aria-expanded="false"
+            onclick="toggleMobileMenu()">
+            ☰
+        </button>
 
         <nav id="staff-nav" class="staff-nav">
+
             <a data-page-link="home" href="index.html">Home</a>
             <a data-page-link="commands" href="commands.html">Commands</a>
             <a data-page-link="tickets" href="tickets.html">Tickets</a>
@@ -41,7 +44,14 @@
             <a data-page-link="announcements" href="announcements.html">Announcements</a>
             <a data-page-link="promosDemos" href="promos-demos.html">Promos &amp; Demos</a>
             <a data-page-link="currentStaff" href="current-staff.html">Current Staff</a>
-            <button class="nav-logout" onclick="logout()">Logout</button>
+
+            <button
+                class="nav-logout"
+                type="button"
+                onclick="logout()">
+                Logout
+            </button>
+
         </nav>
 
         <div id="staff-user" class="staff-user">
@@ -49,27 +59,44 @@
         </div>
 
     </div>
+
 </header>
 
 <main class="hub-main">
+
+    <section class="staff-user-bar">
+        <div>
+            <span class="staff-user-label">Signed in as</span>
+            <span id="staff-user-display">Loading...</span>
+        </div>
+    </section>
+
     <div class="container">
 
         <div class="page-head">
-            <div class="eyebrow">STAFF NEWS</div>
+
+            <div class="eyebrow">
+                STAFF NEWS
+            </div>
 
             <div class="page-title-row">
+
                 <div>
                     <h1>ANNOUNCEMENTS</h1>
+
                     <p>
                         Important internal announcements for Xotic staff.
                     </p>
                 </div>
 
                 <div class="page-actions">
+
                     <button
                         id="announcements-edit-button"
                         class="icon-button"
+                        type="button"
                         hidden
+                        title="Edit Announcements"
                         onclick="openAnnouncementsEditor()">
                         ✎
                     </button>
@@ -77,18 +104,27 @@
                     <button
                         id="announcements-permissions-button"
                         class="icon-button"
+                        type="button"
                         hidden
+                        title="Edit Announcement Permissions"
                         onclick="openPagePermissions('announcements')">
                         ⚙
                     </button>
+
                 </div>
+
             </div>
+
         </div>
 
-        <section id="announcements-list" class="announcement-list">
+        <section
+            id="announcements-list"
+            class="announcement-list">
+
             <div class="empty-state">
                 Loading announcements...
             </div>
+
         </section>
 
         <section
@@ -104,6 +140,7 @@
         </section>
 
     </div>
+
 </main>
 
 <footer>

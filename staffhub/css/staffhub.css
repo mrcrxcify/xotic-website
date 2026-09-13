@@ -1609,3 +1609,426 @@ footer img {
 .current-staff-list .player-card .player-name * {
     color: #ffffff !important;
 }
+/* =========================================================
+   XOTIC STAFFHUB - FINAL MERGE POLISH
+   ========================================================= */
+
+.current-staff-hero {
+    position: relative;
+    overflow: hidden;
+    margin: 32px auto 0;
+    max-width: 1200px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 20px;
+    background:
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(59,130,246,.14),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 85% 80%,
+            rgba(236,72,153,.10),
+            transparent 35%
+        ),
+        rgba(7,11,20,.92);
+    box-shadow:
+        0 25px 80px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.current-staff-hero-glow {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    right: -180px;
+    top: -220px;
+    border-radius: 50%;
+    background: rgba(59,130,246,.10);
+    filter: blur(80px);
+    pointer-events: none;
+}
+
+.current-staff-hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 54px;
+}
+
+.hero-kicker,
+.section-eyebrow,
+.content-section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--blue-light);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+
+.current-staff-hero h1,
+.page-head h1 {
+    margin: 10px 0 12px;
+    font-size: clamp(36px, 6vw, 68px);
+    line-height: .95;
+    letter-spacing: -.045em;
+}
+
+.current-staff-hero p,
+.page-head p {
+    max-width: 650px;
+    margin: 0;
+    color: var(--gray);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.current-staff-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 34px;
+}
+
+.current-staff-stat {
+    min-height: 92px;
+    padding: 18px 20px;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 12px;
+    background: rgba(255,255,255,.025);
+}
+
+.current-staff-stat-number,
+.current-staff-stat-status {
+    display: block;
+    color: var(--white);
+    font-size: 25px;
+    font-weight: 850;
+    letter-spacing: -.03em;
+}
+
+.current-staff-stat-status {
+    color: #67e8f9;
+    font-size: 13px;
+    letter-spacing: .1em;
+    padding-top: 6px;
+}
+
+.current-staff-stat-label {
+    display: block;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.current-staff-section {
+    max-width: 1200px;
+    margin: 28px auto 80px;
+}
+
+.current-staff-section-header,
+.content-shell-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 22px;
+}
+
+.current-staff-section-header h2,
+.content-shell-header h2 {
+    margin: 7px 0 5px;
+    color: var(--white);
+    font-size: 25px;
+    letter-spacing: -.025em;
+}
+
+.current-staff-section-header p,
+.content-shell-header p {
+    margin: 0;
+    color: var(--gray);
+    font-size: 13px;
+}
+
+.section-header-line {
+    flex: 1;
+    height: 1px;
+    margin-bottom: 10px;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.10),
+            transparent
+        );
+}
+
+.current-staff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.staff-role-group {
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 16px;
+    background: rgba(7,11,20,.72);
+    box-shadow: 0 16px 45px rgba(0,0,0,.20);
+}
+
+.staff-role-group > h3 {
+    margin: 0 0 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    color: var(--white);
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.staff-role-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.player-card,
+.staff-member-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 12px;
+    background: rgba(255,255,255,.025);
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        background .18s ease;
+}
+
+.player-card:hover,
+.staff-member-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(96,165,250,.30);
+    background: rgba(59,130,246,.055);
+}
+
+.player-avatar,
+.player-card img {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: #101827;
+}
+
+.player-info,
+.staff-member-info {
+    min-width: 0;
+}
+
+.player-name,
+.player-name a {
+    display: block;
+    overflow: hidden;
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-position,
+.staff-member-role {
+    margin-top: 4px;
+    color: var(--gray);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+/* Promos & Demos */
+
+.page-head {
+    position: relative;
+    overflow: hidden;
+    max-width: 1200px;
+    margin: 32px auto 0;
+    padding: 48px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 20px;
+    background:
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(236,72,153,.11),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 20% 80%,
+            rgba(59,130,246,.12),
+            transparent 32%
+        ),
+        rgba(7,11,20,.92);
+}
+
+.page-head-content {
+    position: relative;
+    z-index: 1;
+}
+
+.page-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--gray);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .15em;
+}
+
+.eyebrow-dot,
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #60a5fa;
+    box-shadow: 0 0 14px rgba(96,165,250,.75);
+}
+
+.content-shell {
+    max-width: 1200px;
+    margin: 24px auto 80px;
+    padding: 28px;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 18px;
+    background: rgba(7,11,20,.72);
+    box-shadow: 0 20px 60px rgba(0,0,0,.22);
+}
+
+.content-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 11px;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 999px;
+    color: var(--gray);
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: .13em;
+    white-space: nowrap;
+}
+
+.updates-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.updates-list:empty::before {
+    content: "No staff activity has been recorded yet.";
+    display: block;
+    padding: 35px;
+    border: 1px dashed rgba(255,255,255,.08);
+    border-radius: 12px;
+    color: var(--muted);
+    text-align: center;
+    font-size: 13px;
+}
+
+.staff-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 160px;
+    color: var(--gray);
+    font-size: 13px;
+}
+
+.staff-loading-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,.10);
+    border-top-color: var(--blue-light);
+    border-radius: 50%;
+    animation: staffhub-spin .7s linear infinite;
+}
+
+@keyframes staffhub-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.staff-error {
+    padding: 18px;
+    border: 1px solid rgba(239,68,68,.18);
+    border-radius: 12px;
+    background: rgba(239,68,68,.05);
+    color: #fca5a5;
+    font-size: 13px;
+}
+
+@media (max-width: 800px) {
+
+    .current-staff-hero,
+    .page-head,
+    .current-staff-section,
+    .content-shell {
+        margin-left: 14px;
+        margin-right: 14px;
+    }
+
+    .current-staff-hero-content,
+    .page-head {
+        padding: 32px 24px;
+    }
+
+    .current-staff-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .current-staff-section-header,
+    .content-shell-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .section-header-line {
+        width: 100%;
+    }
+
+    .staff-role-list {
+        grid-template-columns: 1fr;
+    }
+
+    .content-shell {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 520px) {
+
+    .current-staff-hero h1,
+    .page-head h1 {
+        font-size: 38px;
+    }
+
+    .current-staff-hero-content,
+    .page-head {
+        padding: 28px 19px;
+    }
+
+    .staff-role-group {
+        padding: 14px;
+    }
+}

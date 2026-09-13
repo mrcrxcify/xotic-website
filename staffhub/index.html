@@ -7,7 +7,6 @@
     <title>StaffHub | Xotic Esports</title>
 
     <link rel="icon" href="../images/purplogo.PNG">
-
     <link rel="stylesheet" href="css/staffhub.css">
 </head>
 
@@ -16,26 +15,21 @@
 <header class="navbar">
     <div class="container nav-container">
 
-        
-
-            <a href="index.html" class="logo">
-
+        <a href="index.html" class="logo">
             <img
                 src="../images/whitelogo.PNG"
-                alt="Xotic Esports™ Logo"
+                alt="Xotic Esports Logo"
             >
-
             XOTIC
-
             <span></span>
-
         </a>
 
         <button
             id="mobile-menu-button"
             class="mobile-menu-button"
             type="button"
-            aria-label="Open menu"
+            aria-label="Open navigation"
+            aria-expanded="false"
             onclick="toggleMobileMenu()">
             ☰
         </button>
@@ -60,16 +54,30 @@
         <div id="staff-user" class="staff-user">
             <span>Checking...</span>
         </div>
+
     </div>
 </header>
 
 <main class="hub-main">
+
+    <section class="staff-user-bar">
+        <div>
+            <span class="staff-user-label">Signed in as</span>
+            <span id="staff-user-display">Loading...</span>
+        </div>
+    </section>
+
     <div class="container">
 
         <section class="hero-panel">
-            <div class="eyebrow">XOTIC STAFFHUB</div>
 
-            <h1>STAFF HUB</h1>
+            <div class="eyebrow">
+                XOTIC STAFFHUB
+            </div>
+
+            <h1>
+                STAFF HUB
+            </h1>
 
             <p>
                 Your central place for Xotic staff resources,
@@ -77,6 +85,7 @@
             </p>
 
             <div class="staff-summary">
+
                 <div>
                     <span>USER</span>
                     <strong id="home-welcome">Loading...</strong>
@@ -91,18 +100,23 @@
                     <span>LEVEL</span>
                     <strong id="home-level">Loading...</strong>
                 </div>
+
             </div>
+
         </section>
 
         <section
             id="home-grid"
             class="hub-grid">
+
             <div class="empty-state">
                 Loading StaffHub...
             </div>
+
         </section>
 
     </div>
+
 </main>
 
 <footer>
