@@ -2434,3 +2434,557 @@ VERY SMALL SCREENS
     }
 
 }
+css
+/* ==================================================
+   XOTIC STAFFHUB FINAL OVERRIDES
+================================================== */
+
+/*
+==================================================
+CONSISTENT PAGE WIDTH
+==================================================
+*/
+
+.hub-main,
+.staff-page {
+    width: min(1180px, calc(100% - 40px)) !important;
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.hub-main > .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.hub-main > .container > section,
+.hub-main > .container > .page-head,
+.hub-main > .container > .content-shell {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/*
+Promos uses staff-page directly.
+*/
+
+.staff-page > .content-shell,
+.staff-page > .page-head {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+
+/*
+==================================================
+EDITOR MODE
+==================================================
+*/
+
+body.staffhub-editor-mode {
+    overflow-x: hidden;
+}
+
+body.staffhub-editor-mode
+.staff-user-bar,
+body.staffhub-editor-mode footer {
+    display: none !important;
+}
+
+body.staffhub-editor-mode
+.staffhub-editor-hidden {
+    display: none !important;
+}
+
+body.staffhub-editor-mode
+.editor {
+    display: none !important;
+}
+
+body.staffhub-editor-mode
+.editor.staffhub-active-editor {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+body.staffhub-editor-mode
+.editor.staffhub-active-editor
+.editor-panel {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+
+/*
+==================================================
+EDITOR PANEL
+==================================================
+*/
+
+.editor.staffhub-active-editor {
+    margin-top: 0 !important;
+}
+
+.editor-panel {
+    width: 100%;
+    max-width: none;
+    padding: 28px !important;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.035),
+            rgba(255,255,255,.018)
+        );
+}
+
+.editor-panel h2 {
+    margin: 6px 0 8px;
+    color: var(--white);
+    font-family: "Orbitron","Inter",sans-serif;
+    font-size: 22px;
+}
+
+.editor-panel p {
+    color: var(--gray);
+}
+
+.editor-header {
+    margin-bottom: 24px !important;
+}
+
+
+/*
+==================================================
+DOCUMENT EDITOR
+==================================================
+*/
+
+.editor-category {
+    margin-top: 16px !important;
+    padding: 20px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 13px !important;
+    background: rgba(255,255,255,.025) !important;
+}
+
+.editor-category-header {
+    gap: 16px !important;
+}
+
+.editor-category-header input {
+    min-height: 42px;
+}
+
+.editor-category textarea {
+    width: 100%;
+}
+
+.editor-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+
+/*
+==================================================
+ATTACHMENTS
+==================================================
+*/
+
+.editor-attachment-list {
+    display: grid !important;
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(280px, 1fr)
+        );
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.editor-attachment {
+    position: relative;
+    display: grid;
+    grid-template-columns: 86px minmax(0,1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: rgba(255,255,255,.025);
+}
+
+.editor-attachment-preview {
+    width: 86px;
+    height: 70px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(0,0,0,.25);
+}
+
+.editor-attachment-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.editor-file-icon {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+}
+
+.editor-attachment-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.editor-attachment-info strong {
+    overflow: hidden;
+    color: var(--white);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.editor-attachment-info span {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.editor-attachment-remove {
+    min-width: 76px;
+}
+
+.attachment-empty {
+    grid-column: 1 / -1;
+    min-height: 90px !important;
+}
+
+
+/*
+==================================================
+LOCAL NEW-UPLOAD PREVIEW
+==================================================
+*/
+
+.staffhub-local-upload-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.staffhub-local-upload-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 7px 8px 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255,255,255,.035);
+    color: var(--gray);
+    font-size: 11px;
+}
+
+.staffhub-local-upload-item span {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.staffhub-local-upload-item button {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+    background: rgba(0,0,0,.35);
+    color: var(--white);
+    font-size: 15px;
+    line-height: 1;
+}
+
+.staffhub-local-upload-item button:hover {
+    background: rgba(239,68,68,.2);
+    border-color: rgba(239,68,68,.35);
+    color: #fca5a5;
+}
+
+
+/*
+==================================================
+PROMOS & DEMOS
+==================================================
+*/
+
+.content-shell-header {
+    position: relative;
+}
+
+.staffhub-promos-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+}
+
+.staffhub-promo-card {
+    margin-bottom: 9px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: rgba(255,255,255,.02);
+    overflow: hidden;
+}
+
+.staffhub-promo-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 68px;
+    padding: 13px 15px;
+}
+
+.staffhub-promo-person {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.staffhub-promo-person strong {
+    overflow: hidden;
+    color: var(--white);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.staffhub-promo-person span {
+    flex-shrink: 0;
+    padding: 4px 7px;
+    border: 1px solid rgba(96,165,250,.2);
+    border-radius: 5px;
+    background: rgba(59,130,246,.08);
+    color: var(--blue-light);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.staffhub-promo-details {
+    padding: 0 15px 15px;
+}
+
+.staffhub-promo-detail-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0,1fr));
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.staffhub-promo-detail-grid > div {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255,255,255,.018);
+}
+
+.staffhub-promo-detail-grid small {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.staffhub-promo-detail-grid strong {
+    display: block;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 11px;
+    text-overflow: ellipsis;
+}
+
+.staffhub-promo-view {
+    flex-shrink: 0;
+}
+
+
+/*
+==================================================
+PERMISSIONS
+==================================================
+*/
+
+.permission-page {
+    width: 100%;
+}
+
+.permission-columns {
+    align-items: stretch;
+}
+
+.permission-box {
+    min-width: 0;
+}
+
+.permission-box select[multiple] {
+    min-height: 170px;
+}
+
+
+/*
+==================================================
+COMMAND EDITOR
+==================================================
+*/
+
+.staffhub-command-editor-list {
+    width: 100%;
+}
+
+.editor-command {
+    align-items: flex-start !important;
+}
+
+.editor-command > div:first-child {
+    min-width: 0;
+}
+
+.editor-command code {
+    display: inline-block;
+    margin-bottom: 3px;
+}
+
+
+/*
+==================================================
+ANNOUNCEMENTS
+==================================================
+*/
+
+.announcement-list {
+    width: 100%;
+}
+
+.announcement-card {
+    width: 100%;
+}
+
+.image-preview {
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(150px, 1fr)
+        );
+}
+
+.image-item {
+    min-width: 0;
+}
+
+
+/*
+==================================================
+MOBILE
+==================================================
+*/
+
+@media (max-width: 800px) {
+
+    .hub-main,
+    .staff-page {
+        width: min(
+            100% - 24px,
+            1180px
+        ) !important;
+    }
+
+    .editor-panel {
+        padding: 18px !important;
+    }
+
+    .form-grid,
+    .permission-columns {
+        grid-template-columns: 1fr !important;
+    }
+
+    .editor-category-header {
+        flex-direction: column;
+    }
+
+    .editor-actions {
+        width: 100%;
+    }
+
+    .editor-actions .btn {
+        flex: 1;
+    }
+
+    .editor-attachment-list {
+        grid-template-columns: 1fr;
+    }
+
+    .editor-attachment {
+        grid-template-columns:
+            70px minmax(0,1fr);
+    }
+
+    .editor-attachment-preview {
+        width: 70px;
+        height: 60px;
+    }
+
+    .editor-attachment-remove {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .staffhub-promo-main {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .staffhub-promo-person {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .staffhub-promo-view {
+        width: 100%;
+    }
+
+    .staffhub-promo-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .staffhub-promos-actions {
+        margin-left: 0;
+    }
+}
+
