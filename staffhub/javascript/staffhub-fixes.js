@@ -399,3 +399,853 @@
         }, 0);
     });
 })();
+/* =========================================================
+   FINAL STAFFHUB EDITOR / LAYOUT FIXES
+========================================================= */
+
+(function () {
+    "use strict";
+
+    function get(id) {
+        return document.getElementById(id);
+    }
+
+    function editorMode(editor) {
+        if (!editor) return;
+
+        document.body.classList.add("staffhub-editor-mode");
+
+        const main = document.querySelector(".hub-main");
+        if (!main) return;
+
+        main.querySelectorAll(".editor").forEach(section => {
+            section.hidden = section !== editor;
+            section.classList.toggle(
+                "staffhub-active-editor",
+                section === editor
+            );
+        });
+
+        main.querySelectorAll(
+            ".page-head, .announcement-list, .document, .content-shell, .updates-list, .command-list"
+        ).forEach(section => {
+            if (!section.classList.contains("staffhub-active-editor")) {
+                section.dataset.staffhubWasHidden =
+                    section.hidden ? "1" : "0";
+
+                section.hidden = true;
+            }
+        });
+
+        editor.hidden = false;
+
+        window.scrollTo({
+            top: 0,
+            behavior: "instant"
+        });
+    }
+
+    function exitEditorMode() {
+        document.body.classList.remove("staffhub-editor-mode");
+
+        const main = document.querySelector(".hub-main");
+        if (!main) return;
+
+        main.querySelectorAll(".editor").forEach(section => {
+            section.hidden = true;
+            section.classList.remove(
+                "staffhub-active-editor"
+            );
+        });
+
+        main.querySelectorAll(
+            ".page-head, .announcement-list, .document, .content-shell, .updates-list, .command-list"
+        ).forEach(section => {
+            if (
+                section.dataset.staffhubWasHidden !== undefined
+            ) {
+                section.hidden =
+                    section.dataset.staffhubWasHidden === "1";
+
+                delete section.dataset.staffhubWasHidden;
+            } else {
+                section.hidden = false;
+            }
+        });
+
+        window.scrollTo({
+            top: 0,
+            behavior: "instant"
+        });
+    }
+
+    /*
+    ========================================================
+    GLOBAL EDITOR CSS
+    ========================================================
+    */
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+        body.staffhub-editor-mode {
+            overflow-x: hidden;
+        }
+
+        body.staffhub-editor-mode .staff-user-bar,
+        body.staffhub-editor-mode footer {
+            display: none !important;
+        }
+
+        body.staffhub-editor-mode .editor {
+            display: none !important;
+            width: 100%;
+            margin: 0;
+        }
+
+        body.staffhub-editor-mode
+        .editor.staffhub-active-editor {
+            display: block !important;
+            width: 100%;
+            margin: 0;
+        }
+
+        body.staffhub-editor-mode
+        .editor.staffhub-active-editor
+        .editor-panel {
+            width: 100%;
+            max-width: none;
+            box-sizing: border-box;
+        }
+
+        body.staffhub-editor-mode
+        .hub-main {
+            width: min(1180px, calc(100% - 40px));
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hub-main {
+            width: min(1180px, calc(100% - 40px));
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+
+        .hub-main > .container {
+            width: 100%;
+            max-width: none;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+
+        .page-head {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .page-title-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            box-sizing: border-box;
+        }
+
+        .page-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .editor {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .editor-panel {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .staffhub-editor-mode .page-head {
+            display: none !important;
+        }
+
+        .staffhub-editor-mode .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .staffhub-editor-mode .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        @media (max-width: 700px) {
+            .hub-main {
+                width: calc(100% - 24px);
+            }
+
+            .page-title-row {
+                flex-direction: column;
+            }
+
+            .page-actions {
+                width: 100%;
+            }
+
+            .staffhub-editor-mode .editor-header {
+                flex-direction: column;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+
+
+    /*
+    ========================================================
+    DOCUMENT EDITORS
+    TICKETS / ETIQUETTE / PROMOS
+    ========================================================
+    */
+
+    const originalOpenDocumentEditor =
+        window.openDocumentEditor;
+
+    if (
+        typeof originalOpenDocumentEditor === "function" &&
+        !window.__finalDocumentEditorFix
+    ) {
+        window.__finalDocumentEditorFix = true;
+
+        window.openDocumentEditor = async function (pageName) {
+
+            const editorId =
+                pageName === "promosDemos"
+                    ? "promos-demos-editor"
+                    : `${pageName}-editor`;
+
+            const editor = get(editorId);
+
+            if (!editor) {
+                console.error(
+                    "StaffHub editor not found:",
+                    editorId
+                );
+                return;
+            }
+
+            editor.hidden = false;
+
+            editorMode(editor);
+
+            try {
+                await originalOpenDocumentEditor(
+                    pageName
+                );
+
+                editor.hidden = false;
+
+                editorMode(editor);
+
+            } catch (error) {
+                console.error(
+                    "Document editor failed:",
+                    error
+                );
+
+                editor.innerHTML = `
+                    <div class="editor-panel">
+                        <div class="staffhub-fix-error">
+                            <strong>
+                                Could not load editor
+                            </strong>
+                            <br>
+                            ${String(
+                                error?.message ||
+                                error
+                            )}
+                        </div>
+                    </div>
+                `;
+
+                editor.hidden = false;
+                editorMode(editor);
+            }
+        };
+    }
+
+
+    /*
+    ========================================================
+    ANNOUNCEMENT EDITOR
+    ========================================================
+    */
+
+    const originalOpenAnnouncementsEditor =
+        window.openAnnouncementsEditor;
+
+    if (
+        typeof originalOpenAnnouncementsEditor === "function" &&
+        !window.__finalAnnouncementsEditorFix
+    ) {
+        window.__finalAnnouncementsEditorFix = true;
+
+        window.openAnnouncementsEditor = async function () {
+
+            const editor =
+                get("announcements-editor");
+
+            if (!editor) {
+                console.error(
+                    "announcements-editor not found"
+                );
+                return;
+            }
+
+            editor.hidden = false;
+
+            editorMode(editor);
+
+            try {
+                await originalOpenAnnouncementsEditor();
+
+                editor.hidden = false;
+
+                editorMode(editor);
+
+            } catch (error) {
+                console.error(
+                    "Announcements editor failed:",
+                    error
+                );
+
+                editor.hidden = false;
+                editorMode(editor);
+            }
+        };
+    }
+
+
+    /*
+    ========================================================
+    COMMAND EDITOR
+    ========================================================
+    */
+
+    const originalOpenCommandEditor =
+        window.openCommandEditor;
+
+    if (
+        typeof originalOpenCommandEditor === "function" &&
+        !window.__finalCommandEditorFix
+    ) {
+        window.__finalCommandEditorFix = true;
+
+        window.openCommandEditor = async function () {
+
+            const editor =
+                get("command-editor");
+
+            if (!editor) {
+                console.error(
+                    "command-editor not found"
+                );
+                return;
+            }
+
+            editor.hidden = false;
+
+            editorMode(editor);
+
+            try {
+                await originalOpenCommandEditor();
+
+                editor.hidden = false;
+
+                editorMode(editor);
+
+            } catch (error) {
+                console.error(
+                    "Command editor failed:",
+                    error
+                );
+
+                editor.innerHTML = `
+                    <div class="editor-panel">
+                        <div class="section-label">
+                            COMMAND EDITOR
+                        </div>
+
+                        <div class="staffhub-fix-error">
+                            <strong>
+                                Could not load command editor
+                            </strong>
+
+                            <br>
+
+                            ${String(
+                                error?.message ||
+                                error
+                            )}
+                        </div>
+                    </div>
+                `;
+
+                editor.hidden = false;
+                editorMode(editor);
+            }
+        };
+    }
+
+
+    /*
+    ========================================================
+    PAGE PERMISSIONS
+    ========================================================
+    */
+
+    const originalOpenPagePermissions =
+        window.openPagePermissions;
+
+    if (
+        typeof originalOpenPagePermissions === "function" &&
+        !window.__finalPagePermissionsFix
+    ) {
+        window.__finalPagePermissionsFix = true;
+
+        window.openPagePermissions = async function (pageName) {
+
+            let sectionId;
+
+            if (pageName === "promosDemos") {
+                sectionId =
+                    "promos-demos-permissions";
+            } else {
+                sectionId =
+                    `${pageName}-permissions`;
+            }
+
+            const section =
+                get(sectionId);
+
+            if (!section) {
+                console.error(
+                    "Permissions section not found:",
+                    sectionId
+                );
+
+                return;
+            }
+
+            section.hidden = false;
+
+            editorMode(section);
+
+            try {
+                await originalOpenPagePermissions(
+                    pageName
+                );
+
+                section.hidden = false;
+
+                editorMode(section);
+
+            } catch (error) {
+                console.error(
+                    "Permissions editor failed:",
+                    error
+                );
+
+                section.hidden = false;
+
+                editorMode(section);
+            }
+        };
+    }
+
+
+    /*
+    ========================================================
+    CLOSE EDITOR HELPERS
+    ========================================================
+    */
+
+    [
+        "closeAnnouncementsEditor",
+        "closeCommandEditor",
+        "closePagePermissions",
+        "closeDocumentEditor"
+    ].forEach(name => {
+
+        const original =
+            window[name];
+
+        if (
+            typeof original !== "function" ||
+            window[`__finalCloseFix_${name}`]
+        ) {
+            return;
+        }
+
+        window[`__finalCloseFix_${name}`] = true;
+
+        window[name] = function (...args) {
+
+            exitEditorMode();
+
+            return original.apply(
+                this,
+                args
+            );
+        };
+    });
+
+
+    /*
+    ========================================================
+    MAKE ESCAPE CLOSE EDITOR
+    ========================================================
+    */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            if (
+                document.body.classList.contains(
+                    "staffhub-editor-mode"
+                )
+            ) {
+
+                if (
+                    typeof window.closeAnnouncementsEditor ===
+                    "function"
+                ) {
+                    try {
+                        window.closeAnnouncementsEditor();
+                    } catch {}
+                }
+
+                if (
+                    typeof window.closeCommandEditor ===
+                    "function"
+                ) {
+                    try {
+                        window.closeCommandEditor();
+                    } catch {}
+                }
+
+                if (
+                    typeof window.closePagePermissions ===
+                    "function"
+                ) {
+                    try {
+                        window.closePagePermissions();
+                    } catch {}
+                }
+
+                exitEditorMode();
+            }
+
+        }
+    );
+
+
+    /*
+    ========================================================
+    REPLACE scrollIntoView FOR EDITORS
+    ========================================================
+    */
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            const target =
+                event.target.closest(
+                    "[onclick]"
+                );
+
+            if (!target) {
+                return;
+            }
+
+            const onclick =
+                target.getAttribute("onclick") ||
+                "";
+
+            if (
+                onclick.includes(
+                    "openAnnouncementsEditor"
+                )
+            ) {
+                setTimeout(() => {
+                    const editor =
+                        get("announcements-editor");
+
+                    if (editor) {
+                        editorMode(editor);
+                    }
+                }, 50);
+            }
+
+            if (
+                onclick.includes(
+                    "openCommandEditor"
+                )
+            ) {
+                setTimeout(() => {
+                    const editor =
+                        get("command-editor");
+
+                    if (editor) {
+                        editorMode(editor);
+                    }
+                }, 50);
+            }
+
+            if (
+                onclick.includes(
+                    "openPagePermissions"
+                )
+            ) {
+                setTimeout(() => {
+
+                    const match =
+                        onclick.match(
+                            /openPagePermissions\(['"]([^'"]+)/
+                        );
+
+                    if (!match) return;
+
+                    const page =
+                        match[1];
+
+                    const id =
+                        page === "promosDemos"
+                            ? "promos-demos-permissions"
+                            : `${page}-permissions`;
+
+                    const section =
+                        get(id);
+
+                    if (section) {
+                        editorMode(section);
+                    }
+
+                }, 50);
+            }
+
+        },
+        true
+    );
+
+
+    /*
+    ========================================================
+    FIX NEWLY UPLOADED ATTACHMENT REMOVE BUTTONS
+    ========================================================
+    */
+
+    function refreshAttachmentEditors() {
+
+        document
+            .querySelectorAll(
+                ".editor-attachment-list, .image-preview"
+            )
+            .forEach(list => {
+
+                list.dispatchEvent(
+                    new CustomEvent(
+                        "staffhub-attachment-refresh"
+                    )
+                );
+
+            });
+    }
+
+    window.addEventListener(
+        "staffhub:attachment-added",
+        refreshAttachmentEditors
+    );
+
+    window.addEventListener(
+        "staffhub:attachment-removed",
+        refreshAttachmentEditors
+    );
+
+
+    /*
+    ========================================================
+    PROMOS / DEMOS COMPACT MODE
+    ========================================================
+    */
+
+    function compactPromosDemos() {
+
+        if (
+            document.body.dataset.page !==
+            "promosDemos"
+        ) {
+            return;
+        }
+
+        const list =
+            document.querySelector(
+                ".updates-list"
+            );
+
+        if (!list || list.dataset.compactReady) {
+            return;
+        }
+
+        list.dataset.compactReady = "1";
+
+        list.querySelectorAll(
+            ".staff-update-card"
+        ).forEach(card => {
+
+            const children =
+                [...card.children];
+
+            if (children.length < 2) {
+                return;
+            }
+
+            const details =
+                document.createElement(
+                    "div"
+                );
+
+            details.className =
+                "staffhub-promo-details";
+
+            details.hidden = true;
+
+            while (
+                card.children.length > 1
+            ) {
+                details.appendChild(
+                    card.lastElementChild
+                );
+            }
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.type = "button";
+            button.className =
+                "btn btn-secondary";
+
+            button.textContent =
+                "VIEW ALL";
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    details.hidden =
+                        !details.hidden;
+
+                    button.textContent =
+                        details.hidden
+                            ? "VIEW ALL"
+                            : "SHOW LESS";
+                }
+            );
+
+            card.appendChild(details);
+            card.appendChild(button);
+        });
+    }
+
+
+    /*
+    ========================================================
+    REMOVE USELESS PROMOS EDIT-ACCESS UI
+    ========================================================
+    */
+
+    function removeFounderEditAccess() {
+
+        if (
+            document.body.dataset.page !==
+            "promosDemos"
+        ) {
+            return;
+        }
+
+        document
+            .querySelectorAll(
+                "[data-page='currentStaff'] .edit-access, " +
+                ".founder-edit-access"
+            )
+            .forEach(element => {
+                element.remove();
+            });
+    }
+
+
+    /*
+    ========================================================
+    STARTUP
+    ========================================================
+    */
+
+    function runFinalFixes() {
+
+        compactPromosDemos();
+
+        removeFounderEditAccess();
+    }
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+        document.addEventListener(
+            "DOMContentLoaded",
+            runFinalFixes
+        );
+    } else {
+        runFinalFixes();
+    }
+
+    /*
+    Promos content is rendered asynchronously.
+    Watch for it and compact once it appears.
+    */
+
+    const observer =
+        new MutationObserver(() => {
+
+            compactPromosDemos();
+
+            removeFounderEditAccess();
+
+        });
+
+    observer.observe(
+        document.body,
+        {
+            childList: true,
+            subtree: true
+        }
+    );
+
+})();
