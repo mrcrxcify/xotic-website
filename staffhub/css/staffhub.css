@@ -2079,3 +2079,41 @@ footer img {
 .staffhub-upload-remove:hover {
     background:rgba(220,38,38,.9);
 }
+body.staffhub-editor-mode .staffhub-editor-hidden {
+    display:none !important;
+}
+
+body.staffhub-editor-mode .editor:not(.staffhub-active-editor) {
+    display:none !important;
+}
+
+body.staffhub-editor-mode .editor.staffhub-active-editor {
+    display:block !important;
+}
+
+body.staffhub-editor-mode .staff-user-bar,
+body.staffhub-editor-mode footer {
+    display:none !important;
+}
+
+body.staffhub-editor-mode .hub-main {
+    width:min(1180px, calc(100% - 40px));
+    margin-left:auto;
+    margin-right:auto;
+}
+
+body.staffhub-editor-mode .editor-panel {
+    width:100%;
+    box-sizing:border-box;
+}
+.staffhub-promo-details {
+    margin-top:14px;
+}
+
+.staffhub-promo-details[hidden] {
+    display:none !important;
+}
+
+.staff-update-card > .btn {
+    margin-top:14px;
+}
