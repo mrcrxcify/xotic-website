@@ -120,66 +120,131 @@
         }
     }
 
-    function makeUploadZone(input, label) {
-        if (!input || input.dataset.staffhubUploadReady) return;
-        input.dataset.staffhubUploadReady = "1";
+function makeUploadZone(input, label) {
+    if (!input || input.dataset.staffhubUploadReady) return;
+    input.dataset.staffhubUploadReady = "1";
 
-        const parent = input.parentElement;
-        if (!parent) return;
+    const parent = input.parentElement;
+    if (!parent) return;
 
-        const zone = document.createElement("label");
-        zone.className = "staffhub-upload-zone";
-        zone.innerHTML = `<strong>${esc(label || "Upload files")}</strong><span>Click to browse or drag files here</span>`;
+    const zone = document.createElement("label");
+    zone.className = "staffhub-upload-zone";
+    zone.innerHTML = `
+        <strong>${esc(label || "Upload files")}</strong>
+        <span>Click to browse or drag files here</span>
+    `;
 
-        parent.insertBefore(zone, input);
-        zone.appendChild(input);
-        input.style.display = "none";
+    parent.insertBefore(zone, input);
+    zone.appendChild(input);
+    input.style.display = "none";
 
-        const previews = document.createElement("div");
-        previews.className = "staffhub-upload-previews";
-        parent.insertBefore(previews, zone.nextSibling);
+    const previews = document.createElement("div");
+    previews.className = "staffhub-upload-previews";
+    parent.insertBefore(previews, zone.nextSibling);
 
-        const render = files => {
-            previews.innerHTML = "";
-            [...files].forEach(file => {
-                const card = document.createElement("div");
-                card.className = "staffhub-upload-preview";
-                if (file.type.startsWith("image/")) {
-                    const img = document.createElement("img");
-                    img.src = URL.createObjectURL(file);
-                    img.alt = file.name;
-                    card.appendChild(img);
-                }
-                const name = document.createElement("span");
-                name.textContent = file.name;
-                card.appendChild(name);
-                previews.appendChild(card);
+    let selectedFiles = [];
+
+    function syncInputFiles() {
+        try {
+            const dt = new DataTransfer();
+
+            selectedFiles.forEach(file => {
+                dt.items.add(file);
             });
-        };
 
-        input.addEventListener("change", () => render(input.files));
+            input.files = dt.files;
+        } catch (error) {
+            console.warn("Could not update file input:", error);
+        }
+    }
 
-        ["dragenter","dragover"].forEach(eventName => zone.addEventListener(eventName, e => {
-            e.preventDefault();
-            zone.classList.add("dragover");
-        }));
+    function render() {
+        previews.innerHTML = "";
 
-        ["dragleave","drop"].forEach(eventName => zone.addEventListener(eventName, e => {
-            e.preventDefault();
-            zone.classList.remove("dragover");
-        }));
+        selectedFiles.forEach((file, index) => {
+            const card = document.createElement("div");
+            card.className = "staffhub-upload-preview";
 
-        zone.addEventListener("drop", e => {
-            const files = e.dataTransfer.files;
-            try {
-                const dt = new DataTransfer();
-                [...files].forEach(file => dt.items.add(file));
-                input.files = dt.files;
-            } catch {}
-            render(files);
-            input.dispatchEvent(new Event("change", { bubbles: true }));
+            if (file.type.startsWith("image/")) {
+                const img = document.createElement("img");
+                const objectUrl = URL.createObjectURL(file);
+
+                img.src = objectUrl;
+                img.alt = file.name;
+
+                img.onload = () => {
+                    URL.revokeObjectURL(objectUrl);
+                };
+
+                card.appendChild(img);
+            }
+
+            const name = document.createElement("span");
+            name.textContent = file.name;
+            card.appendChild(name);
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "staffhub-upload-remove";
+            remove.textContent = "×";
+            remove.title = `Remove ${file.name}`;
+
+            remove.addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                selectedFiles.splice(index, 1);
+                syncInputFiles();
+                render();
+
+                input.dispatchEvent(
+                    new CustomEvent("staffhub:file-removed", {
+                        bubbles: true,
+                        detail: { file }
+                    })
+                );
+            });
+
+            card.appendChild(remove);
+            previews.appendChild(card);
         });
     }
+
+    input.addEventListener("change", () => {
+        selectedFiles = [...input.files];
+        render();
+    });
+
+    ["dragenter", "dragover"].forEach(eventName => {
+        zone.addEventListener(eventName, event => {
+            event.preventDefault();
+            event.stopPropagation();
+            zone.classList.add("dragover");
+        });
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+        zone.addEventListener(eventName, event => {
+            event.preventDefault();
+            event.stopPropagation();
+            zone.classList.remove("dragover");
+        });
+    });
+
+    zone.addEventListener("drop", event => {
+        const files = [...event.dataTransfer.files];
+
+        selectedFiles = files;
+        syncInputFiles();
+        render();
+
+        input.dispatchEvent(
+            new Event("change", {
+                bubbles: true
+            })
+        );
+    });
+}
 
     function enhanceUploadInputs() {
         document.querySelectorAll('input[type="file"]').forEach(input => {
@@ -410,74 +475,67 @@
         return document.getElementById(id);
     }
 
-    function editorMode(editor) {
-        if (!editor) return;
+function editorMode(editor) {
+    if (!editor) return;
 
-        document.body.classList.add("staffhub-editor-mode");
+    const main = document.querySelector(".hub-main");
+    if (!main) return;
 
-        const main = document.querySelector(".hub-main");
-        if (!main) return;
+    document.body.classList.add("staffhub-editor-mode");
 
-        main.querySelectorAll(".editor").forEach(section => {
-            section.hidden = section !== editor;
-            section.classList.toggle(
-                "staffhub-active-editor",
-                section === editor
-            );
-        });
+    main.querySelectorAll(".editor").forEach(section => {
+        const active = section === editor;
 
-        main.querySelectorAll(
-            ".page-head, .announcement-list, .document, .content-shell, .updates-list, .command-list"
-        ).forEach(section => {
-            if (!section.classList.contains("staffhub-active-editor")) {
-                section.dataset.staffhubWasHidden =
-                    section.hidden ? "1" : "0";
+        section.classList.toggle(
+            "staffhub-active-editor",
+            active
+        );
 
-                section.hidden = true;
-            }
-        });
+        section.hidden = !active;
+    });
 
-        editor.hidden = false;
+    main.querySelectorAll(
+        ".page-head, .announcement-list, .document, .content-shell, .updates-list, .command-list"
+    ).forEach(section => {
+        section.classList.add("staffhub-editor-hidden");
+    });
 
-        window.scrollTo({
-            top: 0,
-            behavior: "instant"
-        });
-    }
+    editor.hidden = false;
+    editor.classList.add("staffhub-active-editor");
 
-    function exitEditorMode() {
-        document.body.classList.remove("staffhub-editor-mode");
+    window.scrollTo({
+        top: 0,
+        behavior: "instant"
+    });
+}
 
-        const main = document.querySelector(".hub-main");
-        if (!main) return;
+function exitEditorMode() {
+    const main = document.querySelector(".hub-main");
 
-        main.querySelectorAll(".editor").forEach(section => {
-            section.hidden = true;
-            section.classList.remove(
-                "staffhub-active-editor"
-            );
-        });
+    document.body.classList.remove("staffhub-editor-mode");
 
-        main.querySelectorAll(
-            ".page-head, .announcement-list, .document, .content-shell, .updates-list, .command-list"
-        ).forEach(section => {
-            if (
-                section.dataset.staffhubWasHidden !== undefined
-            ) {
-                section.hidden =
-                    section.dataset.staffhubWasHidden === "1";
+    if (!main) return;
 
-                delete section.dataset.staffhubWasHidden;
-            } else {
-                section.hidden = false;
-            }
-        });
+    main.querySelectorAll(".editor").forEach(section => {
+        section.hidden = true;
+        section.classList.remove(
+            "staffhub-active-editor"
+        );
+    });
 
-        window.scrollTo({
-            top: 0,
-            behavior: "instant"
-        });
-    }
+    main.querySelectorAll(
+        ".page-head, .announcement-list, .document, .content-shell, .updates-list, .command-list"
+    ).forEach(section => {
+        section.classList.remove(
+            "staffhub-editor-hidden"
+        );
+    });
+
+    window.scrollTo({
+        top: 0,
+        behavior: "instant"
+    });
+}
 
     /*
     ========================================================
@@ -971,87 +1029,54 @@
     */
 
     document.addEventListener(
-        "click",
-        event => {
+    "click",
+    event => {
+        const target = event.target.closest("[onclick]");
+        if (!target) return;
 
-            const target =
-                event.target.closest(
-                    "[onclick]"
-                );
+        const onclick = target.getAttribute("onclick") || "";
 
-            if (!target) {
-                return;
-            }
+        if (onclick.includes("openAnnouncementsEditor")) {
+            setTimeout(() => {
+                const editor = get("announcements-editor");
+                if (editor) editorMode(editor);
+            }, 50);
+            return;
+        }
 
-            const onclick =
-                target.getAttribute("onclick") ||
-                "";
+        if (onclick.includes("openCommandEditor")) {
+            setTimeout(() => {
+                const editor = get("command-editor");
+                if (editor) editorMode(editor);
+            }, 50);
+            return;
+        }
 
-            if (
-                onclick.includes(
-                    "openAnnouncementsEditor"
-                )
-            ) {
-                setTimeout(() => {
-                    const editor =
-                        get("announcements-editor");
+        if (onclick.includes("openPagePermissions")) {
+            const match = onclick.match(
+                /openPagePermissions\(\s*['"]([^'"]+)['"]\s*\)/
+            );
 
-                    if (editor) {
-                        editorMode(editor);
-                    }
-                }, 50);
-            }
+            if (!match) return;
 
-            if (
-                onclick.includes(
-                    "openCommandEditor"
-                )
-            ) {
-                setTimeout(() => {
-                    const editor =
-                        get("command-editor");
+            const page = match[1];
 
-                    if (editor) {
-                        editorMode(editor);
-                    }
-                }, 50);
-            }
+            setTimeout(() => {
+                const id =
+                    page === "promosDemos"
+                        ? "promos-demos-permissions"
+                        : `${page}-permissions`;
 
-            if (
-                onclick.includes(
-                    "openPagePermissions"
-                )
-            ) {
-                setTimeout(() => {
+                const section = get(id);
 
-                    const match =
-                        onclick.match(
-                            /openPagePermissions\(['"]([^'"]+)/
-                        );
-
-                    if (!match) return;
-
-                    const page =
-                        match[1];
-
-                    const id =
-                        page === "promosDemos"
-                            ? "promos-demos-permissions"
-                            : `${page}-permissions`;
-
-                    const section =
-                        get(id);
-
-                    if (section) {
-                        editorMode(section);
-                    }
-
-                }, 50);
-            }
-
-        },
-        true
-    );
+                if (section) {
+                    editorMode(section);
+                }
+            }, 50);
+        }
+    },
+    true
+);
 
 
     /*
@@ -1094,85 +1119,56 @@
     ========================================================
     */
 
-    function compactPromosDemos() {
-
-        if (
-            document.body.dataset.page !==
-            "promosDemos"
-        ) {
-            return;
-        }
-
-        const list =
-            document.querySelector(
-                ".updates-list"
-            );
-
-        if (!list || list.dataset.compactReady) {
-            return;
-        }
-
-        list.dataset.compactReady = "1";
-
-        list.querySelectorAll(
-            ".staff-update-card"
-        ).forEach(card => {
-
-            const children =
-                [...card.children];
-
-            if (children.length < 2) {
-                return;
-            }
-
-            const details =
-                document.createElement(
-                    "div"
-                );
-
-            details.className =
-                "staffhub-promo-details";
-
-            details.hidden = true;
-
-            while (
-                card.children.length > 1
-            ) {
-                details.appendChild(
-                    card.lastElementChild
-                );
-            }
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-            button.type = "button";
-            button.className =
-                "btn btn-secondary";
-
-            button.textContent =
-                "VIEW ALL";
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    details.hidden =
-                        !details.hidden;
-
-                    button.textContent =
-                        details.hidden
-                            ? "VIEW ALL"
-                            : "SHOW LESS";
-                }
-            );
-
-            card.appendChild(details);
-            card.appendChild(button);
-        });
+function compactPromosDemos() {
+    if (document.body.dataset.page !== "promosDemos") {
+        return;
     }
+
+    const list = document.querySelector(".updates-list");
+
+    if (!list) return;
+
+    list.querySelectorAll(".staff-update-card").forEach(card => {
+        if (card.dataset.compactReady === "1") {
+            return;
+        }
+
+        const children = [...card.children];
+
+        if (children.length < 2) {
+            return;
+        }
+
+        const details = document.createElement("div");
+        details.className = "staffhub-promo-details";
+        details.hidden = true;
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn btn-secondary";
+        button.textContent = "VIEW ALL";
+
+        const first = children[0];
+
+        children.slice(1).forEach(child => {
+            details.appendChild(child);
+        });
+
+        card.appendChild(details);
+        card.appendChild(button);
+
+        button.addEventListener("click", () => {
+            const open = details.hidden;
+
+            details.hidden = !open;
+            button.textContent = open
+                ? "SHOW LESS"
+                : "VIEW ALL";
+        });
+
+        card.dataset.compactReady = "1";
+    });
+}
 
 
     /*
