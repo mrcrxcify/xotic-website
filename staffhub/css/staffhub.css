@@ -2117,3 +2117,320 @@ body.staffhub-editor-mode .editor-panel {
 .staff-update-card > .btn {
     margin-top:14px;
 }
+/* ==================================================
+   XOTIC STAFFHUB FINAL OVERRIDES
+================================================== */
+
+/*
+==================================================
+CONSISTENT PAGE WIDTH
+==================================================
+*/
+
+.hub-main,
+.staff-page {
+    width: min(1180px, calc(100% - 40px)) !important;
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.hub-main > .container,
+.staff-page > .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.hub-main > .container > *,
+.staff-page > .container > * {
+    box-sizing: border-box !important;
+}
+
+
+/*
+==================================================
+EDITOR MODE
+==================================================
+
+When editing:
+NORMAL PAGE = HIDDEN
+EDITOR = ONLY THING VISIBLE
+*/
+
+body.staffhub-editor-mode {
+    overflow-x: hidden;
+}
+
+body.staffhub-editor-mode .staffhub-editor-hidden {
+    display: none !important;
+}
+
+body.staffhub-editor-mode .page-head {
+    display: none !important;
+}
+
+body.staffhub-editor-mode .staff-user-bar {
+    display: none !important;
+}
+
+body.staffhub-editor-mode footer {
+    display: none !important;
+}
+
+body.staffhub-editor-mode .editor {
+    display: none !important;
+}
+
+body.staffhub-editor-mode
+.editor.staffhub-active-editor {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+/*
+==================================================
+EDITOR PANEL
+==================================================
+*/
+
+body.staffhub-editor-mode
+.editor.staffhub-active-editor
+.editor-panel {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+body.staffhub-editor-mode
+.editor.staffhub-active-editor
+.editor-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 18px 0;
+    margin-bottom: 24px;
+    background: rgba(3, 5, 10, .96);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+}
+
+
+/*
+==================================================
+UPLOAD PREVIEWS
+==================================================
+*/
+
+.staffhub-upload-previews {
+    display: grid !important;
+    grid-template-columns:
+        repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.staffhub-upload-preview {
+    position: relative;
+    min-width: 0;
+    min-height: 120px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--dark-2);
+}
+
+.staffhub-upload-preview img {
+    display: block;
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.staffhub-upload-preview-info {
+    padding: 9px 38px 9px 10px;
+    overflow: hidden;
+    color: var(--gray);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.staffhub-upload-remove {
+    position: absolute !important;
+    top: 7px !important;
+    right: 7px !important;
+
+    display: grid !important;
+    place-items: center !important;
+
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 1px solid rgba(255,255,255,.18) !important;
+    border-radius: 50% !important;
+
+    background: rgba(0,0,0,.78) !important;
+    color: #fff !important;
+
+    font-size: 19px !important;
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    z-index: 5;
+}
+
+.staffhub-upload-remove:hover {
+    background: rgba(239,68,68,.85) !important;
+    border-color: rgba(239,68,68,.9) !important;
+    transform: scale(1.05);
+}
+
+.staffhub-upload-file-icon {
+    display: grid;
+    place-items: center;
+    height: 120px;
+    color: var(--blue-light);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+
+
+/*
+==================================================
+PROMOS / DEMOS COMPACT VIEW
+==================================================
+*/
+
+.staffhub-promo-details {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.staffhub-view-all {
+    margin-top: 12px;
+}
+
+
+/*
+==================================================
+PERMISSION PANELS
+==================================================
+*/
+
+.staffhub-editor-mode
+.staffhub-active-editor
+.permission-columns {
+    width: 100%;
+}
+
+.staffhub-editor-mode
+.staffhub-active-editor
+.permission-box {
+    min-width: 0;
+}
+
+
+/*
+==================================================
+ERRORS
+==================================================
+*/
+
+.staffhub-fix-error {
+    padding: 15px 16px;
+    border: 1px solid rgba(239,68,68,.28);
+    border-radius: 10px;
+    background: rgba(239,68,68,.07);
+    color: #fca5a5;
+    line-height: 1.6;
+}
+
+
+/*
+==================================================
+MOBILE
+==================================================
+*/
+
+@media (max-width: 700px) {
+
+    .hub-main,
+    .staff-page {
+        width: calc(100% - 24px) !important;
+        max-width: none !important;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .form-full {
+        grid-column: auto !important;
+    }
+
+    .permission-columns {
+        grid-template-columns: 1fr !important;
+    }
+
+    .staffhub-upload-previews {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .editor-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .editor-header .form-actions,
+    .editor-header .page-actions {
+        width: 100%;
+    }
+
+    .editor-header button {
+        flex: 1;
+    }
+}
+
+
+/*
+==================================================
+VERY SMALL SCREENS
+==================================================
+*/
+
+@media (max-width: 430px) {
+
+    .hub-main,
+    .staff-page {
+        width: calc(100% - 16px) !important;
+    }
+
+    .staffhub-upload-previews {
+        grid-template-columns: 1fr;
+    }
+
+    .staffhub-upload-preview img {
+        height: 150px;
+    }
+
+    .staffhub-upload-file-icon {
+        height: 150px;
+    }
+
+}
