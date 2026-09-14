@@ -1,36 +1,32 @@
+js
 /*
 ==================================================
-XOTIC STAFFHUB - FINAL FIXES
+XOTIC STAFFHUB
+FINAL FRONTEND FIXES
 ==================================================
 
-This file intentionally sits AFTER staffhub.js.
+This file loads AFTER staffhub.js.
 
-It fixes:
-- Consistent page width
+Fixes:
 - Proper editor mode
-- Editors replacing normal page content
-- Command editor loading
-- Permissions editors
-- Announcement permissions
-- Etiquette permissions
-- Tickets permissions
-- Promos & Demos permissions
-- Promos & Demos compact view
-- Upload previews
-- Immediate upload removal
-- Better attachment handling
-- Mobile editor layout
-- Escape-to-close
+- Editors replace the normal page
+- Tickets attachment removal
+- Etiquette attachment removal
+- Immediate removal of newly uploaded files
+- Announcement attachment removal
+- Announcement delete refresh
+- Commands editor loading
+- Permissions editor
+- Promos & Demos gear button
+- Promos & Demos editor
+- Promos & Demos compact activity cards
+- Consistent page width
+- Proper close behaviour
+- Mobile layout
 */
 
 (function () {
     "use strict";
-
-    /*
-    ==================================================
-    HELPERS
-    ==================================================
-    */
 
     const $ = id => document.getElementById(id);
 
@@ -43,63 +39,41 @@ It fixes:
             .replaceAll("'", "&#039;");
     }
 
-    function wait(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    function main() {
+        return (
+            document.querySelector(".hub-main") ||
+            document.querySelector(".staff-page")
+        );
     }
 
-    async function withTimeout(promise, ms, message) {
-        let timer;
-
-        const timeout = new Promise((_, reject) => {
-            timer = setTimeout(() => {
-                reject(new Error(message));
-            }, ms);
-        });
-
-        try {
-            return await Promise.race([
-                promise,
-                timeout
-            ]);
-        } finally {
-            clearTimeout(timer);
-        }
+    function hasEdit(page) {
+        return (
+            typeof window.pagePermission === "function" &&
+            window.pagePermission(page, "edit")
+        );
     }
 
-    function hasPermission(page, type = "view") {
-        if (typeof window.pagePermission !== "function") {
-            return false;
-        }
-
-        return window.pagePermission(page, type);
-    }
-
-    function getMain() {
-        return document.querySelector(".hub-main") ||
-               document.querySelector(".staff-page");
+    function isFounder() {
+        return Boolean(window.staffMe?.founder);
     }
 
     /*
     ==================================================
     EDITOR MODE
     ==================================================
-
-    When an editor opens, the actual page disappears.
-
-    The user sees ONLY the editor.
     */
 
-    function enterEditorMode(editor) {
+    function enterEditor(editor) {
         if (!editor) return;
 
-        const main = getMain();
+        const root = main();
 
         document.body.classList.add(
             "staffhub-editor-mode"
         );
 
-        if (main) {
-            main.querySelectorAll(
+        if (root) {
+            root.querySelectorAll(
                 ".page-head, " +
                 ".announcement-list, " +
                 ".document, " +
@@ -107,24 +81,26 @@ It fixes:
                 ".updates-list, " +
                 ".command-list, " +
                 ".hub-grid, " +
-                ".hub-card, " +
-                ".staff-page-content"
+                ".staff-user-bar"
             ).forEach(element => {
-                if (element !== editor &&
-                    !editor.contains(element)) {
+                if (
+                    element !== editor &&
+                    !editor.contains(element)
+                ) {
                     element.classList.add(
                         "staffhub-editor-hidden"
                     );
                 }
             });
 
-            main.querySelectorAll(".editor").forEach(section => {
-                section.classList.remove(
-                    "staffhub-active-editor"
-                );
-
+            root.querySelectorAll(
+                ".editor"
+            ).forEach(section => {
                 if (section !== editor) {
                     section.hidden = true;
+                    section.classList.remove(
+                        "staffhub-active-editor"
+                    );
                 }
             });
         }
@@ -142,10 +118,7 @@ It fixes:
         });
     }
 
-    window.staffhubEnterEditorMode =
-        enterEditorMode;
-
-    function exitEditorMode() {
+    function exitEditor() {
         document.body.classList.remove(
             "staffhub-editor-mode"
         );
@@ -179,201 +152,1480 @@ It fixes:
         });
     }
 
-    window.staffhubExitEditorMode =
-        exitEditorMode;
+    window.staffhubEnterEditorMode = enterEditor;
+    window.staffhubExitEditorMode = exitEditor;
 
     /*
     ==================================================
-    EDITOR CLOSE BUTTONS
+    CREATE MISSING PROMOS CONTAINERS
     ==================================================
     */
 
-    function closeKnownEditor(id) {
-        const editor = $(id);
+    function ensurePromosEditor() {
+        let editor = $(
+            "promos-demos-editor"
+        );
 
         if (editor) {
-            editor.hidden = true;
-            editor.classList.remove(
-                "staffhub-active-editor"
-            );
+            return editor;
         }
 
-        exitEditorMode();
+        const root = main();
+
+        if (!root) {
+            return null;
+        }
+
+        editor = document.createElement(
+            "section"
+        );
+
+        editor.id =
+            "promos-demos-editor";
+
+        editor.className =
+            "editor";
+
+        editor.hidden = true;
+
+        root.appendChild(editor);
+
+        return editor;
+    }
+
+    function ensurePromosPermissions() {
+        let section = $(
+            "promos-demos-permissions"
+        );
+
+        if (!section) {
+            const root = main();
+
+            if (!root) {
+                return null;
+            }
+
+            section = document.createElement(
+                "section"
+            );
+
+            section.id =
+                "promos-demos-permissions";
+
+            section.className =
+                "editor";
+
+            section.hidden = true;
+
+            root.appendChild(section);
+        }
+
+        let content = $(
+            "promos-demos-permissions-content"
+        );
+
+        if (!content) {
+            content = document.createElement(
+                "div"
+            );
+
+            content.id =
+                "promos-demos-permissions-content";
+
+            section.appendChild(content);
+        }
+
+        return {
+            section,
+            content
+        };
     }
 
     /*
     ==================================================
-    UPLOAD PREVIEW SYSTEM
+    PROMOS BUTTONS
     ==================================================
     */
 
-    function installUploadPreview(input) {
-        if (!input) return;
-
+    function installPromosButtons() {
         if (
-            input.dataset.staffhubPreviewInstalled === "1"
+            document.body.dataset.page !==
+            "promosDemos"
         ) {
             return;
         }
 
-        input.dataset.staffhubPreviewInstalled = "1";
-
-        const wrapper =
-            input.parentElement;
-
-        if (!wrapper) return;
-
-        let preview =
-            wrapper.querySelector(
-                ".staffhub-upload-previews"
+        const head =
+            document.querySelector(
+                ".content-shell-header"
             );
 
-        if (!preview) {
-            preview =
-                document.createElement("div");
-
-            preview.className =
-                "staffhub-upload-previews";
-
-            input.insertAdjacentElement(
-                "afterend",
-                preview
-            );
+        if (!head) {
+            return;
         }
 
-        let files = [];
+        let actions =
+            head.querySelector(
+                ".staffhub-promos-actions"
+            );
 
-        function syncFiles() {
-            try {
-                const dataTransfer =
-                    new DataTransfer();
+        if (!actions) {
+            actions = document.createElement(
+                "div"
+            );
 
-                files.forEach(file => {
-                    dataTransfer.items.add(file);
-                });
+            actions.className =
+                "staffhub-promos-actions";
 
-                input.files =
-                    dataTransfer.files;
+            head.appendChild(actions);
+        }
 
-            } catch (error) {
-                console.warn(
-                    "StaffHub could not sync files:",
-                    error
+        if (
+            hasEdit("promosDemos") &&
+            !actions.querySelector(
+                ".staffhub-promos-edit"
+            )
+        ) {
+            const edit =
+                document.createElement(
+                    "button"
                 );
-            }
+
+            edit.type = "button";
+            edit.className =
+                "icon-button staffhub-promos-edit";
+            edit.title =
+                "Edit Promos & Demos";
+            edit.textContent = "✎";
+
+            edit.onclick =
+                () =>
+                    window.openDocumentEditor(
+                        "promosDemos"
+                    );
+
+            actions.appendChild(edit);
         }
 
-        function render() {
-            preview.innerHTML = "";
+        if (
+            isFounder() &&
+            !actions.querySelector(
+                ".staffhub-promos-permissions"
+            )
+        ) {
+            const gear =
+                document.createElement(
+                    "button"
+                );
 
-            files.forEach((file, index) => {
-                const card =
-                    document.createElement("div");
+            gear.type = "button";
+            gear.className =
+                "icon-button staffhub-promos-permissions";
+            gear.title =
+                "Edit Promos & Demos Permissions";
+            gear.textContent = "⚙";
 
-                card.className =
-                    "staffhub-upload-preview";
-
-                if (
-                    file.type &&
-                    file.type.startsWith("image/")
-                ) {
-                    const image =
-                        document.createElement("img");
-
-                    const objectUrl =
-                        URL.createObjectURL(file);
-
-                    image.src =
-                        objectUrl;
-
-                    image.alt =
-                        file.name;
-
-                    image.onload =
-                        () => {
-                            URL.revokeObjectURL(
-                                objectUrl
-                            );
-                        };
-
-                    card.appendChild(image);
-                } else {
-                    const fileIcon =
-                        document.createElement("div");
-
-                    fileIcon.className =
-                        "staffhub-upload-file-icon";
-
-                    fileIcon.textContent =
-                        "FILE";
-
-                    card.appendChild(
-                        fileIcon
+            gear.onclick =
+                () =>
+                    window.openPagePermissions(
+                        "promosDemos"
                     );
-                }
 
-                const info =
-                    document.createElement("div");
+            actions.appendChild(gear);
+        }
+    }
 
-                info.className =
-                    "staffhub-upload-preview-info";
+    /*
+    ==================================================
+    DOCUMENT ATTACHMENTS
+    ==================================================
+    */
 
-                info.textContent =
-                    file.name;
+    function readAttachmentData(
+        categoryId
+    ) {
+        const input = $(
+            `attachment-data-${categoryId}`
+        );
 
-                card.appendChild(info);
+        if (!input) {
+            return [];
+        }
 
-                const remove =
-                    document.createElement("button");
+        try {
+            const parsed =
+                JSON.parse(
+                    input.value || "[]"
+                );
 
-                remove.type =
-                    "button";
+            return Array.isArray(parsed)
+                ? parsed
+                : [];
+        } catch {
+            return [];
+        }
+    }
 
-                remove.className =
-                    "staffhub-upload-remove";
+    function renderDocumentAttachmentUI(
+        categoryId
+    ) {
+        const container = $(
+            `attachments-${categoryId}`
+        );
 
-                remove.textContent =
-                    "×";
+        if (!container) {
+            return;
+        }
 
-                remove.title =
-                    "Remove attachment";
+        const attachments =
+            readAttachmentData(
+                categoryId
+            );
 
-                remove.addEventListener(
+        if (!attachments.length) {
+            container.innerHTML = `
+                <div class="empty-state attachment-empty">
+                    No attachments added.
+                </div>
+            `;
+
+            return;
+        }
+
+        container.innerHTML =
+            attachments
+                .map(attachment => {
+                    const url =
+                        typeof window.getAttachmentUrl ===
+                        "function"
+                            ? window.getAttachmentUrl(
+                                attachment.url
+                            )
+                            : attachment.url;
+
+                    const type =
+                        String(
+                            attachment.type || ""
+                        ).toLowerCase();
+
+                    const isImage =
+                        type.startsWith("image/") ||
+                        /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(
+                            attachment.name || ""
+                        );
+
+                    return `
+                        <div
+                            class="editor-attachment"
+                            data-attachment-id="${esc(
+                                attachment.id
+                            )}"
+                        >
+
+                            <div class="editor-attachment-preview">
+                                ${
+                                    isImage
+                                        ? `
+                                            <img
+                                                src="${esc(url)}"
+                                                alt="${esc(
+                                                    attachment.name ||
+                                                    "Attachment"
+                                                )}"
+                                                onclick="openImageViewer('${esc(url)}')"
+                                            >
+                                        `
+                                        : `
+                                            <div class="editor-file-icon">
+                                                FILE
+                                            </div>
+                                        `
+                                }
+                            </div>
+
+                            <div class="editor-attachment-info">
+                                <strong>
+                                    ${esc(
+                                        attachment.name ||
+                                        "Attachment"
+                                    )}
+                                </strong>
+
+                                ${
+                                    attachment.size
+                                        ? `
+                                            <span>
+                                                ${
+                                                    typeof window.formatFileSize ===
+                                                    "function"
+                                                        ? window.formatFileSize(
+                                                            attachment.size
+                                                        )
+                                                        : ""
+                                                }
+                                            </span>
+                                        `
+                                        : ""
+                                }
+                            </div>
+
+                            <button
+                                type="button"
+                                class="btn btn-danger editor-attachment-remove"
+                                data-category-id="${esc(
+                                    categoryId
+                                )}"
+                                data-attachment-id="${esc(
+                                    attachment.id
+                                )}"
+                            >
+                                REMOVE
+                            </button>
+
+                        </div>
+                    `;
+                })
+                .join("");
+
+        container
+            .querySelectorAll(
+                ".editor-attachment-remove"
+            )
+            .forEach(button => {
+                button.addEventListener(
                     "click",
                     event => {
                         event.preventDefault();
                         event.stopPropagation();
 
-                        files.splice(
-                            index,
-                            1
-                        );
-
-                        syncFiles();
-                        render();
-
-                        input.dispatchEvent(
-                            new CustomEvent(
-                                "staffhub:file-removed",
-                                {
-                                    bubbles: true,
-                                    detail: {
-                                        file
-                                    }
-                                }
-                            )
+                        removeDocumentAttachmentFixed(
+                            button.dataset.categoryId,
+                            button.dataset.attachmentId
                         );
                     }
                 );
+            });
+    }
 
-                card.appendChild(
-                    remove
+    function removeDocumentAttachmentFixed(
+        categoryId,
+        attachmentId
+    ) {
+        const input = $(
+            `attachment-data-${categoryId}`
+        );
+
+        if (!input) {
+            return;
+        }
+
+        const attachments =
+            readAttachmentData(
+                categoryId
+            ).filter(
+                attachment =>
+                    String(attachment.id) !==
+                    String(attachmentId)
+            );
+
+        input.value =
+            JSON.stringify(
+                attachments
+            );
+
+        renderDocumentAttachmentUI(
+            categoryId
+        );
+    }
+
+    async function handleDocumentAttachmentsFixed(
+        pageName,
+        categoryId,
+        files
+    ) {
+        const selected =
+            Array.from(files || []);
+
+        if (!selected.length) {
+            return;
+        }
+
+        try {
+            const uploaded =
+                await window.uploadAttachments(
+                    selected,
+                    pageName
                 );
 
-                preview.appendChild(
-                    card
+            const input = $(
+                `attachment-data-${categoryId}`
+            );
+
+            if (!input) {
+                return;
+            }
+
+            const existing =
+                readAttachmentData(
+                    categoryId
+                );
+
+            input.value =
+                JSON.stringify(
+                    existing.concat(
+                        uploaded || []
+                    )
+                );
+
+            renderDocumentAttachmentUI(
+                categoryId
+            );
+
+            const fileInput = $(
+                `document-files-${categoryId}`
+            );
+
+            if (fileInput) {
+                fileInput.value = "";
+            }
+
+        } catch (error) {
+            alert(
+                error.message ||
+                "Upload failed."
+            );
+        }
+    }
+
+    window.handleDocumentAttachments =
+        handleDocumentAttachmentsFixed;
+
+    window.removeDocumentAttachment =
+        removeDocumentAttachmentFixed;
+
+    /*
+    ==================================================
+    COMMAND EDITOR
+    ==================================================
+    */
+
+    async function openCommandEditorFixed() {
+        const editor =
+            $("command-editor");
+
+        if (!editor) {
+            console.error(
+                "StaffHub: command-editor is missing."
+            );
+
+            return;
+        }
+
+        if (
+            !window.pagePermission ||
+            !window.pagePermission(
+                "commands",
+                "edit"
+            )
+        ) {
+            return;
+        }
+
+        enterEditor(editor);
+
+        editor.innerHTML = `
+            <div class="editor-panel">
+                <div class="editor-header">
+                    <div>
+                        <div class="section-label">
+                            COMMAND EDITOR
+                        </div>
+
+                        <h2>
+                            Manage Commands
+                        </h2>
+
+                        <p>
+                            Loading command configuration...
+                        </p>
+                    </div>
+
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                        onclick="closeCommandEditor()"
+                    >
+                        CLOSE
+                    </button>
+                </div>
+
+                <div
+                    id="command-editor-list"
+                    class="staffhub-command-editor-list"
+                >
+                    <div class="empty-state">
+                        Loading commands...
+                    </div>
+                </div>
+            </div>
+        `;
+
+        try {
+            const data =
+                await window.api(
+                    "/api/staffhub/commands"
+                );
+
+            window.commandCategories =
+                data.categories || [];
+
+            if (
+                typeof window.loadCommandRoles ===
+                "function"
+            ) {
+                try {
+                    await Promise.race([
+                        window.loadCommandRoles(),
+                        new Promise(resolve =>
+                            setTimeout(
+                                resolve,
+                                5000
+                            )
+                        )
+                    ]);
+                } catch {}
+            }
+
+            if (
+                typeof window.renderCommandEditor ===
+                "function"
+            ) {
+                window.renderCommandEditor();
+            }
+
+            installAllUploads();
+
+        } catch (error) {
+            const list = $(
+                "command-editor-list"
+            );
+
+            if (list) {
+                list.innerHTML = `
+                    <div class="staffhub-fix-error">
+                        <strong>
+                            Could not load commands
+                        </strong>
+                        <span>
+                            ${esc(
+                                error.message
+                            )}
+                        </span>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    window.openCommandEditor =
+        openCommandEditorFixed;
+
+    /*
+    ==================================================
+    DOCUMENT EDITOR
+    ==================================================
+    */
+
+    async function openDocumentEditorFixed(
+        pageName
+    ) {
+        if (!hasEdit(pageName)) {
+            return;
+        }
+
+        let editorId =
+            pageName === "promosDemos"
+                ? "promos-demos-editor"
+                : `${pageName}-editor`;
+
+        let editor = $(editorId);
+
+        if (
+            !editor &&
+            pageName === "promosDemos"
+        ) {
+            editor =
+                ensurePromosEditor();
+        }
+
+        if (!editor) {
+            return;
+        }
+
+        enterEditor(editor);
+
+        editor.innerHTML = `
+            <div class="editor-panel">
+                <div class="editor-header">
+                    <div>
+                        <div class="section-label">
+                            ${
+                                esc(
+                                    window.PAGE_INFO?.[
+                                        pageName
+                                    ]?.title ||
+                                    pageName
+                                ).toUpperCase()
+                            }
+                            EDITOR
+                        </div>
+
+                        <h2>
+                            Manage Content
+                        </h2>
+
+                        <p>
+                            Manage categories, text and attachments.
+                        </p>
+                    </div>
+
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                        onclick="closeDocumentEditor('${esc(
+                            pageName
+                        )}')"
+                    >
+                        CLOSE
+                    </button>
+                </div>
+
+                <div id="${esc(
+                    pageName
+                )}-editor-loading">
+                    <div class="empty-state">
+                        Loading content...
+                    </div>
+                </div>
+            </div>
+        `;
+
+        try {
+            const data =
+                await window.api(
+                    `/api/staffhub/${pageName}`
+                );
+
+            if (
+                typeof window.renderDocumentEditor ===
+                "function"
+            ) {
+                window.renderDocumentEditor(
+                    pageName,
+                    data.page
+                );
+            }
+
+            installAllUploads();
+
+            /*
+            After the original renderer creates
+            its attachment controls, replace
+            their event handlers with ours.
+            */
+
+            document
+                .querySelectorAll(
+                    'input[id^="document-files-"]'
+                )
+                .forEach(input => {
+                    input.onchange = null;
+
+                    input.addEventListener(
+                        "change",
+                        event => {
+                            const match =
+                                input.id.match(
+                                    /^document-files-(.+)$/
+                                );
+
+                            if (!match) {
+                                return;
+                            }
+
+                            handleDocumentAttachmentsFixed(
+                                pageName,
+                                match[1],
+                                event.target.files
+                            );
+                        }
+                    );
+                });
+
+            document
+                .querySelectorAll(
+                    '[id^="attachments-"]'
+                )
+                .forEach(container => {
+                    const categoryId =
+                        container.id.replace(
+                            "attachments-",
+                            ""
+                        );
+
+                    renderDocumentAttachmentUI(
+                        categoryId
+                    );
+                });
+
+        } catch (error) {
+            editor.innerHTML = `
+                <div class="editor-panel">
+                    <div class="section-label">
+                        EDITOR ERROR
+                    </div>
+
+                    <h2>
+                        Could not load editor
+                    </h2>
+
+                    <div class="staffhub-fix-error">
+                        ${esc(
+                            error.message
+                        )}
+                    </div>
+
+                    <div class="form-actions">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            onclick="staffhubExitEditorMode()"
+                        >
+                            CLOSE
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    window.openDocumentEditor =
+        openDocumentEditorFixed;
+
+    /*
+    ==================================================
+    ANNOUNCEMENTS
+    ==================================================
+    */
+
+    async function deleteAnnouncementFixed(
+        id
+    ) {
+        if (
+            !confirm(
+                "Delete this announcement?"
+            )
+        ) {
+            return;
+        }
+
+        try {
+            await window.api(
+                `/api/staffhub/announcements/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            /*
+            IMPORTANT:
+            Wait for the API refresh before
+            doing anything else.
+            */
+
+            await window.renderAnnouncements();
+
+        } catch (error) {
+            alert(
+                error.message ||
+                "Could not delete announcement."
+            );
+        }
+    }
+
+    window.deleteAnnouncement =
+        deleteAnnouncementFixed;
+
+    /*
+    ==================================================
+    ANNOUNCEMENT ATTACHMENTS
+    ==================================================
+    */
+
+    async function handleAnnouncementAttachmentsFixed(
+        files
+    ) {
+        const selected =
+            Array.from(files || []);
+
+        if (!selected.length) {
+            return;
+        }
+
+        try {
+            const uploaded =
+                await window.uploadAttachments(
+                    selected,
+                    "announcements"
+                );
+
+            const input = $(
+                "announcement-attachment-data"
+            );
+
+            if (!input) {
+                return;
+            }
+
+            let existing = [];
+
+            try {
+                existing =
+                    JSON.parse(
+                        input.value || "[]"
+                    );
+            } catch {
+                existing = [];
+            }
+
+            input.value =
+                JSON.stringify(
+                    existing.concat(
+                        uploaded || []
+                    )
+                );
+
+            if (
+                typeof window.renderAnnouncementAttachmentPreview ===
+                "function"
+            ) {
+                window.renderAnnouncementAttachmentPreview();
+            }
+
+            const fileInput = $(
+                "announcement-files"
+            );
+
+            if (fileInput) {
+                fileInput.value = "";
+            }
+
+        } catch (error) {
+            alert(
+                error.message ||
+                "Upload failed."
+            );
+        }
+    }
+
+    window.handleAnnouncementAttachments =
+        handleAnnouncementAttachmentsFixed;
+
+    /*
+    ==================================================
+    PERMISSIONS
+    ==================================================
+    */
+
+    async function openPagePermissionsFixed(
+        pageName
+    ) {
+        if (!isFounder()) {
+            return;
+        }
+
+        let section;
+        let content;
+
+        if (
+            pageName === "promosDemos"
+        ) {
+            const target =
+                ensurePromosPermissions();
+
+            if (!target) {
+                return;
+            }
+
+            section =
+                target.section;
+
+            content =
+                target.content;
+        } else {
+            section = $(
+                pageName === "commands"
+                    ? "command-permissions"
+                    : `${pageName}-permissions`
+            );
+
+            if (!section) {
+                return;
+            }
+
+            content =
+                $(
+                    pageName === "commands"
+                        ? "command-permissions-content"
+                        : `${pageName}-permissions-content`
+                );
+
+            if (!content) {
+                content =
+                    document.createElement(
+                        "div"
+                    );
+
+                content.id =
+                    pageName === "commands"
+                        ? "command-permissions-content"
+                        : `${pageName}-permissions-content`;
+
+                section.appendChild(
+                    content
+                );
+            }
+        }
+
+        enterEditor(section);
+
+        content.innerHTML = `
+            <div class="editor-panel">
+                <div class="section-label">
+                    PAGE PERMISSIONS
+                </div>
+
+                <h2>
+                    Loading permissions...
+                </h2>
+
+                <p>
+                    Loading Discord roles and access settings.
+                </p>
+            </div>
+        `;
+
+        try {
+            const data =
+                await window.api(
+                    "/api/staffhub/permissions"
+                );
+
+            const roles =
+                typeof window.loadPermissionRoles ===
+                "function"
+                    ? await window.loadPermissionRoles()
+                    : [];
+
+            if (
+                typeof window.renderPermissionsEditor ===
+                "function"
+            ) {
+                window.renderPermissionsEditor(
+                    content.id,
+                    pageName,
+                    data.permissions,
+                    roles
+                );
+            }
+
+        } catch (error) {
+            content.innerHTML = `
+                <div class="staffhub-fix-error">
+                    <strong>
+                        Could not load permissions
+                    </strong>
+
+                    <span>
+                        ${esc(
+                            error.message
+                        )}
+                    </span>
+                </div>
+            `;
+        }
+    }
+
+    window.openPagePermissions =
+        openPagePermissionsFixed;
+
+    /*
+    ==================================================
+    CLOSE FUNCTIONS
+    ==================================================
+    */
+
+    function patchClose(
+        name
+    ) {
+        if (
+            typeof window[name] !==
+            "function"
+        ) {
+            return;
+        }
+
+        window[name] = function (...args) {
+            const result =
+                window[
+                    `__staffhub_original_${name}`
+                ]?.(...args);
+
+            exitEditor();
+
+            return result;
+        };
+    }
+
+    [
+        "closeCommandEditor",
+        "closeDocumentEditor",
+        "closeTicketsEditor",
+        "closeEtiquetteEditor",
+        "closeAnnouncementsEditor",
+        "closePagePermissions",
+        "closeCommandPermissions",
+        "closeTicketsPermissions",
+        "closeEtiquettePermissions",
+        "closeAnnouncementsPermissions",
+        "closePromosDemosPermissions"
+    ].forEach(name => {
+        if (
+            typeof window[name] ===
+            "function" &&
+            !window[
+                `__staffhub_original_${name}`
+            ]
+        ) {
+            window[
+                `__staffhub_original_${name}`
+            ] = window[name];
+
+            window[name] =
+                function (...args) {
+                    const result =
+                        window[
+                            `__staffhub_original_${name}`
+                        ](...args);
+
+                    exitEditor();
+
+                    return result;
+                };
+        }
+    });
+
+    /*
+    ==================================================
+    PROMOS & DEMOS
+    ==================================================
+    */
+
+    function renderCompactActivity() {
+        const list =
+            $("staff-activity-results");
+
+        if (!list) {
+            return;
+        }
+
+        const data =
+            Array.isArray(
+                window.staffActivityData
+            )
+                ? window.staffActivityData
+                : [];
+
+        const filters =
+            window.staffActivityFilters ||
+            {
+                type: "all",
+                member: "all",
+                executor: "all"
+            };
+
+        const filtered =
+            data.filter(update => {
+                if (
+                    filters.type !== "all" &&
+                    String(
+                        update.type || ""
+                    ).toLowerCase() !==
+                        filters.type
+                ) {
+                    return false;
+                }
+
+                if (
+                    filters.member !== "all" &&
+                    update.memberId !==
+                        filters.member
+                ) {
+                    return false;
+                }
+
+                if (
+                    filters.executor !== "all" &&
+                    update.updatedBy?.id !==
+                        filters.executor
+                ) {
+                    return false;
+                }
+
+                return true;
+            });
+
+        if (!filtered.length) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    No activity matches those filters.
+                </div>
+            `;
+
+            return;
+        }
+
+        list.innerHTML =
+            filtered.map(update => {
+                const oldRoles =
+                    Array.isArray(
+                        update.oldRoles
+                    )
+                        ? update.oldRoles
+                        : [];
+
+                const newRoles =
+                    Array.isArray(
+                        update.newRoles
+                    )
+                        ? update.newRoles
+                        : [];
+
+                const oldText =
+                    oldRoles.length
+                        ? oldRoles
+                            .map(
+                                role =>
+                                    role.name
+                            )
+                            .join(", ")
+                        : "None";
+
+                const newText =
+                    newRoles.length
+                        ? newRoles
+                            .map(
+                                role =>
+                                    role.name
+                            )
+                            .join(", ")
+                        : "None";
+
+                const executor =
+                    update.updatedBy
+                        ? (
+                            update.updatedBy.displayName ||
+                            update.updatedBy.username ||
+                            "Unknown"
+                        )
+                        : "Unknown";
+
+                const date =
+                    typeof window.formatDate ===
+                    "function"
+                        ? window.formatDate(
+                            update.date
+                        )
+                        : "";
+
+                const id =
+                    `promo-${esc(
+                        update.memberId ||
+                        Math.random()
+                    )}-${Math.random()
+                        .toString(36)
+                        .slice(2)}`;
+
+                return `
+                    <article
+                        class="staffhub-promo-card"
+                    >
+
+                        <div class="staffhub-promo-main">
+
+                            <div class="staffhub-promo-person">
+                                <strong>
+                                    ${esc(
+                                        update.displayName ||
+                                        update.username ||
+                                        "Unknown"
+                                    )}
+                                </strong>
+
+                                <span>
+                                    ${esc(
+                                        getActivityLabelSafe(
+                                            update.type
+                                        )
+                                    )}
+                                </span>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="btn btn-secondary staffhub-promo-view"
+                                data-target="${id}"
+                            >
+                                VIEW ALL
+                            </button>
+
+                        </div>
+
+                        <div
+                            id="${id}"
+                            class="staffhub-promo-details"
+                            hidden
+                        >
+
+                            <div class="staffhub-promo-detail-grid">
+
+                                <div>
+                                    <small>FROM</small>
+                                    <strong>
+                                        ${esc(oldText)}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <small>TO</small>
+                                    <strong>
+                                        ${esc(newText)}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <small>PERFORMED BY</small>
+                                    <strong>
+                                        ${esc(executor)}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <small>DATE</small>
+                                    <strong>
+                                        ${esc(date)}
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+                `;
+            })
+            .join("");
+
+        list
+            .querySelectorAll(
+                ".staffhub-promo-view"
+            )
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        const target =
+                            $(
+                                button.dataset.target
+                            );
+
+                        if (!target) {
+                            return;
+                        }
+
+                        const opening =
+                            target.hidden;
+
+                        target.hidden =
+                            !opening;
+
+                        button.textContent =
+                            opening
+                                ? "SHOW LESS"
+                                : "VIEW ALL";
+                    }
                 );
             });
+    }
+
+    function getActivityLabelSafe(
+        type
+    ) {
+        const normalized =
+            String(
+                type || ""
+            ).toLowerCase();
+
+        const labels = {
+            promotion: "PROMOTION",
+            demotion: "DEMOTION",
+            hire: "HIRE",
+            removal: "FIRE / REMOVAL",
+            resignation: "RESIGNATION",
+            demo: "DEMO",
+            demos: "DEMO",
+            demonstration: "DEMO"
+        };
+
+        return (
+            labels[normalized] ||
+            normalized
+                .replaceAll("_", " ")
+                .toUpperCase() ||
+            "ACTIVITY"
+        );
+    }
+
+    /*
+    Replace the activity renderer once the
+    original function exists.
+    */
+
+    function patchActivityRenderer() {
+        if (
+            typeof window.renderActivityResults !==
+            "function"
+        ) {
+            return;
+        }
+
+        if (
+            window.__staffhubActivityRendererFixed
+        ) {
+            return;
+        }
+
+        window.__staffhubActivityRendererFixed =
+            true;
+
+        window.renderActivityResults =
+            renderCompactActivity;
+    }
+
+    /*
+    ==================================================
+    UPLOAD PREVIEWS
+    ==================================================
+    */
+
+    function installUploadPreview(
+        input
+    ) {
+        if (!input) {
+            return;
+        }
+
+        if (
+            input.dataset
+                .staffhubUploadFixed ===
+            "1"
+        ) {
+            return;
+        }
+
+        input.dataset
+            .staffhubUploadFixed =
+            "1";
+
+        const preview =
+            document.createElement(
+                "div"
+            );
+
+        preview.className =
+            "staffhub-local-upload-preview";
+
+        input.insertAdjacentElement(
+            "afterend",
+            preview
+        );
+
+        let files = [];
+
+        function sync() {
+            try {
+                const dt =
+                    new DataTransfer();
+
+                files.forEach(file =>
+                    dt.items.add(file)
+                );
+
+                input.files =
+                    dt.files;
+            } catch {}
+        }
+
+        function render() {
+            preview.innerHTML =
+                files
+                    .map(
+                        (file, index) => `
+                            <div class="staffhub-local-upload-item">
+
+                                <span>
+                                    ${esc(
+                                        file.name
+                                    )}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    title="Remove"
+                                    aria-label="Remove ${esc(
+                                        file.name
+                                    )}"
+                                    data-index="${index}"
+                                >
+                                    ×
+                                </button>
+
+                            </div>
+                        `
+                    )
+                    .join("");
+
+            preview
+                .querySelectorAll(
+                    "button"
+                )
+                .forEach(button => {
+                    button.onclick =
+                        event => {
+                            event.preventDefault();
+                            event.stopPropagation();
+
+                            files.splice(
+                                Number(
+                                    button.dataset.index
+                                ),
+                                1
+                            );
+
+                            sync();
+                            render();
+                        };
+                });
         }
 
         input.addEventListener(
@@ -387,75 +1639,9 @@ It fixes:
                 render();
             }
         );
-
-        /*
-        Drag and drop
-        */
-
-        const zone =
-            input.closest(
-                ".staffhub-upload-zone"
-            );
-
-        if (zone) {
-            [
-                "dragenter",
-                "dragover"
-            ].forEach(eventName => {
-                zone.addEventListener(
-                    eventName,
-                    event => {
-                        event.preventDefault();
-                        zone.classList.add(
-                            "dragover"
-                        );
-                    }
-                );
-            });
-
-            [
-                "dragleave",
-                "drop"
-            ].forEach(eventName => {
-                zone.addEventListener(
-                    eventName,
-                    event => {
-                        event.preventDefault();
-                        zone.classList.remove(
-                            "dragover"
-                        );
-                    }
-                );
-            });
-
-            zone.addEventListener(
-                "drop",
-                event => {
-                    const dropped =
-                        Array.from(
-                            event.dataTransfer.files || []
-                        );
-
-                    files =
-                        dropped;
-
-                    syncFiles();
-                    render();
-
-                    input.dispatchEvent(
-                        new Event(
-                            "change",
-                            {
-                                bubbles: true
-                            }
-                        )
-                    );
-                }
-            );
-        }
     }
 
-    function installAllUploadPreviews() {
+    function installAllUploads() {
         document
             .querySelectorAll(
                 'input[type="file"]'
@@ -467,841 +1653,38 @@ It fixes:
 
     /*
     ==================================================
-    COMMAND EDITOR
+    INITIALIZATION
     ==================================================
     */
 
-    function installCommandEditor() {
-        if (
-            typeof window.openCommandEditor !==
-            "function"
-        ) {
-            return;
-        }
-
-        if (
-            window.__xoticFinalCommandEditor
-        ) {
-            return;
-        }
-
-        window.__xoticFinalCommandEditor =
-            true;
-
-        const originalOpen =
-            window.openCommandEditor;
-
-        const originalRender =
-            window.renderCommandEditor;
-
-        window.openCommandEditor =
-            async function () {
-
-                const editor =
-                    $("command-editor");
-
-                if (!editor) {
-                    console.error(
-                        "StaffHub: command-editor element missing."
-                    );
-
-                    return;
-                }
-
-                enterEditorMode(
-                    editor
-                );
-
-                editor.innerHTML = `
-                    <div class="editor-panel">
-                        <div class="section-label">
-                            COMMAND EDITOR
-                        </div>
-
-                        <h2>
-                            Loading commands...
-                        </h2>
-
-                        <p class="editor-help">
-                            Loading the command configuration.
-                        </p>
-                    </div>
-                `;
-
-                try {
-
-                    /*
-                    Load commands first.
-                    */
-
-                    if (
-                        typeof window.loadCommands ===
-                        "function"
-                    ) {
-                        await withTimeout(
-                            window.loadCommands(),
-                            10000,
-                            "Command data took too long to load."
-                        );
-                    }
-
-                    /*
-                    Render immediately.
-                    */
-
-                    if (
-                        typeof originalRender ===
-                        "function"
-                    ) {
-                        originalRender();
-                    }
-
-                    /*
-                    Roles are secondary.
-                    Do NOT block the editor on them.
-                    */
-
-                    if (
-                        typeof window.loadCommandRoles ===
-                        "function"
-                    ) {
-                        try {
-                            await withTimeout(
-                                window.loadCommandRoles(),
-                                6000,
-                                "Command roles took too long to load."
-                            );
-
-                            if (
-                                typeof originalRender ===
-                                "function"
-                            ) {
-                                originalRender();
-                            }
-
-                        } catch (roleError) {
-                            console.warn(
-                                "StaffHub command roles failed:",
-                                roleError
-                            );
-                        }
-                    }
-
-                    installAllUploadPreviews();
-
-                    window.scrollTo({
-                        top: 0,
-                        left: 0,
-                        behavior: "instant"
-                    });
-
-                } catch (error) {
-
-                    console.error(
-                        "StaffHub command editor failed:",
-                        error
-                    );
-
-                    editor.innerHTML = `
-                        <div class="editor-panel">
-                            <div class="section-label">
-                                COMMAND EDITOR
-                            </div>
-
-                            <h2>
-                                Could not load commands
-                            </h2>
-
-                            <div class="staffhub-fix-error">
-                                ${esc(error.message)}
-                            </div>
-
-                            <div class="form-actions">
-                                <button
-                                    type="button"
-                                    class="btn btn-secondary"
-                                    onclick="staffhubExitEditorMode()">
-                                    CLOSE
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            };
-    }
-
-    /*
-    ==================================================
-    DOCUMENT EDITORS
-    ==================================================
-    */
-
-    function installDocumentEditor() {
-        if (
-            typeof window.openDocumentEditor !==
-            "function"
-        ) {
-            return;
-        }
-
-        if (
-            window.__xoticFinalDocumentEditor
-        ) {
-            return;
-        }
-
-        window.__xoticFinalDocumentEditor =
-            true;
-
-        const originalOpen =
-            window.openDocumentEditor;
-
-        const originalRender =
-            window.renderDocumentEditor;
-
-        window.openDocumentEditor =
-            async function (pageName) {
-
-                if (
-                    !hasPermission(
-                        pageName,
-                        "edit"
-                    )
-                ) {
-                    return;
-                }
-
-                const editorId =
-                    pageName === "promosDemos"
-                        ? "promos-demos-editor"
-                        : `${pageName}-editor`;
-
-                const editor =
-                    $(editorId);
-
-                if (!editor) {
-                    console.error(
-                        "StaffHub editor missing:",
-                        editorId
-                    );
-
-                    return;
-                }
-
-                enterEditorMode(
-                    editor
-                );
-
-                editor.innerHTML = `
-                    <div class="editor-panel">
-                        <div class="section-label">
-                            EDITOR
-                        </div>
-
-                        <h2>
-                            Loading...
-                        </h2>
-
-                        <p class="editor-help">
-                            Fetching the current configuration.
-                        </p>
-                    </div>
-                `;
-
-                try {
-
-                    const data =
-                        await withTimeout(
-                            window.api(
-                                `/api/staffhub/${pageName}`
-                            ),
-                            10000,
-                            "The editor request timed out."
-                        );
-
-                    if (
-                        typeof originalRender ===
-                        "function"
-                    ) {
-                        originalRender(
-                            pageName,
-                            data.page
-                        );
-                    } else {
-                        /*
-                        Fallback to original function
-                        if the renderer is not globally available.
-                        */
-
-                        await originalOpen(
-                            pageName
-                        );
-                    }
-
-                    installAllUploadPreviews();
-
-                    window.scrollTo({
-                        top: 0,
-                        left: 0,
-                        behavior: "instant"
-                    });
-
-                } catch (error) {
-
-                    console.error(
-                        "StaffHub document editor failed:",
-                        error
-                    );
-
-                    editor.innerHTML = `
-                        <div class="editor-panel">
-                            <div class="section-label">
-                                EDITOR ERROR
-                            </div>
-
-                            <h2>
-                                Could not load editor
-                            </h2>
-
-                            <div class="staffhub-fix-error">
-                                ${esc(error.message)}
-                            </div>
-
-                            <div class="form-actions">
-                                <button
-                                    type="button"
-                                    class="btn btn-secondary"
-                                    onclick="staffhubExitEditorMode()">
-                                    CLOSE
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            };
-    }
-
-    /*
-    ==================================================
-    ANNOUNCEMENT EDITOR
-    ==================================================
-    */
-
-    function installAnnouncementEditor() {
-        if (
-            typeof window.openAnnouncementsEditor !==
-            "function"
-        ) {
-            return;
-        }
-
-        if (
-            window.__xoticFinalAnnouncementEditor
-        ) {
-            return;
-        }
-
-        window.__xoticFinalAnnouncementEditor =
-            true;
-
-        const original =
-            window.openAnnouncementsEditor;
-
-        window.openAnnouncementsEditor =
-            function () {
-
-                const editor =
-                    $("announcements-editor");
-
-                if (!editor) {
-                    return;
-                }
-
-                enterEditorMode(
-                    editor
-                );
-
-                try {
-                    original();
-
-                    /*
-                    The original renderer may replace
-                    the editor contents.
-                    */
-
-                    setTimeout(
-                        installAllUploadPreviews,
-                        50
-                    );
-
-                    setTimeout(
-                        installAllUploadPreviews,
-                        300
-                    );
-
-                } catch (error) {
-
-                    console.error(
-                        error
-                    );
-
-                    editor.innerHTML = `
-                        <div class="editor-panel">
-                            <h2>
-                                Announcement editor error
-                            </h2>
-
-                            <div class="staffhub-fix-error">
-                                ${esc(error.message)}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                window.scrollTo({
-                    top: 0,
-                    left: 0,
-                    behavior: "instant"
-                });
-            };
-    }
-
-    /*
-    ==================================================
-    PERMISSIONS
-    ==================================================
-    */
-
-    function ensurePermissionContainer(
-        pageName
-    ) {
-
-        let sectionId;
-
-        if (
-            pageName === "promosDemos"
-        ) {
-            sectionId =
-                "promos-demos-permissions";
-        } else {
-            sectionId =
-                `${pageName}-permissions`;
-        }
-
-        let section =
-            $(sectionId);
-
-        if (!section) {
-
-            const main =
-                getMain();
-
-            if (!main) {
-                return null;
-            }
-
-            section =
-                document.createElement(
-                    "section"
-                );
-
-            section.id =
-                sectionId;
-
-            section.className =
-                "editor";
-
-            section.hidden =
-                true;
-
-            main.appendChild(
-                section
-            );
-        }
-
-        let content =
-            $(
-                `${sectionId}-content`
-            );
-
-        if (!content) {
-
-            content =
-                document.createElement(
-                    "div"
-                );
-
-            content.id =
-                `${sectionId}-content`;
-
-            section.appendChild(
-                content
-            );
-        }
-
-        return {
-            section,
-            content
-        };
-    }
-
-    function installPermissions() {
-
-        if (
-            typeof window.openPagePermissions !==
-            "function"
-        ) {
-            return;
-        }
-
-        if (
-            window.__xoticFinalPermissions
-        ) {
-            return;
-        }
-
-        window.__xoticFinalPermissions =
-            true;
-
-        const original =
-            window.openPagePermissions;
-
-        window.openPagePermissions =
-            async function (pageName) {
-
-                if (
-                    !hasPermission(
-                        pageName,
-                        "manage"
-                    ) &&
-                    !hasPermission(
-                        pageName,
-                        "permissions"
-                    ) &&
-                    !hasPermission(
-                        pageName,
-                        "edit"
-                    )
-                ) {
-                    /*
-                    Do not silently clear the page.
-                    Let the original permission logic
-                    handle access if it has one.
-                    */
-                }
-
-                const target =
-                    ensurePermissionContainer(
-                        pageName
-                    );
-
-                if (!target) {
-                    return;
-                }
-
-                const {
-                    section,
-                    content
-                } = target;
-
-                enterEditorMode(
-                    section
-                );
-
-                content.innerHTML = `
-                    <div class="editor-panel">
-                        <div class="section-label">
-                            PERMISSIONS
-                        </div>
-
-                        <h2>
-                            Loading permissions...
-                        </h2>
-
-                        <p class="editor-help">
-                            Loading the available staff roles.
-                        </p>
-                    </div>
-                `;
-
-                try {
-
-                    /*
-                    Use the original permission
-                    renderer rather than rebuilding
-                    its API logic.
-                    */
-
-                    await withTimeout(
-                        original(
-                            pageName
-                        ),
-                        10000,
-                        "Permission editor took too long to load."
-                    );
-
-                    /*
-                    Original may have rendered
-                    into the same section.
-                    */
-
-                    section.hidden =
-                        false;
-
-                    section.classList.add(
-                        "staffhub-active-editor"
-                    );
-
-                    installAllUploadPreviews();
-
-                    window.scrollTo({
-                        top: 0,
-                        left: 0,
-                        behavior: "instant"
-                    });
-
-                } catch (error) {
-
-                    console.error(
-                        "StaffHub permissions failed:",
-                        error
-                    );
-
-                    content.innerHTML = `
-                        <div class="editor-panel">
-                            <div class="section-label">
-                                PERMISSIONS
-                            </div>
-
-                            <h2>
-                                Could not load permissions
-                            </h2>
-
-                            <div class="staffhub-fix-error">
-                                ${esc(error.message)}
-                            </div>
-
-                            <div class="form-actions">
-                                <button
-                                    type="button"
-                                    class="btn btn-secondary"
-                                    onclick="staffhubExitEditorMode()">
-                                    CLOSE
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            };
-    }
-
-    /*
-    ==================================================
-    PROMOS & DEMOS
-    ==================================================
-    */
-
-    function installPromosView() {
-
-        const list =
-            $("staff-updates-list");
-
-        if (!list) {
-            return;
-        }
-
-        if (
-            list.dataset.staffhubCompactInstalled ===
-            "1"
-        ) {
-            return;
-        }
-
-        list.dataset.staffhubCompactInstalled =
-            "1";
-
-        function compactCard(card) {
-
-            if (
-                card.dataset.staffhubCompact ===
-                "1"
-            ) {
-                return;
-            }
-
-            const children =
-                Array.from(
-                    card.children
-                );
-
-            if (
-                children.length <= 2
-            ) {
-                return;
-            }
-
-            /*
-            Keep the header and first
-            important piece visible.
-            Everything else goes
-            behind VIEW ALL.
-            */
-
-            const visible =
-                children.slice(
-                    0,
-                    Math.min(
-                        2,
-                        children.length
-                    )
-                );
-
-            const hidden =
-                children.slice(
-                    visible.length
-                );
-
-            if (!hidden.length) {
-                return;
-            }
-
-            const details =
-                document.createElement(
-                    "div"
-                );
-
-            details.className =
-                "staffhub-promo-details";
-
-            details.hidden =
-                true;
-
-            hidden.forEach(
-                child =>
-                    details.appendChild(
-                        child
-                    )
-            );
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-            button.type =
-                "button";
-
-            button.className =
-                "btn btn-secondary staffhub-view-all";
-
-            button.textContent =
-                "VIEW ALL";
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    details.hidden =
-                        !details.hidden;
-
-                    button.textContent =
-                        details.hidden
-                            ? "VIEW ALL"
-                            : "SHOW LESS";
-                }
-            );
-
-            card.innerHTML = "";
-
-            visible.forEach(
-                child =>
-                    card.appendChild(
-                        child
-                    )
-            );
-
-            card.appendChild(
-                details
-            );
-
-            card.appendChild(
-                button
-            );
-
-            card.dataset.staffhubCompact =
-                "1";
-        }
-
-        function run() {
-            list
-                .querySelectorAll(
-                    ".staff-update-card"
-                )
-                .forEach(
-                    compactCard
-                );
-        }
-
-        run();
-
-        const observer =
-            new MutationObserver(
-                run
-            );
-
-        observer.observe(
-            list,
-            {
-                childList: true,
-                subtree: true
-            }
-        );
-    }
-
-    /*
-    ==================================================
-    CURRENT STAFF
-    ==================================================
-    */
-
-    function removeUselessCurrentStaffEditAccess() {
-
-        document
-            .querySelectorAll(
-                ".founder-edit-access, " +
-                ".current-staff-edit-access, " +
-                "[data-current-staff-edit-access]"
-            )
-            .forEach(
-                element =>
-                    element.remove()
-            );
-    }
-
-    /*
-    ==================================================
-    CLOSE BUTTON / ESCAPE HANDLING
-    ==================================================
-    */
-
-    function installCloseHandling() {
+    function initialize() {
+        installPromosButtons();
+        installAllUploads();
+
+        patchActivityRenderer();
+
+        setTimeout(() => {
+            installPromosButtons();
+            installAllUploads();
+            patchActivityRenderer();
+        }, 500);
+
+        setTimeout(() => {
+            installPromosButtons();
+            installAllUploads();
+            patchActivityRenderer();
+        }, 1500);
 
         document.addEventListener(
             "keydown",
             event => {
-
                 if (
-                    event.key !== "Escape"
-                ) {
-                    return;
-                }
-
-                if (
+                    event.key === "Escape" &&
                     document.body.classList.contains(
                         "staffhub-editor-mode"
                     )
                 ) {
-                    exitEditorMode();
+                    exitEditor();
                 }
             }
         );
@@ -1309,181 +1692,24 @@ It fixes:
         document.addEventListener(
             "click",
             event => {
-
-                const button =
+                const close =
                     event.target.closest(
                         "[data-staffhub-close-editor]"
                     );
 
-                if (!button) {
-                    return;
+                if (close) {
+                    event.preventDefault();
+                    exitEditor();
                 }
-
-                event.preventDefault();
-
-                exitEditorMode();
             }
         );
-    }
-
-    /*
-    ==================================================
-    PATCH EXISTING CLOSE FUNCTIONS
-    ==================================================
-    */
-
-    function patchCloseFunction(
-        name,
-        editorId
-    ) {
-
-        if (
-            typeof window[name] !==
-            "function"
-        ) {
-            return;
-        }
-
-        const marker =
-            `__xoticFinal_${name}`;
-
-        if (
-            window[marker]
-        ) {
-            return;
-        }
-
-        window[marker] =
-            true;
-
-        const original =
-            window[name];
-
-        window[name] =
-            function (...args) {
-
-                try {
-                    original.apply(
-                        this,
-                        args
-                    );
-                } catch (error) {
-                    console.warn(
-                        `StaffHub ${name} failed:`,
-                        error
-                    );
-                }
-
-                const editor =
-                    $(editorId);
-
-                if (editor) {
-                    editor.hidden =
-                        true;
-
-                    editor.classList.remove(
-                        "staffhub-active-editor"
-                    );
-                }
-
-                exitEditorMode();
-            };
-    }
-
-    function patchCloseFunctions() {
-
-        patchCloseFunction(
-            "closeAnnouncementsEditor",
-            "announcements-editor"
-        );
-
-        patchCloseFunction(
-            "closeDocumentEditor",
-            "tickets-editor"
-        );
-
-        patchCloseFunction(
-            "closeTicketsEditor",
-            "tickets-editor"
-        );
-
-        patchCloseFunction(
-            "closeEtiquetteEditor",
-            "etiquette-editor"
-        );
-
-        patchCloseFunction(
-            "closeCommandEditor",
-            "command-editor"
-        );
-
-        patchCloseFunction(
-            "closePromosDemosEditor",
-            "promos-demos-editor"
-        );
-    }
-
-    /*
-    ==================================================
-    PERMISSION CLOSE BUTTONS
-    ==================================================
-    */
-
-    function patchPermissionCloseButtons() {
-
-        document
-            .querySelectorAll(
-                ".editor"
-            )
-            .forEach(
-                editor => {
-
-                    editor
-                        .querySelectorAll(
-                            "button"
-                        )
-                        .forEach(
-                            button => {
-
-                                const text =
-                                    button.textContent
-                                        .trim()
-                                        .toLowerCase();
-
-                                if (
-                                    text === "close" ||
-                                    text === "cancel"
-                                ) {
-                                    button.addEventListener(
-                                        "click",
-                                        () => {
-                                            setTimeout(
-                                                exitEditorMode,
-                                                0
-                                            );
-                                        }
-                                    );
-                                }
-                            }
-                        );
-                }
-            );
-    }
-
-    /*
-    ==================================================
-    FIX UPLOAD INPUTS AFTER DYNAMIC RENDERING
-    ==================================================
-    */
-
-    function installDynamicUploadObserver() {
 
         const observer =
-            new MutationObserver(
-                () => {
-                    installAllUploadPreviews();
-                }
-            );
+            new MutationObserver(() => {
+                installPromosButtons();
+                installAllUploads();
+                patchActivityRenderer();
+            });
 
         observer.observe(
             document.body,
@@ -1491,84 +1717,6 @@ It fixes:
                 childList: true,
                 subtree: true
             }
-        );
-    }
-
-    /*
-    ==================================================
-    INITIALIZATION
-    ==================================================
-    */
-
-    function initialize() {
-
-        installCloseHandling();
-
-        /*
-        Wait one tick because staffhub.js
-        may still be finishing its startup.
-        */
-
-        setTimeout(
-            () => {
-
-                installDocumentEditor();
-                installCommandEditor();
-                installAnnouncementEditor();
-                installPermissions();
-
-                installAllUploadPreviews();
-
-                installPromosView();
-
-                removeUselessCurrentStaffEditAccess();
-
-                patchCloseFunctions();
-
-                patchPermissionCloseButtons();
-
-                installDynamicUploadObserver();
-
-            },
-            0
-        );
-
-        /*
-        Run again after the main content
-        has finished rendering.
-        */
-
-        setTimeout(
-            () => {
-
-                installDocumentEditor();
-                installCommandEditor();
-                installAnnouncementEditor();
-                installPermissions();
-
-                installAllUploadPreviews();
-
-                installPromosView();
-
-                removeUselessCurrentStaffEditAccess();
-
-                patchCloseFunctions();
-
-                patchPermissionCloseButtons();
-
-            },
-            750
-        );
-
-        setTimeout(
-            () => {
-
-                installAllUploadPreviews();
-                installPromosView();
-                removeUselessCurrentStaffEditAccess();
-
-            },
-            2000
         );
     }
 
@@ -1586,5 +1734,5 @@ It fixes:
     } else {
         initialize();
     }
-
 })();
+
